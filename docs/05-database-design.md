@@ -365,6 +365,137 @@ CREATE INDEX idx_loadouts_player ON player_loadouts (player_id);
 CREATE INDEX idx_loadouts_default ON player_loadouts (player_id) WHERE is_default = true;
 ```
 
+### 4.4 TimescaleDB for Real-Time Analytics
+
+```sql
+-- Enable TimescaleDB extension
+CREATE EXTENSION IF NOT EXISTS timescaledb;
+
+-- Match events hypertable (kills, deaths, damage, objectives)
+CREATE TABLE match_events (
+    time TIMESTAMPTZ NOT NULL,
+    match_id UUID NOT NULL,
+    event_type VARCHAR(32) NOT NULL, -- 'kill', 'death', 'damage', 'objective', 'ability'
+    
+    -- Players involved
+    source_player_id UUID,
+    target_player_id UUID,
+    
+    -- Event details
+    weapon_id UUID,
+    damage_amount INTEGER,
+    hit_zone VARCHAR(16),
+    position_x FLOAT,
+    position_y FLOAT,
+    position_z FLOAT,
+    
+    -- Metadata
+    round_number INTEGER,
+    tick_number INTEGER,
+    metadata JSONB DEFAULT '{}'
+);
+
+-- Convert to hypertable
+SELECT create_hypertable('match_events', 'time');
+
+-- Create indexes
+CREATE INDEX idx_match_events_match ON match_events (match_id, time DESC);
+CREATE INDEX idx_match_events_type ON match_events (event_type, time DESC);
+CREATE INDEX idx_match_events_player ON match_events (source_player_id, time DESC);
+
+-- Player telemetry hypertable (real-time stats aggregation)
+CREATE TABLE player_telemetry (
+    time TIMESTAMPTZ NOT NULL,
+    player_id UUID NOT NULL,
+    match_id UUID NOT NULL,
+    
+    -- Per-interval stats
+    kills INTEGER DEFAULT 0,
+    deaths INTEGER DEFAULT 0,
+    assists INTEGER DEFAULT 0,
+    damage_dealt BIGINT DEFAULT 0,
+    damage_received BIGINT DEFAULT 0,
+    score INTEGER DEFAULT 0,
+    
+    -- Performance metrics
+    ping_ms INTEGER,
+    fps_avg INTEGER,
+    packet_loss_pct DECIMAL(5,2)
+);
+
+SELECT create_hypertable('player_telemetry', 'time');
+
+-- Server metrics hypertable
+CREATE TABLE server_metrics (
+    time TIMESTAMPTZ NOT NULL,
+    server_id VARCHAR(64) NOT NULL,
+    
+    -- Resource usage
+    cpu_percent DECIMAL(5,2),
+    memory_mb BIGINT,
+    
+    -- Network
+    connections INTEGER,
+    bytes_in BIGINT,
+    bytes_out BIGINT,
+    
+    -- Game metrics
+    active_rooms INTEGER,
+    active_players INTEGER,
+    tick_rate_avg DECIMAL(5,2)
+);
+
+SELECT create_hypertable('server_metrics', 'time');
+```
+
+#### Continuous Aggregates
+
+```sql
+-- Real-time kill feed aggregate (last 5 minutes)
+CREATE MATERIALIZED VIEW kill_feed_recent
+WITH (timescaledb.continuous) AS
+SELECT 
+    time_bucket('1 minute', time) AS bucket,
+    match_id,
+    source_player_id AS killer_id,
+    target_player_id AS victim_id,
+    weapon_id,
+    COUNT(*) AS kill_count
+FROM match_events
+WHERE event_type = 'kill'
+GROUP BY bucket, match_id, source_player_id, target_player_id, weapon_id
+WITH DATA;
+
+-- Refresh policy
+SELECT add_continuous_aggregate_policy('kill_feed_recent',
+    start_offset => INTERVAL '10 minutes',
+    end_offset => INTERVAL '1 minute',
+    schedule_interval => INTERVAL '1 minute');
+
+-- Hourly player stats aggregate
+CREATE MATERIALIZED VIEW player_stats_hourly
+WITH (timescaledb.continuous) AS
+SELECT 
+    time_bucket('1 hour', time) AS bucket,
+    player_id,
+    SUM(kills) AS kills,
+    SUM(deaths) AS deaths,
+    SUM(damage_dealt) AS damage_dealt,
+    AVG(ping_ms) AS avg_ping
+FROM player_telemetry
+GROUP BY bucket, player_id
+WITH DATA;
+```
+
+#### Retention Policies
+
+```sql
+-- Keep raw events for 30 days, aggregates for 1 year
+SELECT add_retention_policy('match_events', INTERVAL '30 days');
+SELECT add_retention_policy('player_telemetry', INTERVAL '30 days');
+SELECT add_retention_policy('server_metrics', INTERVAL '7 days');
+```
+
 ---
 
 ## 5. Multiplayer Systems
