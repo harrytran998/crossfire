@@ -269,14 +269,22 @@ const program = createWebSocketServer.pipe(
 Effect.runPromise(program)
 ```
 
-### 3.5 WebSocket Performance Comparison
+### 3.5 Effect Bun Platform Architecture
+
+The backend follows the **Effect Bun Platform** pattern for high-performance, type-safe service composition:
+
+- **HttpLayerRouter Pattern**: Using `@effect/platform` to define composable HTTP routes and middleware.
+- **RPC Server over WebSocket**: Real-time game commands handled via high-performance RPC over binary WebSocket streams.
+- **Layer Composition**: Services (Database, Redis, Game Logic) are composed using `Layer` for clean dependency injection.
+- **DevTools Integration**: Utilizing `@effect/experimental/DevTools` for real-time tracing, metrics, and fiber inspection during development.
+
+### 3.6 WebSocket Performance Comparison
 
 | Library | Performance | Latency | Features |
 |---------|-------------|---------|----------|
-| **Bun WebSocket** | Very High (~1M+ conn) | Lowest | Native, zero dependencies |
+| **Bun WebSocket** | Very High | Lowest | Native, zero dependencies |
 | **uWebSockets.js** | Very High | Very Low | High-performance, C++ binding |
 | **ws** | High | Low | Standard WebSocket |
-| **Socket.IO** | Medium | Higher | Auto-reconnect, fallback |
 
 **Recommendation**: Use **Bun WebSocket** for best performance and developer experience. Bun's native WebSocket implementation is the fastest available for TypeScript.
 
@@ -513,7 +521,7 @@ For smaller scale or MVP:
               │                     │                     │
      ┌────────▼────────┐   ┌────────▼────────┐   ┌────────▼────────┐
      │   API Server    │   │   API Server    │   │   API Server    │
-     │   (NestJS)      │   │   (NestJS)      │   │   (NestJS)      │
+     │   (Effect Bun)  │   │   (Effect Bun)  │   │   (Effect Bun)  │
      └────────┬────────┘   └────────┬────────┘   └────────┬────────┘
               │                     │                     │
               └─────────────────────┼─────────────────────┘
@@ -553,7 +561,7 @@ For smaller scale or MVP:
 |------|---------|
 | Vitest | Unit testing |
 | Playwright | E2E testing |
-| Socket.io-mock | WebSocket mocking |
+| Bun Test | Native test runner |
 
 ### 7.3 CI/CD
 
@@ -581,7 +589,8 @@ For smaller scale or MVP:
     "rapier3d-compat": "^0.12.0",
     "howler": "^2.2.4",
     "zustand": "^4.4.0",
-    "socket.io-client": "^4.6.0"
+    "effect": "^3.x",
+    "@effect/platform": "^0.x"
   },
   "devDependencies": {
     "typescript": "^5.3.0",
@@ -598,20 +607,20 @@ For smaller scale or MVP:
 {
   "name": "crossfire-web-server",
   "dependencies": {
-    "@nestjs/core": "^10.3.0",
-    "@nestjs/platform-socket.io": "^10.3.0",
-    "@nestjs/websockets": "^10.3.0",
+    "effect": "^3.x",
+    "@effect/platform": "^0.x",
+    "@effect/platform-bun": "^0.x",
+    "@effect/experimental": "^0.x",
+    "@effect/sql": "^0.x",
+    "@effect/sql-prisma": "^0.x",
     "@prisma/client": "^5.8.0",
-    "socket.io": "^4.6.0",
     "ioredis": "^5.3.0",
-    "class-validator": "^0.14.0",
-    "bcrypt": "^5.1.0",
-    "jsonwebtoken": "^9.0.0"
+    "msgpackr": "^1.x"
   },
   "devDependencies": {
     "typescript": "^5.3.0",
     "prisma": "^5.8.0",
-    "@types/node": "^20.10.0"
+    "@types/bun": "latest"
   }
 }
 ```
@@ -624,9 +633,9 @@ For smaller scale or MVP:
 |-------------|----------|----------|----------|
 | 3D Rendering | Three.js | Babylon.js | Three.js (smaller bundle, R3F) |
 | UI Framework | React | Vue/Svelte | React (ecosystem, R3F) |
-| Backend | NestJS | Express | NestJS (WebSocket, DI) |
+| Backend | Effect Bun | Express | Effect Bun (functional, typed errors) |
 | Database | PostgreSQL | MongoDB | PostgreSQL (ACID, relations) |
-| WebSocket | Socket.IO | ws | Socket.IO (dev), uWS (prod) |
+| WebSocket | Bun WebSocket | uWS | Bun WebSocket (native, high perf) |
 | ORM | Prisma | TypeORM | Prisma (DX, migrations) |
 | Cache | Redis | Memcached | Redis (data structures) |
 | Deployment | K8s + Agones | Docker Compose | K8s for scale, Docker for MVP |
