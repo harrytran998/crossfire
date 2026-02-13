@@ -352,6 +352,663 @@ Response (200):
 }
 ```
 
+### 2.7 Friends & Social
+
+#### Get Friend List
+```http
+GET /friends
+Authorization: Bearer {accessToken}
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "friends": [
+      {
+        "id": "uuid",
+        "username": "friend1",
+        "displayName": "Friend One",
+        "status": "online",
+        "lastSeen": "2026-02-13T10:00:00Z"
+      }
+    ]
+  }
+}
+```
+
+#### Send Friend Request
+```http
+POST /friends/request
+Authorization: Bearer {accessToken}
+
+Request:
+{
+  "recipientId": "uuid"
+}
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "requestId": "uuid",
+    "status": "pending"
+  }
+}
+```
+
+#### Accept/Decline Friend Request
+```http
+PUT /friends/request/{requestId}
+Authorization: Bearer {accessToken}
+
+Request:
+{
+  "action": "accept" // or "decline"
+}
+
+Response (200):
+{
+  "success": true
+}
+```
+
+#### Remove Friend
+```http
+DELETE /friends/{friendId}
+Authorization: Bearer {accessToken}
+
+Response (200):
+{
+  "success": true
+}
+```
+
+#### Get Online Friends
+```http
+GET /friends/online
+Authorization: Bearer {accessToken}
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "onlineFriends": [
+      {
+        "id": "uuid",
+        "displayName": "Friend One",
+        "currentRoom": "uuid" // null if not in room
+      }
+    ]
+  }
+}
+```
+
+#### Report Player
+```http
+POST /players/{playerId}/report
+Authorization: Bearer {accessToken}
+
+Request:
+{
+  "reason": "cheating",
+  "description": "Used speed hack in TDM",
+  "matchId": "uuid"
+}
+
+Response (200):
+{
+  "success": true,
+  "message": "Report submitted successfully"
+}
+```
+
+### 2.8 Matchmaking
+
+#### Join Matchmaking Queue
+```http
+POST /matchmaking/queue
+Authorization: Bearer {accessToken}
+
+Request:
+{
+  "modes": ["team_deathmatch", "search_destroy"],
+  "regions": ["ASIA", "US_WEST"]
+}
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "queueId": "uuid",
+    "estimatedWaitTime": 45
+  }
+}
+```
+
+#### Leave Queue
+```http
+DELETE /matchmaking/queue
+Authorization: Bearer {accessToken}
+
+Response (200):
+{
+  "success": true
+}
+```
+
+#### Get Queue Status
+```http
+GET /matchmaking/status
+Authorization: Bearer {accessToken}
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "inQueue": true,
+    "waitTime": 32,
+    "status": "searching" // 'searching', 'matching', 'ready'
+  }
+}
+```
+
+#### Quick Match
+```http
+POST /matchmaking/quick
+Authorization: Bearer {accessToken}
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "roomId": "uuid"
+  }
+}
+```
+
+### 2.9 Rooms
+
+#### List Available Rooms
+```http
+GET /rooms?mode=team_deathmatch&status=waiting
+Authorization: Bearer {accessToken}
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "rooms": [
+      {
+        "id": "uuid",
+        "name": "Pro Only",
+        "mode": "team_deathmatch",
+        "map": "Desert Storm",
+        "players": 12,
+        "maxPlayers": 16,
+        "isPrivate": false
+      }
+    ]
+  }
+}
+```
+
+#### Create Room
+```http
+POST /rooms
+Authorization: Bearer {accessToken}
+
+Request:
+{
+  "name": "My Room",
+  "mode": "team_deathmatch",
+  "mapId": "uuid",
+  "maxPlayers": 16,
+  "isPrivate": false,
+  "password": ""
+}
+
+Response (201):
+{
+  "success": true,
+  "data": {
+    "roomId": "uuid",
+    "roomCode": "ABC123"
+  }
+}
+```
+
+#### Get Room Details
+```http
+GET /rooms/{roomId}
+Authorization: Bearer {accessToken}
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "name": "Pro Only",
+    "players": [
+      { "id": "uuid", "displayName": "Player1", "team": 1, "isReady": true }
+    ],
+    "settings": { ... }
+  }
+}
+```
+
+#### Update Room Settings
+```http
+PUT /rooms/{roomId}
+Authorization: Bearer {accessToken}
+
+Request:
+{
+  "name": "Updated Room Name",
+  "maxPlayers": 12
+}
+
+Response (200):
+{
+  "success": true
+}
+```
+
+#### Delete Room
+```http
+DELETE /rooms/{roomId}
+Authorization: Bearer {accessToken}
+
+Response (200):
+{
+  "success": true
+}
+```
+
+#### Join Room
+```http
+POST /rooms/{roomId}/join
+Authorization: Bearer {accessToken}
+
+Request:
+{
+  "password": "optionalPassword"
+}
+
+Response (200):
+{
+  "success": true
+}
+```
+
+#### Leave Room
+```http
+POST /rooms/{roomId}/leave
+Authorization: Bearer {accessToken}
+
+Response (200):
+{
+  "success": true
+}
+```
+
+#### Kick Player
+```http
+POST /rooms/{roomId}/kick
+Authorization: Bearer {accessToken}
+
+Request:
+{
+  "playerId": "uuid"
+}
+
+Response (200):
+{
+  "success": true
+}
+```
+
+#### Change Team
+```http
+PUT /rooms/{roomId}/team
+Authorization: Bearer {accessToken}
+
+Request:
+{
+  "team": 2
+}
+
+Response (200):
+{
+  "success": true
+}
+```
+
+#### Set Ready Status
+```http
+POST /rooms/{roomId}/ready
+Authorization: Bearer {accessToken}
+
+Request:
+{
+  "isReady": true
+}
+
+Response (200):
+{
+  "success": true
+}
+```
+
+#### Start Match
+```http
+POST /rooms/{roomId}/start
+Authorization: Bearer {accessToken}
+
+Response (200):
+{
+  "success": true
+}
+```
+
+### 2.10 Inventory & Shop
+
+#### Get Player Inventory
+```http
+GET /inventory
+Authorization: Bearer {accessToken}
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "items": [
+      { "id": "uuid", "type": "weapon", "key": "ak47", "acquiredAt": "2026-01-01T00:00:00Z" }
+    ]
+  }
+}
+```
+
+#### List All Weapons
+```http
+GET /weapons
+Authorization: Bearer {accessToken}
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "weapons": [
+      { "id": "uuid", "key": "m4a1", "name": "M4A1", "price": 0 }
+    ]
+  }
+}
+```
+
+#### Get Weapon Details
+```http
+GET /weapons/{weaponId}
+Authorization: Bearer {accessToken}
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "key": "m4a1",
+    "name": "M4A1",
+    "stats": { ... },
+    "description": "Versatile assault rifle"
+  }
+}
+```
+
+#### List Attachments
+```http
+GET /attachments
+Authorization: Bearer {accessToken}
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "attachments": [
+      { "id": "uuid", "name": "Red Dot Sight", "type": "optic" }
+    ]
+  }
+}
+```
+
+#### Create Loadout
+```http
+POST /loadouts
+Authorization: Bearer {accessToken}
+
+Request:
+{
+  "name": "Stealth",
+  "primaryId": "uuid",
+  "secondaryId": "uuid"
+}
+
+Response (201):
+{
+  "success": true,
+  "data": { "id": "uuid" }
+}
+```
+
+#### Update Loadout
+```http
+PUT /loadouts/{loadoutId}
+Authorization: Bearer {accessToken}
+
+Request:
+{
+  "primaryId": "uuid"
+}
+
+Response (200):
+{
+  "success": true
+}
+```
+
+#### Delete Loadout
+```http
+DELETE /loadouts/{loadoutId}
+Authorization: Bearer {accessToken}
+
+Response (200):
+{
+  "success": true
+}
+```
+
+### 2.11 Achievements
+
+#### List All Achievements
+```http
+GET /achievements
+Authorization: Bearer {accessToken}
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "achievements": [
+      { "id": "uuid", "name": "First Blood", "description": "Get 1 kill" }
+    ]
+  }
+}
+```
+
+#### Get Player Achievements
+```http
+GET /players/me/achievements
+Authorization: Bearer {accessToken}
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "achievements": [
+      { "id": "uuid", "unlockedAt": "2026-02-10T12:00:00Z" }
+    ]
+  }
+}
+```
+
+#### Get Achievement Progress
+```http
+GET /players/me/achievements/progress
+Authorization: Bearer {accessToken}
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "progress": [
+      { "achievementId": "uuid", "current": 50, "target": 100 }
+    ]
+  }
+}
+```
+
+### 2.12 Zombie Mode (Phase 2)
+
+#### Get Zombie Mode Maps
+```http
+GET /zombie/maps
+Authorization: Bearer {accessToken}
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "maps": [
+      { "id": "uuid", "name": "Biohazard Lab", "difficulty": "hard" }
+    ]
+  }
+}
+```
+
+#### Get Mutant Classes
+```http
+GET /zombie/classes
+Authorization: Bearer {accessToken}
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "classes": [
+      { "id": "uuid", "name": "Dread", "abilities": ["speed_boost"] }
+    ]
+  }
+}
+```
+
+#### Request Supply Drop
+```http
+POST /zombie/supply-drop
+Authorization: Bearer {accessToken}
+
+Request:
+{
+  "position": { "x": 10, "y": 0, "z": 20 }
+}
+
+Response (200):
+{
+  "success": true,
+  "data": { "dropId": "uuid" }
+}
+```
+
+#### Zombie Mode Leaderboards
+```http
+GET /zombie/leaderboards?type=survivor_kills
+Authorization: Bearer {accessToken}
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "entries": [
+      { "rank": 1, "displayName": "SurvivorKing", "score": 50000 }
+    ]
+  }
+}
+```
+
+### 2.13 Admin (Internal)
+
+#### List Players (Admin)
+```http
+GET /admin/players?limit=20&offset=0
+Authorization: Bearer {adminToken}
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "players": [
+      { "id": "uuid", "username": "player1", "status": "active" }
+    ]
+  }
+}
+```
+
+#### Ban Player
+```http
+PUT /admin/players/{playerId}/ban
+Authorization: Bearer {adminToken}
+
+Request:
+{
+  "reason": "Hacking",
+  "duration": "perm" // or duration in seconds
+}
+
+Response (200):
+{
+  "success": true
+}
+```
+
+#### List Reports
+```http
+GET /admin/reports
+Authorization: Bearer {adminToken}
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "reports": [
+      { "id": "uuid", "reporterId": "uuid", "targetId": "uuid", "reason": "toxicity" }
+    ]
+  }
+}
+```
+
+#### Server Metrics
+```http
+GET /admin/metrics
+Authorization: Bearer {adminToken}
+
+Response (200):
+{
+  "success": true,
+  "data": {
+    "cpuUsage": 15.5,
+    "memoryUsage": 1024,
+    "activeConnections": 450,
+    "uptime": 86400
+  }
+}
+```
+
 ---
 
 ## 3. WebSocket Protocol
