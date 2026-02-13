@@ -88,54 +88,114 @@ This document specifies all game features, mechanics, weapons, and modes for the
 
 ### 2.2 Zombie/Mutation Mode (Phase 2)
 
-#### 2.2.1 Mutation Mode
+#### 2.2.1 Mutation Mode Overview
 
 | Property | Description |
 |----------|-------------|
 | **Objective** | Survivors survive the round OR Mutants infect all humans |
 | **Players** | 8-16 players |
-| **Win Condition** | Survive timer (humans) or infect everyone (mutants) |
-| **Time Limit** | 2:30 per round |
-| **Respawn** | No (dead mutants stay dead) |
+| **Win Condition (Humans)** | Survive timer (2:30) or kill all mutants |
+| **Win Condition (Mutants)** | Infect all humans before time expires |
+| **Respawn** | Dead mutants stay dead, infected humans respawn as mutants |
 
 **Gameplay Flow:**
 1. Round starts with all players as soldiers
-2. 20-second preparation time to find defensive positions
-3. 1-2 random players transform into mutants (Mutant Zero)
-4. Mutants attempt to infect all humans by attacking them
-5. Infected humans become mutants
-6. Humans win by surviving timer or killing all mutants
-7. Mutants win by infecting all humans
+2. **20-second preparation time** - find defensive positions, no weapons fire
+3. **1-2 random players transform into "Mutant Zero"** (Host mutants with bonus HP)
+4. Mutants attempt to infect humans by attacking (melee only)
+5. **Infected humans become mutants** after 3-second transformation
+6. Supply crates drop periodically with special weapons
+7. **Hero transformation** - when 2-3 humans remain, they become Heroes with powerful weapons
+8. Round ends when all humans infected (Mutants win) or time expires/survivors remain (Humans win)
 
-**Mutant Classes:**
-| Class | Ability | Description |
-|-------|---------|-------------|
-| **Standard Mutant** | Basic | High HP, faster movement, melee attack |
-| **Speed Mutant** | Speed Boost | Very fast movement, lower HP |
-| **Tank Mutant** | Shield | Very high HP, can shield from damage |
-| **Invisible Mutant** | Cloak | Can become semi-invisible for short periods |
-| **Terminator** | Energy Attack | Ranged attack, high HP, special abilities |
+#### 2.2.2 Mutant Classes
 
-**Human Abilities:**
-- Supply crates with special weapons
-- Hero transformation (when only few survivors remain)
-- Special ammunition types
+| Class | HP | Speed | Special Ability | Unlock |
+|-------|-----|-------|-----------------|--------|
+| **Dread (Normal)** | 2000 | Fast | Basic mutant, available to all | Default |
+| **Slug** | 3000 | Slow | Extended reach (tentacle attack) | Level 10 |
+| **Maiden** | 2500 | Fast | Invisibility (3 sec) + High Jump | Level 20 |
+| **Smoke** | 2000 | Fast | Smoke screen (obscures vision) | Level 30 |
+| **Assassin** | 2200 | Very Fast | Repulse grenades (knockback humans) | Level 40 |
+| **Enchantress** | 1800 | Fast | Heal nearby mutants, speed boost | Level 50 |
+| **Terminator** | 5000 | Slow | Ranged energy attack, very high HP | Premium/Special |
 
-#### 2.2.2 Zombie Mode (PVE)
+**Mutant Evolution System:**
+- Each infection earns evolution points
+- Evolution increases HP by 200 per level
+- Maximum 5 evolution levels per round
+- Higher evolution = larger mutant hitbox
+
+#### 2.2.3 Human Abilities & Items
+
+| Item | Effect | Source |
+|------|--------|--------|
+| **Mutation Spike** | Barrier that repels mutants (5 sec) | Supply crate |
+| **Mutation Grenade** | Explosion damages/knockback mutants | Supply crate |
+| **Mutation Jacket** | +1000 HP for humans | Supply crate |
+| **Medic Grenade** | Heals nearby humans | Supply crate |
+| **Hero Transformation** | Powerful weapon + 2000 HP | Auto (2-3 survivors) |
+
+**Supply Crate System:**
+- Crates drop at 30-second intervals
+- Contains 1-2 random items
+- Marked on minimap for all humans
+- Competition for crates adds tactical element
+
+#### 2.2.4 Zombie Mode (PVE)
 
 | Property | Description |
 |----------|-------------|
-| **Objective** | Complete map objectives while surviving zombie hordes |
+| **Objective** | Survive waves and complete objectives |
 | **Players** | 4-8 players (cooperative) |
-| **Win Condition** | Complete all objectives/bosses |
-| **Respawn** | Limited revives or checkpoint system |
+| **Win Condition** | Complete all waves + defeat final boss |
+| **Respawn** | Limited revives (3 per team per wave) |
 
 **Gameplay Flow:**
-1. Team spawns at map start
-2. Progress through map objectives
-3. Defeat zombie hordes and mini-bosses
-4. Final boss battle
-5. Extract/complete mission
+1. Team spawns at map start point
+2. **Waves of AI zombies** attack progressively
+3. Each wave increases zombie count and types
+4. **Mini-boss** appears every 3rd wave
+5. **Final boss battle** at wave 10
+6. **Supply drops** between waves
+7. **Scoring system** rates performance: SS, S+, A, B, C
+
+**Zombie Types (AI):**
+
+| Type | HP | Speed | Behavior |
+|------|-----|-------|----------|
+| **Shambler** | 100 | Slow | Basic, walks toward players |
+| **Runner** | 80 | Fast | Sprints at players |
+| **Crawler** | 150 | Medium | Low profile, harder to hit |
+| **Spitter** | 60 | Slow | Ranged acid attack |
+| **Tank** | 1000 | Slow | High HP, charge attack |
+| **Boss** | 10000 | Variable | Unique abilities per boss |
+
+**Scoring System:**
+| Grade | Requirements |
+|-------|--------------|
+| **SS** | 0 deaths, 95%+ accuracy, fast clear |
+| **S+** | 1-2 deaths, 85%+ accuracy |
+| **A** | 3-4 deaths, good performance |
+| **B** | 5+ deaths, completed mission |
+| **C** | Multiple revives used |
+
+#### 2.2.5 Mutation Mode Maps
+
+| Map | Setting | Features |
+|-----|---------|----------|
+| **Port** | Cargo ship | Multiple levels, containers |
+| **Zombie Lab** | Underground facility | Narrow corridors, ambush points |
+| **Lost City** | Abandoned city | Open areas, building interiors |
+| **Prison** | Abandoned prison | Cell blocks, guard towers |
+
+#### 2.2.6 Zombie Mode Maps
+
+| Map | Waves | Boss | Difficulty |
+|-----|-------|------|------------|
+| **Dead End** | 10 | Abomination | Normal |
+| **The Maze** | 12 | Hydra | Hard |
+| **Red Zone** | 15 | Overlord | Expert |
 
 ---
 
