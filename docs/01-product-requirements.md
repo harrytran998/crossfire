@@ -143,14 +143,21 @@ A web-based FPS platform that:
 | US-062 | As a player, I want achievements | Unlockable badges and titles |
 | US-063 | As a player, I want daily rewards | Login bonuses, daily challenges |
 
-### 4.8 Zombie Mode (Priority: P2 - Future)
+### 4.8 Zombie/Mutation Mode (Priority: P2 - Future)
 
 | ID | User Story | Acceptance Criteria |
 |----|------------|---------------------|
-| US-070 | As a survivor, I want to survive waves | Cooperative PVE against AI zombies |
-| US-071 | As a mutant, I want to infect humans | Mutation mode with playable zombies |
-| US-072 | As a player, I want boss fights | Epic boss battles at wave ends |
-| US-073 | As a player, I want special abilities | Hero abilities for survivors, skills for mutants |
+| US-070 | As a survivor, I want to survive mutant infection | 20-second prep time, defensive positions |
+| US-071 | As a mutant, I want to infect humans | Melee attack transforms humans after 3 seconds |
+| US-072 | As a player, I want to choose mutant class | Unlock classes by level: Dread, Slug, Maiden, Smoke, Assassin, Enchantress |
+| US-073 | As a player, I want hero transformation | Auto-transform when 2-3 survivors remain |
+| US-074 | As a survivor, I want supply crates | Crates drop every 30 seconds with items |
+| US-075 | As a survivor, I want mutation items | Use Mutation Spike, Grenade, Jacket, Medic Grenade |
+| US-076 | As a mutant, I want to evolve | Each infection gives evolution points, +200 HP per level |
+| US-077 | As a player, I want zombie PVE mode | Cooperative waves vs AI zombies with boss battles |
+| US-078 | As a player, I want zombie scoring | Performance grades: SS, S+, A, B, C based on deaths and accuracy |
+| US-079 | As a player, I want different zombie types | Face Shambler, Runner, Crawler, Spitter, Tank zombies |
+| US-080 | As a player, I want boss fights | Mini-boss every 3 waves, final boss at wave 10 |
 
 ---
 
@@ -186,10 +193,17 @@ A web-based FPS platform that:
 |----|-------------|----------|
 | FR-020 | Zombie/Mutation mode | P2 |
 | FR-021 | Voice chat | P2 |
-| FR-022 | Spectator mode | P2 |
-| FR-023 | Replay system | P2 |
-| FR-024 | Clan/Guild system | P2 |
-| FR-025 | Custom map editor | P3 |
+| FR-022 | Mutation Mode - 7 mutant classes | P2 |
+| FR-023 | Mutation Mode - 4 special items | P2 |
+| FR-024 | Mutation Mode - Evolution system | P2 |
+| FR-025 | Zombie PVE Mode - 5 zombie types | P2 |
+| FR-026 | Zombie PVE Mode - Boss battles | P2 |
+| FR-027 | Zombie Mode - Scoring system (SS-S-C) | P2 |
+| FR-028 | Zombie Mode - 4 dedicated maps | P2 |
+| FR-029 | Spectator mode | P2 |
+| FR-030 | Replay system | P2 |
+| FR-031 | Clan/Guild system | P2 |
+| FR-032 | Custom map editor | P3 |
 
 ---
 
@@ -320,10 +334,13 @@ A web-based FPS platform that:
 
 ### Phase 3: Zombie Mode (Months 5-6)
 
-- Mutation/Zombie mode
-- AI zombie behavior
-- Boss mechanics
-- Special abilities
+- Mutation Mode with 7 mutant classes
+- Zombie PVE Mode with AI zombies
+- Evolution and hero transformation systems
+- Supply crate and item system
+- Boss mechanics and wave progression
+- Scoring and reward system
+- 4 dedicated Zombie/Mutation maps
 
 ### Phase 4: Polish & Scale (Ongoing)
 
