@@ -85,6 +85,7 @@ bun dev
 | [API & Network Protocol](./docs/06-api-network-protocol.md) | Complete REST + WebSocket API reference |
 | [Deployment](./docs/07-deployment-infrastructure.md) | Cloud infrastructure, Docker, Kubernetes |
 | [Development Roadmap](./docs/08-development-roadmap.md) | 7-month phased implementation |
+| [Security & Anti-Cheat](./docs/09-security.md) | Security architecture and anti-cheat design |
 
 ## 🎯 Game Modes
 

@@ -16,6 +16,7 @@ This project aims to build a **browser-based multiplayer FPS game** inspired by 
 | [API & Network Protocol](./06-api-network-protocol.md) | WebSocket protocols, REST APIs, message formats | ✅ Ready |
 | [Deployment & Infrastructure](./07-deployment-infrastructure.md) | Cloud deployment, scaling, monitoring | ✅ Ready |
 | [Development Roadmap](./08-development-roadmap.md) | Phased implementation plan, milestones | ✅ Ready |
+| [Security & Anti-Cheat](./09-security.md) | Security architecture and anti-cheat design | ✅ Ready |
 
 ## Quick Start
 
