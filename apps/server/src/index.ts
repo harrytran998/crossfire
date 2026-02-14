@@ -55,4 +55,4 @@ const Main = Program.pipe(
   Effect.catchAllCause((error) => Effect.logFatal('Server crashed', error))
 )
 
-Effect.runPromise(Main)
+void Effect.runPromise(Main)

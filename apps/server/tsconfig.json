@@ -2,15 +2,7 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "@crossfire/tsconfig/node.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "outDir": "dist",
     "rootDir": "src",
-    "paths": {
-      "@crossfire/shared": ["../../packages/shared/src"],
-      "@crossfire/shared/*": ["../../packages/shared/src/*"],
-      "@crossfire/database": ["../../packages/database/src"],
-      "@crossfire/database/*": ["../../packages/database/src/*"]
-    },
     "types": ["bun-types"]
   },
   "include": ["src/**/*"],

@@ -1,6 +1,7 @@
 {
   "name": "crossfire",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "description": "Browser-Based Multiplayer FPS - Inspired by Crossfire",
   "license": "MIT",
@@ -11,13 +12,12 @@
       "packages/*"
     ]
   },
-  "type": "module",
   "scripts": {
     "dev": "cd apps/server && bunx tsdown --watch",
     "build": "cd packages/shared && bunx tsdown && cd ../database && bunx tsdown && cd ../../apps/server && bunx tsdown",
     "test": "echo 'No tests yet' && exit 0",
-    "lint": "oxlint",
-    "lint:fix": "oxlint --fix",
+    "lint": "oxlint --type-aware",
+    "lint:fix": "oxlint --fix --type-aware",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
     "typecheck": "echo 'Type checking skipped' && exit 0",
@@ -31,6 +31,7 @@
   "devDependencies": {
     "oxfmt": "^0.32.0",
     "oxlint": "^1.47.0",
+    "oxlint-tsgolint": "^0.12.2",
     "tsdown": "^0.20.0",
     "typescript": "^5.9.3"
   },

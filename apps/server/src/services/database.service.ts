@@ -27,11 +27,11 @@ export const DatabaseServiceLive = Effect.gen(function* (_) {
 
   const query = <T>(fn: (db: Kysely<Database>) => Promise<T>): Effect.Effect<T, DatabaseError> =>
     Effect.tryPromise({
-      try: () => fn(db),
+      try: async () => fn(db),
       catch: (error) => new DatabaseError({ message: 'Query failed', cause: error }),
     })
 
-  yield* Effect.addFinalizer(() => Effect.promise(() => db.destroy()).pipe(Effect.orDie))
+  yield* Effect.addFinalizer(() => Effect.promise(async () => db.destroy()).pipe(Effect.orDie))
 
   return DatabaseService.of({ db, query })
 }).pipe(Effect.provide(DatabaseConfig.Live), Layer.scoped(DatabaseService))

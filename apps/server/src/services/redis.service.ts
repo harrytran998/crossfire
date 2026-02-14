@@ -27,20 +27,20 @@ export const RedisServiceLive = Effect.gen(function* (_) {
   })
 
   yield* Effect.tryPromise({
-    try: () => client.ping(),
+    try: async () => client.ping(),
     catch: (error) => new RedisError({ message: 'Failed to connect to Redis', cause: error }),
   })
 
   const get = (key: string): Effect.Effect<string | null, RedisError> =>
     Effect.tryPromise({
-      try: () => client.get(key),
+      try: async () => client.get(key),
       catch: (error) => new RedisError({ message: `Failed to get key: ${key}`, cause: error }),
     })
 
   const set = (key: string, value: string, ttl?: number): Effect.Effect<void, RedisError> =>
     Effect.tryPromise({
       try: async () => {
-        if (ttl) {
+        if (ttl != null && ttl > 0) {
           await client.setex(key, ttl, value)
         } else {
           await client.set(key, value)
@@ -67,13 +67,13 @@ export const RedisServiceLive = Effect.gen(function* (_) {
 
   const hget = (key: string, field: string): Effect.Effect<string | null, RedisError> =>
     Effect.tryPromise({
-      try: () => client.hget(key, field),
+      try: async () => client.hget(key, field),
       catch: (error) => new RedisError({ message: `Failed to hget ${key}:${field}`, cause: error }),
     })
 
   const hgetall = (key: string): Effect.Effect<Record<string, string>, RedisError> =>
     Effect.tryPromise({
-      try: () => client.hgetall(key),
+      try: async () => client.hgetall(key),
       catch: (error) => new RedisError({ message: `Failed to hgetall ${key}`, cause: error }),
     })
 
@@ -85,7 +85,7 @@ export const RedisServiceLive = Effect.gen(function* (_) {
       catch: (error) => new RedisError({ message: `Failed to expire ${key}`, cause: error }),
     })
 
-  yield* Effect.addFinalizer(() => Effect.promise(() => client.quit()).pipe(Effect.orDie))
+  yield* Effect.addFinalizer(() => Effect.promise(async () => client.quit()).pipe(Effect.orDie))
 
   return RedisService.of({ client, get, set, del, hset, hget, hgetall, expire })
 }).pipe(Effect.provide(RedisConfig.Live), Layer.scoped(RedisService))
