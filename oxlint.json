@@ -1,0 +1,29 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oxc-project/oxlint/main/docs/configuration.md",
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn",
+    "restriction": "warn",
+    "pedantic": "off",
+    "style": "off",
+    "nursery": "off"
+  },
+  "plugins": ["typescript", "import", "unicorn", "react"],
+  "rules": {
+    "no-unused-vars": "error",
+    "typescript/no-explicit-any": "warn",
+    "typescript/explicit-function-return-type": "off",
+    "import/no-default-export": "off",
+    "unicorn/prefer-node-protocol": "error"
+  },
+  "ignore": [
+    "node_modules",
+    "dist",
+    "build",
+    ".moon",
+    "coverage",
+    "*.config.js",
+    "*.config.ts"
+  ]
+}

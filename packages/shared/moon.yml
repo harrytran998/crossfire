@@ -5,7 +5,7 @@ language: "typescript"
 
 tasks:
   build:
-    command: "bun build src/index.ts --outdir dist"
+    command: "bun build src/index.ts --outdir dist --target bun"
     description: "Build shared package"
     inputs:
       - "src/**/*"

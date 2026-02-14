@@ -46,7 +46,7 @@ tasks:
       DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/crossfire"
 
   build:
-    command: "bun build src/index.ts --outdir dist"
+    command: "bun build src/index.ts --outdir dist --target bun"
     description: "Build database package"
     inputs:
       - "src/**/*"

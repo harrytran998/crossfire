@@ -19,6 +19,3 @@ vcs:
   provider: "github"
   defaultBranch: "main"
 
-# Notifier for task completion notifications
-notifier:
-  terminal: true
