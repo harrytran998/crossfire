@@ -24,7 +24,8 @@ tasks:
       NODE_ENV: "development"
 
   build:
-    description: "Build the project"
+    command: "tsdown"
+    description: "Build the project with tsdown"
     env:
       NODE_ENV: "production"
 
