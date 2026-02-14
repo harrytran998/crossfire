@@ -14,7 +14,7 @@
   "type": "module",
   "scripts": {
     "dev": "cd apps/server && bunx tsdown --watch",
-    "build": "bunx moon run :build",
+    "build": "cd packages/shared && bunx tsdown && cd ../database && bunx tsdown && cd ../../apps/server && bunx tsdown",
     "test": "echo 'No tests yet' && exit 0",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
