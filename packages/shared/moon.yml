@@ -5,16 +5,17 @@ language: "typescript"
 
 tasks:
   build:
-    command: "bun build src/index.ts --outdir dist"
-    description: "Build shared package"
+    command: "tsdown"
+    description: "Build shared package with tsdown"
     inputs:
       - "src/**/*"
+      - "tsdown.config.ts"
       - "package.json"
     outputs:
       - "dist/"
 
   dev:
-    command: "bun build src/index.ts --outdir dist --watch"
+    command: "tsdown --watch"
     description: "Build in watch mode"
     local: true
 

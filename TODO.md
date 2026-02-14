@@ -7,16 +7,16 @@
 
 ## Technology Stack
 
-| Layer | Technology |
-|-------|------------|
-| Database | PostgreSQL 18.2 (UUID v7) |
-| Query Builder | Kysely 0.28.11 |
-| Migrations | golang-migrate 4.19.x |
-| Monorepo | Moonrepo |
-| Linting | oxlint 1.47.0 |
-| Formatting | oxfmt 0.32.0 |
-| Runtime | Bun 1.3.9 |
-| Framework | Effect 3.19.16 |
+| Layer         | Technology                |
+| ------------- | ------------------------- |
+| Database      | PostgreSQL 18.2 (UUID v7) |
+| Query Builder | Kysely 0.28.11            |
+| Migrations    | golang-migrate 4.19.x     |
+| Monorepo      | Moonrepo                  |
+| Linting       | oxlint 1.47.0             |
+| Formatting    | oxfmt 0.32.0              |
+| Runtime       | Bun 1.3.9                 |
+| Framework     | Effect 3.19.16            |
 
 ---
 
@@ -44,7 +44,7 @@
 
 - [ ] **P0-W1-T05** | Create environment config system (Effect Config)
   - Category: ultrabrain | Skills: effect | Est: 4-5h
-  - Files: packages/shared/src/config/*.ts
+  - Files: packages/shared/src/config/\*.ts
 
 - [ ] **P0-W1-T06** | Setup GitHub Actions CI/CD
   - Category: devops | Skills: git-master | Est: 3h
@@ -54,7 +54,7 @@
 
 - [ ] **P0-W2-T07** | Implement Kysely schema + SQL migrations
   - Category: ultrabrain | Skills: database | Est: 8-10h
-  - Files: packages/database/migrations/*.sql, packages/database/src/types.ts
+  - Files: packages/database/migrations/\*.sql, packages/database/src/types.ts
   - **Key**: Use uuidv7() for primary keys, kysely-codegen for types
   - **BLOCKS**: Most Phase 1+ tasks
 
@@ -66,7 +66,7 @@
 
 - [ ] **P0-W2-T09** | Create shared package (types & utilities)
   - Category: quick | Skills: bun | Est: 4-6h
-  - Files: packages/shared/src/types/*.ts
+  - Files: packages/shared/src/types/\*.ts
 
 - [ ] **P0-W2-T10** | Setup Effect platform in server
   - Category: ultrabrain | Skills: effect | Est: 4-5h
@@ -221,17 +221,18 @@
 
 ## Summary Statistics
 
-| Metric | Count |
-|--------|-------|
-| Total Tasks | 42 |
-| Phase 0 Tasks | 10 |
-| Phase 1 Tasks | 8 |
-| Phase 2 Tasks | 9 |
-| Phase 3 Tasks | 6 |
-| Phase 4 Tasks | 4 |
-| Phase 5 Tasks | 6 |
+| Metric        | Count |
+| ------------- | ----- |
+| Total Tasks   | 42    |
+| Phase 0 Tasks | 10    |
+| Phase 1 Tasks | 8     |
+| Phase 2 Tasks | 9     |
+| Phase 3 Tasks | 6     |
+| Phase 4 Tasks | 4     |
+| Phase 5 Tasks | 6     |
 
 ### Estimated Total Effort
+
 - **Phase 0-4 (API + Database)**: ~200-240 hours (~12-14 weeks)
 - **Phase 5 (Frontend)**: ~60-80 hours (~4-5 weeks)
 
@@ -240,6 +241,7 @@
 ## Quick Start Commands
 
 ### Moonrepo
+
 ```bash
 # Setup moon in the project
 moon setup
@@ -263,6 +265,7 @@ moon query affected
 ```
 
 ### golang-migrate
+
 ```bash
 # Install
 brew install golang-migrate
@@ -278,12 +281,14 @@ migrate -database $DATABASE_URL -path packages/database/migrations down 1
 ```
 
 ### Kysely Type Generation
+
 ```bash
 # Generate types from database
 kysely-codegen --out-file packages/database/src/types.ts
 ```
 
 ### oxlint/oxfmt
+
 ```bash
 # Lint
 bun run lint
@@ -296,6 +301,7 @@ bun run format:check
 ```
 
 ### PostgreSQL 18 UUID v7
+
 ```sql
 -- Create table with UUID v7 primary key
 CREATE TABLE users (
@@ -309,17 +315,17 @@ CREATE TABLE users (
 
 ## Key Changes from v1.0
 
-| Old | New | Reason |
-|-----|-----|--------|
-| PostgreSQL 16 | PostgreSQL 18.2 | UUID v7, better performance |
-| Prisma | Kysely 0.28.x + golang-migrate 4.19.x | More control, SQL-first |
-| Turborepo | Moonrepo | Better Bun support, task inheritance |
-| ESLint/Prettier | oxlint 1.47.x/oxfmt 0.32.x | 10-100x faster |
-| React 18 | React 19 | Latest features |
-| Vite 5 | Vite 7 | Latest features |
+| Old             | New                                   | Reason                               |
+| --------------- | ------------------------------------- | ------------------------------------ |
+| PostgreSQL 16   | PostgreSQL 18.2                       | UUID v7, better performance          |
+| Prisma          | Kysely 0.28.x + golang-migrate 4.19.x | More control, SQL-first              |
+| Turborepo       | Moonrepo                              | Better Bun support, task inheritance |
+| ESLint/Prettier | oxlint 1.47.x/oxfmt 0.32.x            | 10-100x faster                       |
+| React 18        | React 19                              | Latest features                      |
+| Vite 5          | Vite 7                                | Latest features                      |
 
 ---
 
-*TODO List Version: 2.2*  
-*Generated from: EXECUTION_PLAN.md v2.2*  
-*Last Updated: February 2026*
+_TODO List Version: 2.2_  
+_Generated from: EXECUTION_PLAN.md v2.2_  
+_Last Updated: February 2026_

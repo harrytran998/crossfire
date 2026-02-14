@@ -1,6 +1,7 @@
 # Effect Framework Patterns
 
 ## Core Principles
+
 - **Tagged errors**: Use `Tag<"ErrorName">` for compiler-verified errors
 - **Layer pattern**: Compose services using `Layer` for dependency injection
 - **Effect as workflow**: Everything is an Effect; compose with pipe
@@ -10,6 +11,7 @@
 ## DO ✅
 
 ### 1. Use Tagged Errors
+
 ```typescript
 // DO: Define errors with Tag
 import { Tag } from 'effect'
@@ -20,24 +22,19 @@ const DatabaseError = Tag<'DatabaseError', { readonly reason: string }>()
 // DO: Use errors in Effect return type
 export const findUser = (id: string): Effect.Effect<User, UserNotFound> => {
   return Effect.succeed(user).pipe(
-    Effect.catch('UserNotFound', () => 
-      new UserNotFound({ userId: id })
-    )
+    Effect.catch('UserNotFound', () => new UserNotFound({ userId: id }))
   )
 }
 
 // DO: Handle specific errors
 const program = findUser('123').pipe(
-  Effect.catch('UserNotFound', (err) => 
-    Effect.logInfo(`User not found: ${err.userId}`)
-  ),
-  Effect.catch('DatabaseError', (err) => 
-    Effect.sync(() => console.error(err.reason))
-  )
+  Effect.catch('UserNotFound', (err) => Effect.logInfo(`User not found: ${err.userId}`)),
+  Effect.catch('DatabaseError', (err) => Effect.sync(() => console.error(err.reason)))
 )
 ```
 
 ### 2. Use Layer for Dependency Injection
+
 ```typescript
 // DO: Define service interface
 interface UserRepository {
@@ -47,34 +44,25 @@ interface UserRepository {
 }
 
 // DO: Implement with Layer
-const UserRepositoryLive = Layer.succeed(
-  UserRepository,
-  {
-    _tag: 'UserRepository' as const,
-    findById: (id: string) => Effect.sync(() => findInDB(id)),
-    save: (user: User) => Effect.sync(() => saveInDB(user))
-  }
-)
+const UserRepositoryLive = Layer.succeed(UserRepository, {
+  _tag: 'UserRepository' as const,
+  findById: (id: string) => Effect.sync(() => findInDB(id)),
+  save: (user: User) => Effect.sync(() => saveInDB(user)),
+})
 
 // DO: Consume via Effect.serviceWithEffect
-export const getUser = (id: string): Effect.Effect<User, UserNotFound, UserRepository> => 
+export const getUser = (id: string): Effect.Effect<User, UserNotFound, UserRepository> =>
   Effect.serviceWithEffect(UserRepository, (repo) => repo.findById(id))
 
 // DO: Compose layers
-const AppLayer = Layer.merge(
-  UserRepositoryLive,
-  DatabaseLive,
-  LoggerLive
-)
+const AppLayer = Layer.merge(UserRepositoryLive, DatabaseLive, LoggerLive)
 
 // DO: Provide layer to effect
-program.pipe(
-  Effect.provide(AppLayer),
-  Effect.runPromise
-)
+program.pipe(Effect.provide(AppLayer), Effect.runPromise)
 ```
 
 ### 3. Use Effect Pipeline Pattern
+
 ```typescript
 // DO: Compose effects with pipe
 const workflow = getUserData(userId).pipe(
@@ -82,16 +70,13 @@ const workflow = getUserData(userId).pipe(
   Effect.andThen((validUser) => saveUser(validUser)),
   Effect.tap((saved) => Effect.logInfo(`Saved: ${saved.id}`)),
   Effect.map((user) => ({ success: true, data: user })),
-  Effect.catch('ValidationError', (err) => 
-    Effect.fail(new APIError('Invalid user', 400))
-  ),
-  Effect.catch('SaveError', (_) => 
-    Effect.fail(new APIError('Database error', 500))
-  )
+  Effect.catch('ValidationError', (err) => Effect.fail(new APIError('Invalid user', 400))),
+  Effect.catch('SaveError', (_) => Effect.fail(new APIError('Database error', 500)))
 )
 ```
 
 ### 4. Resource Management with Scoped
+
 ```typescript
 // DO: Use scoped for resource cleanup
 const DatabaseLive = Layer.scoped(
@@ -107,29 +92,22 @@ const readFile = (path: string): Effect.Effect<string, FileError> =>
   Effect.acquireRelease(
     Effect.sync(() => fs.openSync(path, 'r')),
     (fd) => Effect.sync(() => fs.closeSync(fd))
-  ).pipe(
-    Effect.andThen((fd) => Effect.sync(() => fs.readFileSync(fd, 'utf-8')))
-  )
+  ).pipe(Effect.andThen((fd) => Effect.sync(() => fs.readFileSync(fd, 'utf-8'))))
 ```
 
 ### 5. Testing Effects
+
 ```typescript
 // DO: Test effects with Effect.runSync or Effect.runPromise
 describe('UserService', () => {
   it('should find user', async () => {
-    const result = await getUserData('123').pipe(
-      Effect.provide(TestLayer),
-      Effect.runPromise
-    )
+    const result = await getUserData('123').pipe(Effect.provide(TestLayer), Effect.runPromise)
     expect(result.id).toBe('123')
   })
 
   // DO: Test error cases
   it('should fail with UserNotFound', async () => {
-    const result = findUser('invalid').pipe(
-      Effect.provide(TestLayer),
-      Effect.runPromise
-    )
+    const result = findUser('invalid').pipe(Effect.provide(TestLayer), Effect.runPromise)
     await expect(result).rejects.toThrow('UserNotFound')
   })
 })
@@ -138,6 +116,7 @@ describe('UserService', () => {
 ## DON'T ❌
 
 ### 1. Avoid Raw Promises
+
 ```typescript
 // DON'T: Mix Promises and Effects
 const findUser = (id: string): Promise<User> => {
@@ -146,7 +125,7 @@ const findUser = (id: string): Promise<User> => {
 
 // Instead, wrap in Effect
 const findUser = (id: string): Effect.Effect<User, FetchError> =>
-  Effect.promise(() => 
+  Effect.promise(() =>
     fetch(`/api/users/${id}`).then(r => r.json())
   ).pipe(
     Effect.catch('NetworkError', () => new FetchError(...))
@@ -154,6 +133,7 @@ const findUser = (id: string): Effect.Effect<User, FetchError> =>
 ```
 
 ### 2. Avoid Untyped Errors
+
 ```typescript
 // DON'T: Use generic Error or string
 Effect.fail('Something went wrong')
@@ -165,11 +145,12 @@ Effect.fail(new DatabaseError({ message: 'Connection failed' }))
 ```
 
 ### 3. Avoid Deep Nesting
+
 ```typescript
 // DON'T: Nested callbacks
-findUser(id).then(user => {
-  validateUser(user).then(valid => {
-    saveUser(valid).then(saved => {
+findUser(id).then((user) => {
+  validateUser(user).then((valid) => {
+    saveUser(valid).then((saved) => {
       console.log('Done')
     })
   })
@@ -184,6 +165,7 @@ findUser(id).pipe(
 ```
 
 ### 4. Avoid Manual Dependency Passing
+
 ```typescript
 // DON'T: Manually pass dependencies
 class UserService {
@@ -199,19 +181,16 @@ class UserService {
 const UserServiceLive = Layer.effect(
   UserService,
   Effect.all([Database, Logger, Cache, Validator]).pipe(
-    Effect.map(([db, logger, cache, validator]) => 
-      new UserService(db, logger, cache, validator)
-    )
+    Effect.map(([db, logger, cache, validator]) => new UserService(db, logger, cache, validator))
   )
 )
 ```
 
 ### 5. Avoid Catching All Errors
+
 ```typescript
 // DON'T: Swallow all errors
-Effect.try(() => someOperation()).pipe(
-  Effect.catch(() => Effect.succeed(null))
-)
+Effect.try(() => someOperation()).pipe(Effect.catch(() => Effect.succeed(null)))
 
 // Instead, be specific
 Effect.try(() => someOperation()).pipe(
@@ -224,6 +203,7 @@ Effect.try(() => someOperation()).pipe(
 ## Error Handling Patterns
 
 ### Tagged Errors Structure
+
 ```typescript
 // Define errors as separate tags
 const NotFound = Tag<'NotFound', { readonly resource: string }>()
@@ -247,21 +227,23 @@ const handler = (error: ApiError): string => {
 ```
 
 ## Integration with Skills
+
 - **Use with /git-master**: Effect changes often involve error type updates
 - **Use with /refactor**: Effect refactoring focuses on improving error flow
 - **Use in testing**: Test both happy path and error cases
 
 ## Rationale
 
-| Pattern | Why |
-|---------|-----|
-| Tagged errors | Compiler checks error handling; no missed cases |
-| Layer | Explicit dependencies; testable; clear initialization |
-| Effect pipes | Readable, functional composition; error propagation automatic |
-| Scoped resources | Automatic cleanup; no resource leaks |
-| Type safety | Errors are data; type system guides handling |
+| Pattern          | Why                                                           |
+| ---------------- | ------------------------------------------------------------- |
+| Tagged errors    | Compiler checks error handling; no missed cases               |
+| Layer            | Explicit dependencies; testable; clear initialization         |
+| Effect pipes     | Readable, functional composition; error propagation automatic |
+| Scoped resources | Automatic cleanup; no resource leaks                          |
+| Type safety      | Errors are data; type system guides handling                  |
 
 ## References
+
 - Effect Documentation: https://effect.website/
 - Error Management: https://effect.website/docs/guides/error-management
 - Dependency Injection: https://effect.website/docs/guides/dependency-injection

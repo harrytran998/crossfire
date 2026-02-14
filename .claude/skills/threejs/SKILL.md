@@ -10,6 +10,7 @@ Three.js is a JavaScript 3D library built on WebGL. React Three Fiber (R3F) is a
 ## Key Concepts
 
 ### Three.js Fundamentals
+
 - **Scene**: Container for all 3D objects
 - **Camera**: Defines viewpoint (orthographic or perspective)
 - **Renderer**: Renders scene to canvas
@@ -18,12 +19,14 @@ Three.js is a JavaScript 3D library built on WebGL. React Three Fiber (R3F) is a
 - **Mesh**: Combines geometry + material
 
 ### React Three Fiber
+
 - Declarative scene composition
 - Component-based architecture
 - Automatic WebGL resource management
 - Hooks for frame updates and interactions
 
 ### Rendering Pipeline
+
 1. Clear frame
 2. Update scene
 3. Apply lights and shadows
@@ -32,52 +35,54 @@ Three.js is a JavaScript 3D library built on WebGL. React Three Fiber (R3F) is a
 ## Code Examples
 
 ### Basic Three.js Scene
+
 ```typescript
-import * as THREE from "three";
+import * as THREE from 'three'
 
 // Create scene, camera, renderer
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const scene = new THREE.Scene()
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
+const renderer = new THREE.WebGLRenderer({ antialias: true })
 
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setClearColor(0x000000);
-document.body.appendChild(renderer.domElement);
+renderer.setSize(window.innerWidth, window.innerHeight)
+renderer.setClearColor(0x000000)
+document.body.appendChild(renderer.domElement)
 
 // Create geometry and material
-const geometry = new THREE.BoxGeometry();
-const material = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
-const mesh = new THREE.Mesh(geometry, material);
+const geometry = new THREE.BoxGeometry()
+const material = new THREE.MeshPhongMaterial({ color: 0x00ff00 })
+const mesh = new THREE.Mesh(geometry, material)
 
-scene.add(mesh);
-camera.position.z = 5;
+scene.add(mesh)
+camera.position.z = 5
 
 // Add lighting
-const light = new THREE.PointLight(0xffffff, 1, 100);
-light.position.set(5, 5, 5);
-scene.add(light);
+const light = new THREE.PointLight(0xffffff, 1, 100)
+light.position.set(5, 5, 5)
+scene.add(light)
 
 // Animation loop
 const animate = () => {
-  requestAnimationFrame(animate);
-  
-  mesh.rotation.x += 0.01;
-  mesh.rotation.y += 0.01;
-  
-  renderer.render(scene, camera);
-};
+  requestAnimationFrame(animate)
 
-animate();
+  mesh.rotation.x += 0.01
+  mesh.rotation.y += 0.01
+
+  renderer.render(scene, camera)
+}
+
+animate()
 
 // Handle window resize
-window.addEventListener("resize", () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight
+  camera.updateProjectionMatrix()
+  renderer.setSize(window.innerWidth, window.innerHeight)
+})
 ```
 
 ### React Three Fiber Canvas Setup
+
 ```typescript
 import React from "react";
 import { Canvas } from "@react-three/fiber";
@@ -101,6 +106,7 @@ export default Scene;
 ```
 
 ### Rotating Box Component
+
 ```typescript
 import { useRef, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
@@ -135,6 +141,7 @@ function Scene() {
 ```
 
 ### Camera Control
+
 ```typescript
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
@@ -144,15 +151,15 @@ function Scene() {
     <Canvas>
       <PerspectiveCamera makeDefault position={[0, 5, 5]} />
       <OrbitControls />
-      
+
       <ambientLight intensity={0.5} />
       <pointLight position={[10, 10, 10]} intensity={1} />
-      
+
       <mesh>
         <sphereGeometry args={[1, 32, 32]} />
         <meshStandardMaterial color={0x0088ff} />
       </mesh>
-      
+
       <gridHelper args={[10, 10]} />
     </Canvas>
   );
@@ -160,6 +167,7 @@ function Scene() {
 ```
 
 ### Textures and Materials
+
 ```typescript
 import { useTexture } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
@@ -196,6 +204,7 @@ function Scene() {
 ```
 
 ### Lighting Setups
+
 ```typescript
 import { Canvas } from "@react-three/fiber";
 
@@ -241,6 +250,7 @@ function LightingScene() {
 ```
 
 ### Interactive Objects
+
 ```typescript
 import { useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
@@ -255,7 +265,7 @@ function InteractiveBox() {
     if (meshRef.current) {
       meshRef.current.rotation.x += 0.005;
       meshRef.current.rotation.y += 0.01;
-      
+
       if (clicked) {
         meshRef.current.scale.lerp(new THREE.Vector3(1.5, 1.5, 1.5), 0.1);
       } else {
@@ -292,6 +302,7 @@ function Scene() {
 ```
 
 ### Animations with Tweens
+
 ```typescript
 import { useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
@@ -331,6 +342,7 @@ function Scene() {
 ```
 
 ### Model Loading (GLTF)
+
 ```typescript
 import { useGLTF, PerspectiveCamera, OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
@@ -348,7 +360,7 @@ function Scene() {
       <OrbitControls />
       <ambientLight intensity={0.6} />
       <directionalLight position={[10, 10, 10]} intensity={1} />
-      
+
       <Suspense fallback={null}>
         <Model />
       </Suspense>
@@ -358,6 +370,7 @@ function Scene() {
 ```
 
 ### Post-Processing Effects
+
 ```typescript
 import { Canvas } from "@react-three/fiber";
 import { EffectComposer, Bloom, DepthOfField } from "@react-three/postprocessing";
@@ -384,6 +397,7 @@ function Scene() {
 ```
 
 ### Particles System
+
 ```typescript
 import { useRef, useMemo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
@@ -437,6 +451,7 @@ function Scene() {
 ## Best Practices
 
 ### 1. Performance
+
 - Use `PerspectiveCamera` with appropriate near/far planes
 - Enable frustum culling for large scenes
 - Use LOD (Level of Detail) for complex models
@@ -444,24 +459,28 @@ function Scene() {
 - Profile with Three.js DevTools
 
 ### 2. Lighting
+
 - Use minimal lights for performance
 - Enable shadow mapping only where needed
 - Use lower shadow map resolution when possible
 - Combine lights efficiently
 
 ### 3. Textures
+
 - Compress textures (JPEG for photos, PNG for graphics)
 - Use appropriate texture sizes
 - Implement texture atlasing
 - Lazy-load textures
 
 ### 4. React Three Fiber Patterns
+
 - Memoize expensive components
 - Use `useFrame` for animation, not useState
 - Clean up resources in useEffect
 - Avoid creating objects in render
 
 ### 5. Accessibility
+
 - Provide alternative experiences for non-3D browsers
 - Allow interaction via keyboard and mouse
 - Respect reduced motion preferences
@@ -470,6 +489,7 @@ function Scene() {
 ## Common Patterns
 
 ### Component Library Structure
+
 ```typescript
 // Base mesh component
 interface MeshProps {
@@ -489,6 +509,7 @@ export function Box({ position, rotation, scale }: MeshProps) {
 ```
 
 ### Scene Manager Pattern
+
 ```typescript
 interface SceneConfig {
   camera: CameraConfig;
@@ -509,6 +530,7 @@ function SceneManager({ config }: { config: SceneConfig }) {
 ```
 
 ### Performance Monitoring
+
 ```typescript
 import { useFrame } from "@react-three/fiber";
 import { useState } from "react";

@@ -1,24 +1,20 @@
 # Moonrepo Workspace Configuration
 # https://moonrepo.dev/docs/config/workspace
 
-$schema: "https://moonrepo.dev/schemas/workspace.json"
+$schema: 'https://moonrepo.dev/schemas/workspace.json'
 
 # Project globs - defines which directories contain projects
 projects:
-  - "apps/*"
-  - "packages/*"
+  - 'apps/*'
+  - 'packages/*'
 
 # Generator configuration for scaffolding
 generator:
   templates:
-    - ".moon/templates"
+    - '.moon/templates'
 
 # VCS (Version Control System) settings
 vcs:
-  manager: "git"
-  provider: "github"
-  defaultBranch: "main"
-
-# Notifier for task completion notifications
-notifier:
-  terminal: true
+  manager: 'git'
+  provider: 'github'
+  defaultBranch: 'main'

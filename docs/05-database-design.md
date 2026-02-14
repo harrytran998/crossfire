@@ -7,6 +7,7 @@
 ## 1. Overview
 
 This document defines the complete PostgreSQL 18.2 database schema for the Crossfire web game, supporting:
+
 - Player management and authentication
 - Game rooms and matchmaking
 - Match history and statistics
@@ -15,11 +16,11 @@ This document defines the complete PostgreSQL 18.2 database schema for the Cross
 
 ### PostgreSQL 18 Features Used
 
-| Feature | Usage | Benefit |
-|---------|-------|---------|
-| **UUID v7** | Primary keys | Time-ordered, sortable IDs |
-| **Async I/O** | Automatic | 2-3x faster reads |
-| **Improved btree** | Indexes | Better query performance |
+| Feature            | Usage        | Benefit                    |
+| ------------------ | ------------ | -------------------------- |
+| **UUID v7**        | Primary keys | Time-ordered, sortable IDs |
+| **Async I/O**      | Automatic    | 2-3x faster reads          |
+| **Improved btree** | Indexes      | Better query performance   |
 
 ---
 
@@ -63,13 +64,13 @@ CREATE TABLE users (
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     email_verified BOOLEAN DEFAULT false,
-    
+
     -- Account status
     is_active BOOLEAN NOT NULL DEFAULT true,
     is_banned BOOLEAN NOT NULL DEFAULT false,
     banned_until TIMESTAMPTZ,
     ban_reason TEXT,
-    
+
     -- Timestamps
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -83,7 +84,7 @@ CREATE TABLE sessions (
     refresh_token VARCHAR(255) NOT NULL UNIQUE,
     ip_address INET,
     user_agent TEXT,
-    
+
     -- Session lifecycle
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     expires_at TIMESTAMPTZ NOT NULL,
@@ -96,7 +97,7 @@ CREATE INDEX idx_users_email ON users (email);
 CREATE INDEX idx_users_active ON users (is_active) WHERE is_banned = false;
 CREATE INDEX idx_sessions_user ON sessions (user_id);
 CREATE INDEX idx_sessions_token ON sessions (refresh_token);
-CREATE INDEX idx_sessions_active ON sessions (user_id, expires_at) 
+CREATE INDEX idx_sessions_active ON sessions (user_id, expires_at)
     WHERE revoked_at IS NULL;
 ```
 
@@ -107,49 +108,49 @@ CREATE INDEX idx_sessions_active ON sessions (user_id, expires_at)
 CREATE TABLE players (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    
+
     -- Profile info
     display_name VARCHAR(64) NOT NULL,
     avatar_url VARCHAR(512),
     bio TEXT,
-    
+
     -- Preferences
     region VARCHAR(16) DEFAULT 'ASIA',
     language VARCHAR(8) DEFAULT 'en',
-    
+
     -- Timestamps
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    
+
     UNIQUE(user_id)
 );
 
 -- Player statistics (cumulative)
 CREATE TABLE player_stats (
     player_id UUID PRIMARY KEY REFERENCES players(id) ON DELETE CASCADE,
-    
+
     -- Match stats
     total_matches INTEGER NOT NULL DEFAULT 0,
     matches_won INTEGER NOT NULL DEFAULT 0,
     matches_lost INTEGER NOT NULL DEFAULT 0,
-    
+
     -- Combat stats
     total_kills BIGINT NOT NULL DEFAULT 0,
     total_deaths BIGINT NOT NULL DEFAULT 0,
     total_assists BIGINT NOT NULL DEFAULT 0,
     total_headshots BIGINT NOT NULL DEFAULT 0,
-    
+
     -- Damage stats
     total_damage_dealt BIGINT NOT NULL DEFAULT 0,
     total_damage_received BIGINT NOT NULL DEFAULT 0,
-    
+
     -- Score & time
     total_score BIGINT NOT NULL DEFAULT 0,
     playtime_seconds BIGINT NOT NULL DEFAULT 0,
-    
+
     -- Mode-specific stats stored as JSONB
     mode_stats JSONB DEFAULT '{}',
-    
+
     last_updated TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -196,16 +197,16 @@ INSERT INTO levels (level, xp_required, title) VALUES
 -- Player progression
 CREATE TABLE player_progression (
     player_id UUID PRIMARY KEY REFERENCES players(id) ON DELETE CASCADE,
-    
+
     -- Current state
     current_level INTEGER NOT NULL DEFAULT 1,
     current_xp BIGINT NOT NULL DEFAULT 0,
     total_xp BIGINT NOT NULL DEFAULT 0,
-    
+
     -- Boosters
     xp_multiplier DECIMAL(3,2) DEFAULT 1.0,
     xp_booster_expires TIMESTAMPTZ,
-    
+
     last_updated TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -213,16 +214,16 @@ CREATE TABLE player_progression (
 CREATE TABLE xp_history (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     player_id UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
-    
+
     -- Source
     source VARCHAR(32) NOT NULL, -- 'match', 'daily_bonus', 'achievement', 'event'
     match_id UUID REFERENCES matches(id),
-    
+
     -- Amount
     base_amount INTEGER NOT NULL,
     multiplier DECIMAL(3,2) DEFAULT 1.0,
     final_amount INTEGER NOT NULL,
-    
+
     gained_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -240,7 +241,7 @@ CREATE INDEX idx_xp_history_player ON xp_history (player_id, gained_at DESC);
 ```sql
 -- Weapon types enum
 CREATE TYPE weapon_type AS ENUM (
-    'assault_rifle', 'smg', 'sniper', 'shotgun', 
+    'assault_rifle', 'smg', 'sniper', 'shotgun',
     'machine_gun', 'pistol', 'melee', 'grenade'
 );
 
@@ -255,11 +256,11 @@ CREATE TABLE weapons (
     weapon_key VARCHAR(64) NOT NULL UNIQUE,
     name VARCHAR(128) NOT NULL,
     description TEXT,
-    
+
     -- Classification
     weapon_type weapon_type NOT NULL,
     rarity weapon_rarity NOT NULL DEFAULT 'common',
-    
+
     -- Stats
     base_damage INTEGER NOT NULL,
     fire_rate DECIMAL(6,2), -- rounds per second
@@ -268,17 +269,17 @@ CREATE TABLE weapons (
     accuracy DECIMAL(4,3), -- 0.0 to 1.0
     range_meters INTEGER,
     move_speed_modifier DECIMAL(3,2) DEFAULT 1.0,
-    
+
     -- Unlock
     unlock_level INTEGER DEFAULT 1,
     unlock_cost INTEGER DEFAULT 0,
-    
+
     -- State
     is_active BOOLEAN NOT NULL DEFAULT true,
-    
+
     -- Flexible stats (recoil pattern, etc.)
     stats JSONB DEFAULT '{}',
-    
+
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -286,17 +287,17 @@ CREATE TABLE weapons (
 CREATE TABLE weapon_attachments (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     weapon_id UUID REFERENCES weapons(id) ON DELETE CASCADE,
-    
+
     attachment_type VARCHAR(32) NOT NULL, -- 'scope', 'barrel', 'magazine', 'grip', 'stock'
     name VARCHAR(128) NOT NULL,
-    
+
     -- Stat modifiers
     stat_modifiers JSONB NOT NULL DEFAULT '{}',
     -- Example: {"damage": 1.1, "accuracy": 0.95, "reload_time": 0.9}
-    
+
     unlock_level INTEGER DEFAULT 1,
     is_active BOOLEAN DEFAULT true,
-    
+
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -317,15 +318,15 @@ CREATE TABLE maps (
     name VARCHAR(128) NOT NULL,
     description TEXT,
     thumbnail_url VARCHAR(512),
-    
+
     -- Map config
     max_players INTEGER NOT NULL,
     supported_modes TEXT[] NOT NULL, -- Array of game modes
     size_category VARCHAR(16), -- 'small', 'medium', 'large'
-    
+
     -- State
     is_active BOOLEAN DEFAULT true,
-    
+
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -345,12 +346,12 @@ CREATE TABLE player_inventory (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     player_id UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
     weapon_id UUID NOT NULL REFERENCES weapons(id),
-    
+
     -- Ownership
     acquired_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     is_permanent BOOLEAN DEFAULT true,
     expires_at TIMESTAMPTZ, -- For rental items
-    
+
     UNIQUE(player_id, weapon_id)
 );
 
@@ -358,29 +359,29 @@ CREATE TABLE player_inventory (
 CREATE TABLE player_loadouts (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     player_id UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
-    
+
     -- Loadout config
     name VARCHAR(64) NOT NULL DEFAULT 'Loadout 1',
     slot INTEGER NOT NULL DEFAULT 1,
     is_default BOOLEAN DEFAULT false,
-    
+
     -- Weapons (references to inventory)
     primary_weapon_id UUID REFERENCES player_inventory(id) ON DELETE SET NULL,
     secondary_weapon_id UUID REFERENCES player_inventory(id) ON DELETE SET NULL,
     melee_weapon_id UUID REFERENCES player_inventory(id) ON DELETE SET NULL,
-    
+
     -- Grenades (counts)
     frag_grenades INTEGER DEFAULT 1,
     flash_grenades INTEGER DEFAULT 1,
     smoke_grenades INTEGER DEFAULT 0,
-    
+
     -- Attachments
     primary_attachments UUID[] DEFAULT '{}',
     secondary_attachments UUID[] DEFAULT '{}',
-    
+
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    
+
     UNIQUE(player_id, slot)
 );
 
@@ -401,11 +402,11 @@ CREATE TABLE match_events (
     time TIMESTAMPTZ NOT NULL,
     match_id UUID NOT NULL,
     event_type VARCHAR(32) NOT NULL, -- 'kill', 'death', 'damage', 'objective', 'ability'
-    
+
     -- Players involved
     source_player_id UUID,
     target_player_id UUID,
-    
+
     -- Event details
     weapon_id UUID,
     damage_amount INTEGER,
@@ -413,7 +414,7 @@ CREATE TABLE match_events (
     position_x FLOAT,
     position_y FLOAT,
     position_z FLOAT,
-    
+
     -- Metadata
     round_number INTEGER,
     tick_number INTEGER,
@@ -433,7 +434,7 @@ CREATE TABLE player_telemetry (
     time TIMESTAMPTZ NOT NULL,
     player_id UUID NOT NULL,
     match_id UUID NOT NULL,
-    
+
     -- Per-interval stats
     kills INTEGER DEFAULT 0,
     deaths INTEGER DEFAULT 0,
@@ -441,7 +442,7 @@ CREATE TABLE player_telemetry (
     damage_dealt BIGINT DEFAULT 0,
     damage_received BIGINT DEFAULT 0,
     score INTEGER DEFAULT 0,
-    
+
     -- Performance metrics
     ping_ms INTEGER,
     fps_avg INTEGER,
@@ -454,16 +455,16 @@ SELECT create_hypertable('player_telemetry', 'time');
 CREATE TABLE server_metrics (
     time TIMESTAMPTZ NOT NULL,
     server_id VARCHAR(64) NOT NULL,
-    
+
     -- Resource usage
     cpu_percent DECIMAL(5,2),
     memory_mb BIGINT,
-    
+
     -- Network
     connections INTEGER,
     bytes_in BIGINT,
     bytes_out BIGINT,
-    
+
     -- Game metrics
     active_rooms INTEGER,
     active_players INTEGER,
@@ -479,7 +480,7 @@ SELECT create_hypertable('server_metrics', 'time');
 -- Real-time kill feed aggregate (last 5 minutes)
 CREATE MATERIALIZED VIEW kill_feed_recent
 WITH (timescaledb.continuous) AS
-SELECT 
+SELECT
     time_bucket('1 minute', time) AS bucket,
     match_id,
     source_player_id AS killer_id,
@@ -500,7 +501,7 @@ SELECT add_continuous_aggregate_policy('kill_feed_recent',
 -- Hourly player stats aggregate
 CREATE MATERIALIZED VIEW player_stats_hourly
 WITH (timescaledb.continuous) AS
-SELECT 
+SELECT
     time_bucket('1 hour', time) AS bucket,
     player_id,
     SUM(kills) AS kills,
@@ -535,7 +536,7 @@ CREATE TYPE room_status AS ENUM (
 
 -- Game modes enum
 CREATE TYPE game_mode AS ENUM (
-    'team_deathmatch', 'free_for_all', 'search_destroy', 
+    'team_deathmatch', 'free_for_all', 'search_destroy',
     'elimination', 'mutation', 'zombie'
 );
 
@@ -544,20 +545,20 @@ CREATE TABLE room_configs (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     name VARCHAR(64) NOT NULL,
     game_mode game_mode NOT NULL,
-    
+
     -- Player limits
     min_players INTEGER NOT NULL DEFAULT 2,
     max_players INTEGER NOT NULL DEFAULT 16,
-    
+
     -- Match settings
     time_limit_seconds INTEGER,
     score_limit INTEGER,
     round_limit INTEGER,
-    
+
     -- Flags
     is_ranked BOOLEAN DEFAULT false,
     is_official BOOLEAN DEFAULT false,
-    
+
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -575,16 +576,16 @@ CREATE TABLE game_rooms (
     config_id UUID NOT NULL REFERENCES room_configs(id),
     map_id UUID NOT NULL REFERENCES maps(id),
     host_player_id UUID NOT NULL REFERENCES players(id),
-    
+
     -- Room info
     room_code VARCHAR(8) UNIQUE,
     name VARCHAR(128),
     password_hash VARCHAR(255), -- For private rooms
-    
+
     -- State
     status room_status NOT NULL DEFAULT 'waiting',
     current_players INTEGER DEFAULT 0,
-    
+
     -- Timestamps
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     started_at TIMESTAMPTZ,
@@ -596,15 +597,15 @@ CREATE TABLE room_participants (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     room_id UUID NOT NULL REFERENCES game_rooms(id) ON DELETE CASCADE,
     player_id UUID NOT NULL REFERENCES players(id),
-    
+
     -- Participant state
     team INTEGER, -- 0 = unassigned, 1 = team 1, 2 = team 2
     is_ready BOOLEAN DEFAULT false,
     loadout_id UUID REFERENCES player_loadouts(id),
-    
+
     joined_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     left_at TIMESTAMPTZ,
-    
+
     UNIQUE(room_id, player_id)
 );
 
@@ -623,18 +624,18 @@ CREATE INDEX idx_participants_player ON room_participants (player_id, joined_at 
 CREATE TABLE matches (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     room_id UUID REFERENCES game_rooms(id),
-    
+
     -- Match info
     game_mode game_mode NOT NULL,
     map_id UUID NOT NULL REFERENCES maps(id),
-    
+
     -- Results
     winning_team INTEGER, -- NULL for FFA, team number for team modes
     mvp_player_id UUID REFERENCES players(id),
-    
+
     -- Duration
     duration_seconds INTEGER NOT NULL,
-    
+
     -- Timestamps
     started_at TIMESTAMPTZ NOT NULL,
     completed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -645,34 +646,34 @@ CREATE TABLE match_participants (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     match_id UUID NOT NULL REFERENCES matches(id) ON DELETE CASCADE,
     player_id UUID NOT NULL REFERENCES players(id),
-    
+
     -- Team
     team INTEGER,
-    
+
     -- Performance
     kills INTEGER NOT NULL DEFAULT 0,
     deaths INTEGER NOT NULL DEFAULT 0,
     assists INTEGER NOT NULL DEFAULT 0,
     headshots INTEGER NOT NULL DEFAULT 0,
-    
+
     -- Score
     score INTEGER NOT NULL DEFAULT 0,
     damage_dealt BIGINT NOT NULL DEFAULT 0,
     damage_received BIGINT NOT NULL DEFAULT 0,
-    
+
     -- Result
     is_winner BOOLEAN NOT NULL DEFAULT false,
     position INTEGER, -- Final standing (for FFA)
-    
+
     -- Rewards
     xp_gained INTEGER NOT NULL DEFAULT 0,
-    
+
     -- Time
     playtime_seconds INTEGER NOT NULL DEFAULT 0,
-    
+
     -- Detailed stats (weapon usage, etc.)
     detailed_stats JSONB DEFAULT '{}',
-    
+
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -681,14 +682,14 @@ CREATE TABLE match_weapon_usage (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     match_participant_id UUID NOT NULL REFERENCES match_participants(id) ON DELETE CASCADE,
     weapon_id UUID NOT NULL REFERENCES weapons(id),
-    
+
     -- Stats
     kills INTEGER DEFAULT 0,
     shots_fired INTEGER DEFAULT 0,
     shots_hit INTEGER DEFAULT 0,
     headshots INTEGER DEFAULT 0,
     damage_dealt BIGINT DEFAULT 0,
-    
+
     UNIQUE(match_participant_id, weapon_id)
 );
 
@@ -711,13 +712,13 @@ CREATE TABLE friendships (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     requester_id UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
     addressee_id UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
-    
+
     -- Status
     status VARCHAR(16) NOT NULL DEFAULT 'pending', -- 'pending', 'accepted', 'blocked'
-    
+
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    
+
     UNIQUE(requester_id, addressee_id),
     CHECK (requester_id != addressee_id)
 );
@@ -725,7 +726,7 @@ CREATE TABLE friendships (
 -- Indexes
 CREATE INDEX idx_friendships_requester ON friendships (requester_id);
 CREATE INDEX idx_friendships_addressee ON friendships (addressee_id);
-CREATE INDEX idx_friendships_accepted ON friendships (requester_id, addressee_id) 
+CREATE INDEX idx_friendships_accepted ON friendships (requester_id, addressee_id)
     WHERE status = 'accepted';
 ```
 
@@ -742,11 +743,11 @@ CREATE TABLE leaderboards (
     metric_key VARCHAR(32) NOT NULL, -- 'kills', 'wins', 'score', 'kd_ratio'
     period_type leaderboard_period NOT NULL,
     game_mode game_mode,
-    
+
     -- Settings
     min_matches_required INTEGER DEFAULT 10,
     is_active BOOLEAN NOT NULL DEFAULT true,
-    
+
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -755,26 +756,26 @@ CREATE TABLE leaderboard_entries (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     leaderboard_id UUID NOT NULL REFERENCES leaderboards(id) ON DELETE CASCADE,
     player_id UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
-    
+
     -- Ranking
     rank INTEGER NOT NULL,
     metric_value BIGINT NOT NULL,
-    
+
     -- Metadata
     matches_count INTEGER NOT NULL DEFAULT 0,
-    
+
     -- Period
     period_start TIMESTAMPTZ NOT NULL,
     period_end TIMESTAMPTZ NOT NULL,
-    
+
     last_updated TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    
+
     UNIQUE(leaderboard_id, player_id, period_start)
 );
 
 -- Materialized view for fast leaderboard queries
 CREATE MATERIALIZED VIEW leaderboard_rankings AS
-SELECT 
+SELECT
     le.leaderboard_id,
     le.player_id,
     p.display_name,
@@ -821,15 +822,15 @@ CREATE TABLE achievements (
     name VARCHAR(128) NOT NULL,
     description TEXT,
     category achievement_category NOT NULL,
-    
+
     -- Rewards
     xp_reward INTEGER NOT NULL DEFAULT 0,
-    
+
     -- Display
     icon_url VARCHAR(512),
     sort_order INTEGER DEFAULT 0,
     is_hidden BOOLEAN DEFAULT false,
-    
+
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -837,16 +838,16 @@ CREATE TABLE achievements (
 CREATE TABLE achievement_criteria (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     achievement_id UUID NOT NULL REFERENCES achievements(id) ON DELETE CASCADE,
-    
+
     -- Condition
     condition_key VARCHAR(64) NOT NULL, -- 'kills_total', 'wins_streak', 'headshots_total'
     target_value INTEGER NOT NULL,
     operator VARCHAR(8) DEFAULT '>=', -- '>=', '=', '>'
-    
+
     -- Optional params
     game_mode game_mode, -- NULL = any mode
     weapon_type weapon_type, -- NULL = any weapon
-    
+
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -854,12 +855,12 @@ CREATE TABLE achievement_criteria (
 CREATE TABLE player_achievements (
     player_id UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
     achievement_id UUID NOT NULL REFERENCES achievements(id) ON DELETE CASCADE,
-    
+
     -- Progress (for multi-criteria achievements)
     progress JSONB DEFAULT '{}',
-    
+
     unlocked_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    
+
     PRIMARY KEY (player_id, achievement_id)
 );
 
@@ -955,9 +956,10 @@ CREATE INDEX idx_criteria_achievement ON achievement_criteria (achievement_id);
 ## 9. Useful Queries
 
 ### Player Statistics
+
 ```sql
 -- Get player with full stats
-SELECT 
+SELECT
     p.display_name,
     p.region,
     pp.current_level,
@@ -985,9 +987,10 @@ WHERE player_id = $1;
 ```
 
 ### Leaderboard Queries
+
 ```sql
 -- Get top 100 players for a leaderboard
-SELECT 
+SELECT
     rank,
     display_name,
     metric_value
@@ -1010,15 +1013,16 @@ SELECT le.rank, p.display_name, le.metric_value
 FROM leaderboard_entries le
 JOIN players p ON le.player_id = p.id
 WHERE le.leaderboard_id = $1
-  AND le.rank BETWEEN (SELECT rank FROM player_rank) - 5 
+  AND le.rank BETWEEN (SELECT rank FROM player_rank) - 5
                    AND (SELECT rank FROM player_rank) + 5
 ORDER BY le.rank;
 ```
 
 ### Match History
+
 ```sql
 -- Get player's recent matches
-SELECT 
+SELECT
     m.completed_at,
     m.game_mode,
     map.name as map_name,
@@ -1040,6 +1044,7 @@ LIMIT 20;
 ## 10. Database Maintenance
 
 ### Regular Tasks
+
 ```sql
 -- Vacuum analyze tables (run weekly)
 VACUUM ANALYZE player_stats;
@@ -1050,7 +1055,7 @@ VACUUM ANALYZE leaderboard_entries;
 SELECT refresh_leaderboards();
 
 -- Clean up old sessions (run daily)
-DELETE FROM sessions 
+DELETE FROM sessions
 WHERE expires_at < NOW() OR revoked_at IS NOT NULL;
 
 -- Archive old matches (run monthly)
@@ -1058,6 +1063,7 @@ WHERE expires_at < NOW() OR revoked_at IS NOT NULL;
 ```
 
 ### Index Maintenance
+
 ```sql
 -- Reindex if needed
 REINDEX INDEX idx_stats_kills;
@@ -1066,6 +1072,6 @@ REINDEX INDEX idx_matches_player;
 
 ---
 
-*Document Version: 2.1*
-*Last Updated: February 2026*
-*Changes: PostgreSQL 18.2, updated golang-migrate to 4.19.x, Redis 8.x*
+_Document Version: 2.1_
+_Last Updated: February 2026_
+_Changes: PostgreSQL 18.2, updated golang-migrate to 4.19.x, Redis 8.x_

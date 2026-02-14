@@ -1,6 +1,6 @@
 ---
 description: Create a detailed implementation plan for a feature or task
-argument-hint: "[feature-name]"
+argument-hint: '[feature-name]'
 ---
 
 # Plan Command

@@ -1,6 +1,6 @@
 ---
 description: Fix build issues and resolve compilation errors
-argument-hint: "[error-message]"
+argument-hint: '[error-message]'
 ---
 
 # Build Fix Command

@@ -1,6 +1,7 @@
 # TypeScript Conventions
 
 ## Core Principles
+
 - **No `any` type**: Always use explicit types or generics
 - **Strict mode enabled**: tsconfig.json must have `strict: true`
 - **Interfaces for contracts**: Use interfaces for public APIs
@@ -10,12 +11,11 @@
 ## DO ✅
 
 ### 1. Use Strict Types
+
 ```typescript
 // DO: Explicit return type and parameter types
 function processUser(user: User): Promise<Result<UserData>> {
-  return Effect.succeed(user.data).pipe(
-    Effect.map(data => ({ ...data, processed: true }))
-  )
+  return Effect.succeed(user.data).pipe(Effect.map((data) => ({ ...data, processed: true })))
 }
 
 // DO: Use generics instead of any
@@ -31,6 +31,7 @@ interface UserRepository {
 ```
 
 ### 2. Use Proper Type Constructs
+
 ```typescript
 // DO: Interface for object contracts
 interface Config {
@@ -40,16 +41,15 @@ interface Config {
 }
 
 // DO: Type for discriminated unions
-type Response<T> = 
-  | { status: 'success'; data: T }
-  | { status: 'error'; error: Error }
+type Response<T> = { status: 'success'; data: T } | { status: 'error'; error: Error }
 
 // DO: Use const assertions for literals
 const ROLES = ['admin', 'user', 'guest'] as const
-type Role = typeof ROLES[number]
+type Role = (typeof ROLES)[number]
 ```
 
 ### 3. Type Parameters with Constraints
+
 ```typescript
 // DO: Constrain generic types
 function getProperty<T, K extends keyof T>(obj: T, key: K): T[K] {
@@ -63,6 +63,7 @@ type Flatten<T> = T extends Array<infer U> ? U : T
 ## DON'T ❌
 
 ### 1. Avoid `any`
+
 ```typescript
 // DON'T: Using any defeats TypeScript
 const result: any = someFunction()
@@ -80,19 +81,21 @@ function handle(response: unknown): void {
 ```
 
 ### 2. Avoid Implicit Types
+
 ```typescript
 // DON'T: Inferred return types on complex functions
 function processData(input) {
-  return input.map(x => x.value).filter(v => v > 0)
+  return input.map((x) => x.value).filter((v) => v > 0)
 }
 
 // Instead, be explicit
 function processData(input: Item[]): number[] {
-  return input.map(x => x.value).filter(v => v > 0)
+  return input.map((x) => x.value).filter((v) => v > 0)
 }
 ```
 
 ### 3. Avoid `type: 'module'` Issues
+
 ```typescript
 // DON'T: Mix CommonJS and ESM
 export = MyClass
@@ -105,13 +108,13 @@ import { MyClass } from './file'
 
 ## Rationale
 
-| Rule | Why |
-|------|-----|
-| No `any` | Defeats TypeScript's entire purpose; creates runtime bugs |
-| Strict mode | Catches null/undefined errors at compile time |
-| Interface for public | Forces API clarity and contract stability |
-| Type for unions | More flexible and better for algebraic types |
-| Explicit returns | Self-documenting code; catch inference bugs early |
+| Rule                 | Why                                                       |
+| -------------------- | --------------------------------------------------------- |
+| No `any`             | Defeats TypeScript's entire purpose; creates runtime bugs |
+| Strict mode          | Catches null/undefined errors at compile time             |
+| Interface for public | Forces API clarity and contract stability                 |
+| Type for unions      | More flexible and better for algebraic types              |
+| Explicit returns     | Self-documenting code; catch inference bugs early         |
 
 ## File Structure Example
 
@@ -146,10 +149,12 @@ export interface IUserService {
 ```
 
 ## Integration with Skills
+
 - **Use with /git-master**: Type changes require careful commit messages
 - **Use with /refactor**: TypeScript refactoring uses LSP type information
 - **Use in TDD flow**: Write types before implementation
 
 ## References
+
 - TypeScript Handbook: https://www.typescriptlang.org/docs/handbook/
 - Strict Mode: https://www.typescriptlang.org/tsconfig#strict

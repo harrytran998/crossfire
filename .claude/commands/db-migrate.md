@@ -1,6 +1,6 @@
 ---
 description: Database migration helper for schema changes and data updates
-argument-hint: "[migration-name]"
+argument-hint: '[migration-name]'
 ---
 
 # DB Migrate Command

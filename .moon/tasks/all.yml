@@ -1,66 +1,37 @@
-# Moonrepo Global Tasks Configuration
-# https://moonrepo.dev/docs/config/tasks
-
 $schema: "https://moonrepo.dev/schemas/tasks.json"
 
-# Global tasks available to all projects
 tasks:
-  # Linting with oxlint (Rust-based, 10-100x faster than ESLint)
   lint:
     command: "oxlint"
     description: "Lint source files with oxlint"
-    options:
-      cache: true
-      outputStyle: "stream"
 
   lint-fix:
     command: "oxlint --fix"
     description: "Lint and auto-fix issues with oxlint"
-    options:
-      cache: false
-      outputStyle: "stream"
 
-  # Formatting with oxfmt (Rust-based, 10-100x faster than Prettier)
   format:
     command: "oxfmt --write"
     description: "Format source files with oxfmt"
-    options:
-      cache: false
-      outputStyle: "stream"
 
   format-check:
     command: "oxfmt --check"
     description: "Check formatting without making changes"
-    options:
-      cache: true
-      outputStyle: "stream"
 
-  # TypeScript type checking
   typecheck:
     command: "bun tsc --noEmit"
     description: "Type check TypeScript files"
-    options:
-      cache: true
-      outputStyle: "stream"
     env:
       NODE_ENV: "development"
 
-  # Build (project-specific implementation)
   build:
-    description: "Build the project"
-    options:
-      cache: true
-      outputStyle: "stream"
+    command: "tsdown"
+    description: "Build the project with tsdown"
     env:
       NODE_ENV: "production"
 
-  # Test runner
   test:
     command: "bun test"
     description: "Run tests with Bun test runner"
-    options:
-      cache: true
-      outputStyle: "stream"
     env:
       NODE_ENV: "test"
 
@@ -68,33 +39,15 @@ tasks:
     command: "bun test --watch"
     description: "Run tests in watch mode"
     local: true
-    options:
-      cache: false
-      outputStyle: "stream"
     env:
       NODE_ENV: "test"
 
-  # Development server
   dev:
     description: "Start development server"
     local: true
-    options:
-      cache: false
-      outputStyle: "stream"
     env:
       NODE_ENV: "development"
 
-  # Clean build artifacts
   clean:
     command: "rm -rf dist node_modules/.cache"
     description: "Clean build artifacts"
-    options:
-      cache: false
-      outputStyle: "none"
-
-# Task inheritance and defaults
-implicitDeps:
-  - "^build"
-
-# Output format configuration
-outputStyle: "hierarchical"

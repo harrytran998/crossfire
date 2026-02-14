@@ -19,12 +19,14 @@ tasks:
       NODE_ENV: "development"
 
   build:
-    command: "bun build src/index.ts --outdir dist --target bun"
-    description: "Build server for production"
+    command: "tsdown"
+    description: "Build server for production with tsdown"
     deps:
       - "shared:build"
+      - "database:build"
     inputs:
       - "src/**/*"
+      - "tsdown.config.ts"
       - "package.json"
     outputs:
       - "dist/"

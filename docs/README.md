@@ -6,17 +6,17 @@ This project aims to build a **browser-based multiplayer FPS game** inspired by 
 
 ## Documentation Index
 
-| Document | Description | Status |
-|----------|-------------|--------|
-| [Product Requirements (PRD)](./01-product-requirements.md) | Product vision, goals, user stories, and success metrics | ✅ Ready |
-| [Game Features Specification](./02-game-features.md) | Detailed game modes, weapons, mechanics | ✅ Ready |
-| [Technology Stack](./03-technology-stack.md) | Frontend, Backend, Database, Cloud technology decisions | ✅ Ready |
-| [System Architecture](./04-system-architecture.md) | High-level architecture, components, data flow | ✅ Ready |
-| [Database Design](./05-database-design.md) | PostgreSQL schema design, ERD, indexing | ✅ Ready |
-| [API & Network Protocol](./06-api-network-protocol.md) | WebSocket protocols, REST APIs, message formats | ✅ Ready |
-| [Deployment & Infrastructure](./07-deployment-infrastructure.md) | Cloud deployment, scaling, monitoring | ✅ Ready |
-| [Development Roadmap](./08-development-roadmap.md) | Phased implementation plan, milestones | ✅ Ready |
-| [Security & Anti-Cheat](./09-security.md) | Security architecture and anti-cheat design | ✅ Ready |
+| Document                                                         | Description                                              | Status   |
+| ---------------------------------------------------------------- | -------------------------------------------------------- | -------- |
+| [Product Requirements (PRD)](./01-product-requirements.md)       | Product vision, goals, user stories, and success metrics | ✅ Ready |
+| [Game Features Specification](./02-game-features.md)             | Detailed game modes, weapons, mechanics                  | ✅ Ready |
+| [Technology Stack](./03-technology-stack.md)                     | Frontend, Backend, Database, Cloud technology decisions  | ✅ Ready |
+| [System Architecture](./04-system-architecture.md)               | High-level architecture, components, data flow           | ✅ Ready |
+| [Database Design](./05-database-design.md)                       | PostgreSQL schema design, ERD, indexing                  | ✅ Ready |
+| [API & Network Protocol](./06-api-network-protocol.md)           | WebSocket protocols, REST APIs, message formats          | ✅ Ready |
+| [Deployment & Infrastructure](./07-deployment-infrastructure.md) | Cloud deployment, scaling, monitoring                    | ✅ Ready |
+| [Development Roadmap](./08-development-roadmap.md)               | Phased implementation plan, milestones                   | ✅ Ready |
+| [Security & Anti-Cheat](./09-security.md)                        | Security architecture and anti-cheat design              | ✅ Ready |
 
 ## Quick Start
 
@@ -51,13 +51,13 @@ This project aims to build a **browser-based multiplayer FPS game** inspired by 
 
 ## Technical Summary
 
-| Layer | Technology |
-|-------|------------|
-| **Frontend** | React + TypeScript + Three.js + Rapier.js |
-| **Backend** | Bun + Bun WebSocket + Effect |
-| **Database** | PostgreSQL (persistent) + Redis (real-time state) |
-| **Cloud** | Docker + Kubernetes + CDN |
-| **Communication** | WebSocket (game) + REST (API) |
+| Layer             | Technology                                        |
+| ----------------- | ------------------------------------------------- |
+| **Frontend**      | React + TypeScript + Three.js + Rapier.js         |
+| **Backend**       | Bun + Bun WebSocket + Effect                      |
+| **Database**      | PostgreSQL (persistent) + Redis (real-time state) |
+| **Cloud**         | Docker + Kubernetes + CDN                         |
+| **Communication** | WebSocket (game) + REST (API)                     |
 
 ## Getting Started
 
@@ -79,4 +79,4 @@ Documentation and code contributions are welcome. Please refer to individual doc
 
 ---
 
-*Last Updated: February 2026*
+_Last Updated: February 2026_

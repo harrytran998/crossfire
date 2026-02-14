@@ -1,6 +1,6 @@
 ---
 description: Start Test-Driven Development workflow
-argument-hint: "[test-file]"
+argument-hint: '[test-file]'
 ---
 
 # TDD Command

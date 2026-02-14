@@ -1,6 +1,7 @@
 # Git Workflow Conventions
 
 ## Core Principles
+
 - **Atomic Commits**: One logical change per commit; tests pass on each commit
 - **Clear Messages**: Follow Conventional Commits; type + description
 - **Branch Naming**: Feature branches follow pattern `feature/*`, `fix/*`, `docs/*`
@@ -11,6 +12,7 @@
 ## DO ✅
 
 ### 1. Use Conventional Commits
+
 ```bash
 # DO: Clear, categorized commit messages
 git commit -m "feat(users): add user authentication service
@@ -59,6 +61,7 @@ git commit -m "perf(search): optimize user search query
 ```
 
 ### 2. Branch Naming Conventions
+
 ```bash
 # DO: Descriptive branch names
 git checkout -b feature/user-authentication
@@ -81,6 +84,7 @@ git checkout -b fix/order-race-#456
 ```
 
 ### 3. PR Process with git-master Skill
+
 ```bash
 # Step 1: Create feature branch
 git checkout -b feature/new-payment-service
@@ -140,6 +144,7 @@ gh pr merge --squash feature/new-payment-service
 ```
 
 ### 4. Commit Size Guidelines
+
 ```bash
 # DO: Small, focused commits
 # Good: 50-200 lines changed
@@ -162,6 +167,7 @@ git commit -m "feat(payment): integrate payment processor into orders"
 ```
 
 ### 5. Keep History Clean
+
 ```bash
 # DO: Rebase before PR to clean up history
 git fetch origin
@@ -191,6 +197,7 @@ git push --force origin feature/my-feature
 ```
 
 ### 6. Cherry-pick and Revert Properly
+
 ```bash
 # DO: Cherry-pick commits to other branches
 git checkout hotfix/urgent-bug
@@ -210,6 +217,7 @@ git revert abc1234 --no-edit
 ## DON'T ❌
 
 ### 1. Don't Commit to main Directly
+
 ```bash
 # DON'T: Committing directly to main
 git checkout main
@@ -223,6 +231,7 @@ git push -u origin fix/urgent-bug
 ```
 
 ### 2. Don't Make Unfocused Commits
+
 ```bash
 # DON'T: Multiple concerns in one commit
 git commit -m "refactor and add tests and update docs and fix bug"
@@ -236,6 +245,7 @@ git commit -m "fix(auth): resolve token expiry bug"
 ```
 
 ### 3. Don't Use Vague Commit Messages
+
 ```bash
 # DON'T: Unclear messages
 git commit -m "fix stuff"
@@ -249,6 +259,7 @@ git commit -m "feat(notifications): add email queue system"
 ```
 
 ### 4. Don't Mix Formatting and Logic Changes
+
 ```bash
 # DON'T: Format entire file + add feature
 git diff
@@ -263,6 +274,7 @@ git commit -m "feat(users): add email validation to UserService"
 ```
 
 ### 5. Don't Rewrite Published History
+
 ```bash
 # DON'T: Amend pushed commits
 git commit --amend
@@ -274,6 +286,7 @@ git push origin main
 ```
 
 ### 6. Don't Leave Merge Commits in History
+
 ```bash
 # DON'T: Merge conflicts with messy merge commits
 git merge feature/old-feature
@@ -301,6 +314,7 @@ gh pr merge --squash feature/my-feature
 ```
 
 ### Types
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `refactor`: Code change (no feature, no bug fix)
@@ -311,21 +325,25 @@ gh pr merge --squash feature/my-feature
 - `chore`: Maintenance (deps, build)
 
 ### Scopes (Examples)
+
 - `auth`, `users`, `orders`, `payment`
 - `database`, `api`, `cache`
 - `tests`, `docs`
 
 ### Subject
+
 - Imperative mood ("add" not "added")
 - No period at end
 - Max 50 characters
 
 ### Body
+
 - Explain WHY, not WHAT
 - Wrap at 72 characters
 - Separate from subject with blank line
 
 ### Footer
+
 - Reference issues: `Closes #123`
 - Reference PRs: `PR: #456`
 - Breaking changes: `BREAKING CHANGE: description`
@@ -393,6 +411,7 @@ git rebase -i origin/main
 ```
 
 ## Integration with Skills
+
 - **Use /git-master skill**: For complex rebase, squash, history search
 - **Use with TDD**: Red → Green → Refactor → Commit
 - **Use with clean-architecture**: Architecture changes get focused commits
@@ -400,15 +419,16 @@ git rebase -i origin/main
 
 ## Rationale
 
-| Practice | Why |
-|----------|-----|
+| Practice             | Why                                          |
+| -------------------- | -------------------------------------------- |
 | Conventional Commits | Automated tooling; clear history; searchable |
-| Atomic commits | Bisectable; easy to revert; clear changes |
-| Branch naming | Clear intent; organizeable; reviewable |
-| Clean history | Readable `git log`; easier debugging |
-| PR process | Peer review; quality gate; CI verification |
+| Atomic commits       | Bisectable; easy to revert; clear changes    |
+| Branch naming        | Clear intent; organizeable; reviewable       |
+| Clean history        | Readable `git log`; easier debugging         |
+| PR process           | Peer review; quality gate; CI verification   |
 
 ## References
+
 - Conventional Commits: https://www.conventionalcommits.org/
 - GitHub CLI: https://cli.github.com/
 - Git Rebase Guide: https://git-scm.com/docs/git-rebase

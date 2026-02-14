@@ -10,22 +10,26 @@ Oxlint is a fast, zero-config JavaScript/TypeScript linter written in Rust. It p
 ## Key Concepts
 
 ### Speed
+
 - Written in Rust for performance
 - Analyzes entire codebase in milliseconds
 - Suitable for large codebases
 
 ### ESLint Compatibility
+
 - Supports ESLint configuration files
 - Compatible with many ESLint plugins
 - Easy migration from ESLint
 
 ### Built-in Rules
+
 - JavaScript best practices
 - TypeScript type safety
 - React/JSX conventions
 - Tree-shaking warnings
 
 ### Zero-Config Philosophy
+
 - Works with sensible defaults
 - Minimal configuration needed
 - Optional customization available
@@ -33,6 +37,7 @@ Oxlint is a fast, zero-config JavaScript/TypeScript linter written in Rust. It p
 ## Code Examples
 
 ### Installation and Basic Usage
+
 ```bash
 # Install oxlint
 npm install --save-dev oxlint
@@ -54,6 +59,7 @@ npx oxlint --rule=no-unused-vars
 ```
 
 ### Basic oxlintrc.json Configuration
+
 ```json
 {
   "rules": {
@@ -74,6 +80,7 @@ npx oxlint --rule=no-unused-vars
 ```
 
 ### TOML Configuration (.oxlintrc.toml)
+
 ```toml
 [rules]
 # JavaScript/TypeScript
@@ -112,6 +119,7 @@ es2020 = true
 ```
 
 ### Configuration with Overrides
+
 ```json
 {
   "rules": {
@@ -137,6 +145,7 @@ es2020 = true
 ```
 
 ### Ignoring Files
+
 ```
 # .oxlintignore
 node_modules/
@@ -155,6 +164,7 @@ temp/
 ```
 
 ### Recommended Rule Sets
+
 ```json
 {
   "extends": ["oxlint/recommended"],
@@ -167,6 +177,7 @@ temp/
 ```
 
 ### Package.json Integration
+
 ```json
 {
   "scripts": {
@@ -186,6 +197,7 @@ temp/
 ### Rule Categories and Examples
 
 #### Best Practices Rules
+
 ```json
 {
   "rules": {
@@ -251,6 +263,7 @@ temp/
 ```
 
 #### TypeScript-Specific Rules
+
 ```json
 {
   "rules": {
@@ -271,6 +284,7 @@ temp/
 ```
 
 #### React-Specific Rules
+
 ```json
 {
   "rules": {
@@ -298,6 +312,7 @@ temp/
 ```
 
 ### Integration with CI/CD
+
 ```yaml
 # .github/workflows/lint.yml
 name: Lint
@@ -324,6 +339,7 @@ jobs:
 ```
 
 ### Pre-commit Hook Integration
+
 ```bash
 #!/bin/bash
 # .husky/pre-commit
@@ -340,6 +356,7 @@ echo "✅ Linting passed"
 ```
 
 ### VS Code Integration
+
 ```json
 // .vscode/settings.json
 {
@@ -363,30 +380,35 @@ echo "✅ Linting passed"
 ## Best Practices
 
 ### 1. Configuration
+
 - Start with recommended configuration
 - Gradually customize rules per project needs
 - Keep configuration version controlled
 - Document why rules are overridden
 
 ### 2. Rule Severity
+
 - Use "error" for critical issues
 - Use "warn" for important but not blocking
 - Use "off" for rules that don't apply
 - Consider team consensus on severity
 
 ### 3. Performance
+
 - Run linting in CI on every commit
 - Use `--fix` for automatic corrections
 - Ignore generated files (node_modules, dist, etc.)
 - Run locally before pushing
 
 ### 4. Integration
+
 - Add to pre-commit hooks for early feedback
 - Integrate with editor for real-time feedback
 - Use in CI for final validation
 - Generate reports for code quality metrics
 
 ### 5. Maintenance
+
 - Review and update rules periodically
 - Stay updated with Oxlint releases
 - Consider project maturity and team size
@@ -395,6 +417,7 @@ echo "✅ Linting passed"
 ## Common Patterns
 
 ### Monorepo Configuration
+
 ```json
 // Root oxlintrc.json
 {
@@ -426,6 +449,7 @@ echo "✅ Linting passed"
 ```
 
 ### Strict Type Checking
+
 ```json
 {
   "rules": {
@@ -438,6 +462,7 @@ echo "✅ Linting passed"
 ```
 
 ### Production-Ready Config
+
 ```toml
 # .oxlintrc.toml
 [rules]

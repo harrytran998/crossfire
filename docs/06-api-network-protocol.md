@@ -7,6 +7,7 @@
 ## 1. Overview
 
 This document defines the API and network protocols for the Crossfire web game:
+
 - **REST API**: Authentication, user management, static data
 - **WebSocket Protocol**: Real-time game communication
 - **Message Formats**: Binary serialization with MessagePack
@@ -25,6 +26,7 @@ Content-Type: application/json
 ### 2.2 Authentication Endpoints
 
 #### Register User
+
 ```http
 POST /auth/register
 
@@ -59,6 +61,7 @@ Error (400):
 ```
 
 #### Login
+
 ```http
 POST /auth/login
 
@@ -87,6 +90,7 @@ Response (200):
 ```
 
 #### Refresh Token
+
 ```http
 POST /auth/refresh
 
@@ -106,6 +110,7 @@ Response (200):
 ```
 
 #### Logout
+
 ```http
 POST /auth/logout
 Authorization: Bearer {accessToken}
@@ -119,6 +124,7 @@ Response (200):
 ### 2.3 Player Endpoints
 
 #### Get Player Profile
+
 ```http
 GET /players/me
 Authorization: Bearer {accessToken}
@@ -144,6 +150,7 @@ Response (200):
 ```
 
 #### Update Player Profile
+
 ```http
 PATCH /players/me
 Authorization: Bearer {accessToken}
@@ -166,6 +173,7 @@ Response (200):
 ```
 
 #### Get Player Statistics
+
 ```http
 GET /players/me/stats
 Authorization: Bearer {accessToken}
@@ -198,6 +206,7 @@ Response (200):
 ### 2.4 Weapons & Loadouts
 
 #### Get All Weapons
+
 ```http
 GET /weapons
 Authorization: Bearer {accessToken}
@@ -233,6 +242,7 @@ Response (200):
 ```
 
 #### Get Player Loadouts
+
 ```http
 GET /players/me/loadouts
 Authorization: Bearer {accessToken}
@@ -262,6 +272,7 @@ Response (200):
 ```
 
 #### Update Loadout
+
 ```http
 PUT /players/me/loadouts/{loadoutId}
 Authorization: Bearer {accessToken}
@@ -292,6 +303,7 @@ Response (200):
 ### 2.5 Match History
 
 #### Get Match History
+
 ```http
 GET /players/me/matches?page=1&limit=20
 Authorization: Bearer {accessToken}
@@ -326,6 +338,7 @@ Response (200):
 ### 2.6 Leaderboards
 
 #### Get Leaderboard
+
 ```http
 GET /leaderboards/{type}?period=weekly&mode=team_deathmatch
 
@@ -355,6 +368,7 @@ Response (200):
 ### 2.7 Friends & Social
 
 #### Get Friend List
+
 ```http
 GET /friends
 Authorization: Bearer {accessToken}
@@ -377,6 +391,7 @@ Response (200):
 ```
 
 #### Send Friend Request
+
 ```http
 POST /friends/request
 Authorization: Bearer {accessToken}
@@ -397,6 +412,7 @@ Response (200):
 ```
 
 #### Accept/Decline Friend Request
+
 ```http
 PUT /friends/request/{requestId}
 Authorization: Bearer {accessToken}
@@ -413,6 +429,7 @@ Response (200):
 ```
 
 #### Remove Friend
+
 ```http
 DELETE /friends/{friendId}
 Authorization: Bearer {accessToken}
@@ -424,6 +441,7 @@ Response (200):
 ```
 
 #### Get Online Friends
+
 ```http
 GET /friends/online
 Authorization: Bearer {accessToken}
@@ -444,6 +462,7 @@ Response (200):
 ```
 
 #### Report Player
+
 ```http
 POST /players/{playerId}/report
 Authorization: Bearer {accessToken}
@@ -465,6 +484,7 @@ Response (200):
 ### 2.8 Matchmaking
 
 #### Join Matchmaking Queue
+
 ```http
 POST /matchmaking/queue
 Authorization: Bearer {accessToken}
@@ -486,6 +506,7 @@ Response (200):
 ```
 
 #### Leave Queue
+
 ```http
 DELETE /matchmaking/queue
 Authorization: Bearer {accessToken}
@@ -497,6 +518,7 @@ Response (200):
 ```
 
 #### Get Queue Status
+
 ```http
 GET /matchmaking/status
 Authorization: Bearer {accessToken}
@@ -513,6 +535,7 @@ Response (200):
 ```
 
 #### Quick Match
+
 ```http
 POST /matchmaking/quick
 Authorization: Bearer {accessToken}
@@ -529,6 +552,7 @@ Response (200):
 ### 2.9 Rooms
 
 #### List Available Rooms
+
 ```http
 GET /rooms?mode=team_deathmatch&status=waiting
 Authorization: Bearer {accessToken}
@@ -553,6 +577,7 @@ Response (200):
 ```
 
 #### Create Room
+
 ```http
 POST /rooms
 Authorization: Bearer {accessToken}
@@ -578,6 +603,7 @@ Response (201):
 ```
 
 #### Get Room Details
+
 ```http
 GET /rooms/{roomId}
 Authorization: Bearer {accessToken}
@@ -597,6 +623,7 @@ Response (200):
 ```
 
 #### Update Room Settings
+
 ```http
 PUT /rooms/{roomId}
 Authorization: Bearer {accessToken}
@@ -614,6 +641,7 @@ Response (200):
 ```
 
 #### Delete Room
+
 ```http
 DELETE /rooms/{roomId}
 Authorization: Bearer {accessToken}
@@ -625,6 +653,7 @@ Response (200):
 ```
 
 #### Join Room
+
 ```http
 POST /rooms/{roomId}/join
 Authorization: Bearer {accessToken}
@@ -641,6 +670,7 @@ Response (200):
 ```
 
 #### Leave Room
+
 ```http
 POST /rooms/{roomId}/leave
 Authorization: Bearer {accessToken}
@@ -652,6 +682,7 @@ Response (200):
 ```
 
 #### Kick Player
+
 ```http
 POST /rooms/{roomId}/kick
 Authorization: Bearer {accessToken}
@@ -668,6 +699,7 @@ Response (200):
 ```
 
 #### Change Team
+
 ```http
 PUT /rooms/{roomId}/team
 Authorization: Bearer {accessToken}
@@ -684,6 +716,7 @@ Response (200):
 ```
 
 #### Set Ready Status
+
 ```http
 POST /rooms/{roomId}/ready
 Authorization: Bearer {accessToken}
@@ -700,6 +733,7 @@ Response (200):
 ```
 
 #### Start Match
+
 ```http
 POST /rooms/{roomId}/start
 Authorization: Bearer {accessToken}
@@ -713,6 +747,7 @@ Response (200):
 ### 2.10 Inventory & Shop
 
 #### Get Player Inventory
+
 ```http
 GET /inventory
 Authorization: Bearer {accessToken}
@@ -729,6 +764,7 @@ Response (200):
 ```
 
 #### List All Weapons
+
 ```http
 GET /weapons
 Authorization: Bearer {accessToken}
@@ -745,6 +781,7 @@ Response (200):
 ```
 
 #### Get Weapon Details
+
 ```http
 GET /weapons/{weaponId}
 Authorization: Bearer {accessToken}
@@ -763,6 +800,7 @@ Response (200):
 ```
 
 #### List Attachments
+
 ```http
 GET /attachments
 Authorization: Bearer {accessToken}
@@ -779,6 +817,7 @@ Response (200):
 ```
 
 #### Create Loadout
+
 ```http
 POST /loadouts
 Authorization: Bearer {accessToken}
@@ -798,6 +837,7 @@ Response (201):
 ```
 
 #### Update Loadout
+
 ```http
 PUT /loadouts/{loadoutId}
 Authorization: Bearer {accessToken}
@@ -814,6 +854,7 @@ Response (200):
 ```
 
 #### Delete Loadout
+
 ```http
 DELETE /loadouts/{loadoutId}
 Authorization: Bearer {accessToken}
@@ -827,6 +868,7 @@ Response (200):
 ### 2.11 Achievements
 
 #### List All Achievements
+
 ```http
 GET /achievements
 Authorization: Bearer {accessToken}
@@ -843,6 +885,7 @@ Response (200):
 ```
 
 #### Get Player Achievements
+
 ```http
 GET /players/me/achievements
 Authorization: Bearer {accessToken}
@@ -859,6 +902,7 @@ Response (200):
 ```
 
 #### Get Achievement Progress
+
 ```http
 GET /players/me/achievements/progress
 Authorization: Bearer {accessToken}
@@ -877,6 +921,7 @@ Response (200):
 ### 2.12 Zombie Mode (Phase 2)
 
 #### Get Zombie Mode Maps
+
 ```http
 GET /zombie/maps
 Authorization: Bearer {accessToken}
@@ -893,6 +938,7 @@ Response (200):
 ```
 
 #### Get Mutant Classes
+
 ```http
 GET /zombie/classes
 Authorization: Bearer {accessToken}
@@ -909,6 +955,7 @@ Response (200):
 ```
 
 #### Request Supply Drop
+
 ```http
 POST /zombie/supply-drop
 Authorization: Bearer {accessToken}
@@ -926,6 +973,7 @@ Response (200):
 ```
 
 #### Zombie Mode Leaderboards
+
 ```http
 GET /zombie/leaderboards?type=survivor_kills
 Authorization: Bearer {accessToken}
@@ -944,6 +992,7 @@ Response (200):
 ### 2.13 Admin (Internal)
 
 #### List Players (Admin)
+
 ```http
 GET /admin/players?limit=20&offset=0
 Authorization: Bearer {adminToken}
@@ -960,6 +1009,7 @@ Response (200):
 ```
 
 #### Ban Player
+
 ```http
 PUT /admin/players/{playerId}/ban
 Authorization: Bearer {adminToken}
@@ -977,6 +1027,7 @@ Response (200):
 ```
 
 #### List Reports
+
 ```http
 GET /admin/reports
 Authorization: Bearer {adminToken}
@@ -993,6 +1044,7 @@ Response (200):
 ```
 
 #### Server Metrics
+
 ```http
 GET /admin/metrics
 Authorization: Bearer {adminToken}
@@ -1020,6 +1072,7 @@ WebSocket URL: wss://game.crossfire-game.com/ws
 ```
 
 **Connection Headers:**
+
 ```
 Authorization: Bearer {accessToken}
 X-Client-Version: 1.0.0
@@ -1030,18 +1083,20 @@ X-Client-Version: 1.0.0
 All WebSocket messages use **MessagePack** binary encoding for efficiency.
 
 **Message Envelope:**
+
 ```typescript
 interface Message {
-  type: string;      // Message type identifier
-  seq?: number;      // Sequence number (for ordering)
-  ts: number;        // Timestamp (ms)
-  payload: unknown;  // Message-specific data
+  type: string // Message type identifier
+  seq?: number // Sequence number (for ordering)
+  ts: number // Timestamp (ms)
+  payload: unknown // Message-specific data
 }
 ```
 
 ### 3.3 Client → Server Messages
 
 #### Join Lobby
+
 ```typescript
 {
   type: "join_lobby",
@@ -1051,6 +1106,7 @@ interface Message {
 ```
 
 #### Create Room
+
 ```typescript
 {
   type: "create_room",
@@ -1066,6 +1122,7 @@ interface Message {
 ```
 
 #### Join Room
+
 ```typescript
 {
   type: "join_room",
@@ -1079,6 +1136,7 @@ interface Message {
 ```
 
 #### Leave Room
+
 ```typescript
 {
   type: "leave_room",
@@ -1090,6 +1148,7 @@ interface Message {
 ```
 
 #### Set Ready
+
 ```typescript
 {
   type: "set_ready",
@@ -1102,6 +1161,7 @@ interface Message {
 ```
 
 #### Player Input (High Frequency - 60Hz)
+
 ```typescript
 {
   type: "input",
@@ -1118,6 +1178,7 @@ interface Message {
 ```
 
 #### Chat Message
+
 ```typescript
 {
   type: "chat",
@@ -1133,6 +1194,7 @@ interface Message {
 ### 3.4 Server → Client Messages
 
 #### Welcome
+
 ```typescript
 {
   type: "welcome",
@@ -1147,6 +1209,7 @@ interface Message {
 ```
 
 #### Room Created
+
 ```typescript
 {
   type: "room_created",
@@ -1162,6 +1225,7 @@ interface Message {
 ```
 
 #### Room List Update
+
 ```typescript
 {
   type: "room_list",
@@ -1183,6 +1247,7 @@ interface Message {
 ```
 
 #### Room State Update
+
 ```typescript
 {
   type: "room_state",
@@ -1204,6 +1269,7 @@ interface Message {
 ```
 
 #### Player Joined Room
+
 ```typescript
 {
   type: "player_joined",
@@ -1221,6 +1287,7 @@ interface Message {
 ```
 
 #### Game Starting
+
 ```typescript
 {
   type: "game_starting",
@@ -1238,6 +1305,7 @@ interface Message {
 ```
 
 #### Game State (High Frequency - 20-30Hz)
+
 ```typescript
 {
   type: "game_state",
@@ -1272,6 +1340,7 @@ interface Message {
 ```
 
 #### Player Death Event
+
 ```typescript
 {
   type: "player_death",
@@ -1287,6 +1356,7 @@ interface Message {
 ```
 
 #### Game Ended
+
 ```typescript
 {
   type: "game_ended",
@@ -1312,6 +1382,7 @@ interface Message {
 ```
 
 #### Error
+
 ```typescript
 {
   type: "error",
@@ -1334,30 +1405,30 @@ For bandwidth efficiency, game state uses delta compression:
 
 ```typescript
 interface DeltaState {
-  tick: number;
-  timestamp: number;
-  
+  tick: number
+  timestamp: number
+
   // Only changed entities
-  players?: DeltaPlayer[];
-  projectiles?: DeltaProjectile[];
-  
+  players?: DeltaPlayer[]
+  projectiles?: DeltaProjectile[]
+
   // Removed entity IDs
-  removed?: string[];
-  
+  removed?: string[]
+
   // Last acknowledged input per player
-  lastInput?: Record<string, number>;
+  lastInput?: Record<string, number>
 }
 
 interface DeltaPlayer {
-  id: string;
-  
+  id: string
+
   // Only include changed fields
-  pos?: Vec3;
-  rot?: Quaternion;
-  vel?: Vec3;
-  health?: number;
-  state?: string;
-  weapon?: number;
+  pos?: Vec3
+  rot?: Quaternion
+  vel?: Vec3
+  health?: number
+  state?: string
+  weapon?: number
 }
 ```
 
@@ -1365,18 +1436,18 @@ interface DeltaPlayer {
 
 ```typescript
 class StateReconciler {
-  private lastState: Map<string, PlayerState> = new Map();
-  
+  private lastState: Map<string, PlayerState> = new Map()
+
   applyDelta(delta: DeltaState): Map<string, PlayerState> {
     // Remove deleted entities
     for (const id of delta.removed || []) {
-      this.lastState.delete(id);
+      this.lastState.delete(id)
     }
-    
+
     // Apply delta updates
     for (const deltaPlayer of delta.players || []) {
-      const existing = this.lastState.get(deltaPlayer.id);
-      
+      const existing = this.lastState.get(deltaPlayer.id)
+
       if (existing) {
         // Merge delta with existing
         this.lastState.set(deltaPlayer.id, {
@@ -1385,15 +1456,15 @@ class StateReconciler {
           rot: deltaPlayer.rot ?? existing.rot,
           vel: deltaPlayer.vel ?? existing.vel,
           health: deltaPlayer.health ?? existing.health,
-          state: deltaPlayer.state ?? existing.state
-        });
+          state: deltaPlayer.state ?? existing.state,
+        })
       } else {
         // New entity (full state expected)
-        this.lastState.set(deltaPlayer.id, deltaPlayer as PlayerState);
+        this.lastState.set(deltaPlayer.id, deltaPlayer as PlayerState)
       }
     }
-    
-    return this.lastState;
+
+    return this.lastState
   }
 }
 ```
@@ -1403,52 +1474,57 @@ class StateReconciler {
 ## 5. Error Codes
 
 ### Authentication Errors
-| Code | HTTP Status | Description |
-|------|-------------|-------------|
-| `INVALID_TOKEN` | 401 | Token is invalid or expired |
-| `TOKEN_EXPIRED` | 401 | Access token has expired |
-| `INVALID_CREDENTIALS` | 401 | Wrong email/password |
-| `EMAIL_TAKEN` | 400 | Email already registered |
-| `USERNAME_TAKEN` | 400 | Username already taken |
+
+| Code                  | HTTP Status | Description                 |
+| --------------------- | ----------- | --------------------------- |
+| `INVALID_TOKEN`       | 401         | Token is invalid or expired |
+| `TOKEN_EXPIRED`       | 401         | Access token has expired    |
+| `INVALID_CREDENTIALS` | 401         | Wrong email/password        |
+| `EMAIL_TAKEN`         | 400         | Email already registered    |
+| `USERNAME_TAKEN`      | 400         | Username already taken      |
 
 ### Game Errors
-| Code | Description |
-|------|-------------|
-| `ROOM_NOT_FOUND` | Room does not exist |
-| `ROOM_FULL` | Room has reached max players |
-| `ROOM_STARTED` | Game already in progress |
-| `NOT_ROOM_HOST` | Only host can perform action |
-| `INVALID_PASSWORD` | Wrong room password |
-| `PLAYER_BANNED` | Player is banned |
-| `RATE_LIMITED` | Too many requests |
+
+| Code               | Description                  |
+| ------------------ | ---------------------------- |
+| `ROOM_NOT_FOUND`   | Room does not exist          |
+| `ROOM_FULL`        | Room has reached max players |
+| `ROOM_STARTED`     | Game already in progress     |
+| `NOT_ROOM_HOST`    | Only host can perform action |
+| `INVALID_PASSWORD` | Wrong room password          |
+| `PLAYER_BANNED`    | Player is banned             |
+| `RATE_LIMITED`     | Too many requests            |
 
 ### WebSocket Errors
-| Code | Description |
-|------|-------------|
+
+| Code                | Description                    |
+| ------------------- | ------------------------------ |
 | `CONNECTION_FAILED` | Could not establish connection |
-| `INVALID_MESSAGE` | Malformed message format |
-| `UNAUTHORIZED` | Missing or invalid auth |
-| `SERVER_ERROR` | Internal server error |
+| `INVALID_MESSAGE`   | Malformed message format       |
+| `UNAUTHORIZED`      | Missing or invalid auth        |
+| `SERVER_ERROR`      | Internal server error          |
 
 ---
 
 ## 6. Rate Limiting
 
 ### REST API Limits
-| Endpoint | Limit |
-|----------|-------|
-| `/auth/login` | 5 requests/minute |
-| `/auth/register` | 3 requests/hour |
-| `/players/*` | 60 requests/minute |
+
+| Endpoint          | Limit              |
+| ----------------- | ------------------ |
+| `/auth/login`     | 5 requests/minute  |
+| `/auth/register`  | 3 requests/hour    |
+| `/players/*`      | 60 requests/minute |
 | `/leaderboards/*` | 30 requests/minute |
 
 ### WebSocket Limits
-| Action | Limit |
-|--------|-------|
-| `create_room` | 10/minute |
-| `join_room` | 30/minute |
-| `chat` | 30/minute |
-| `input` | 120/second (handled by client) |
+
+| Action        | Limit                          |
+| ------------- | ------------------------------ |
+| `create_room` | 10/minute                      |
+| `join_room`   | 30/minute                      |
+| `chat`        | 30/minute                      |
+| `input`       | 120/second (handled by client) |
 
 ---
 
@@ -1457,8 +1533,8 @@ class StateReconciler {
 ### Server Setup with Effect
 
 ```typescript
-import { Effect, Context, Layer, Config } from "effect"
-import { serve } from "bun"
+import { Effect, Context, Layer, Config } from 'effect'
+import { serve } from 'bun'
 
 // WebSocket connection context
 interface WebSocketConnection {
@@ -1467,63 +1543,61 @@ interface WebSocketConnection {
   readonly roomId?: string
 }
 
-const WebSocketConnection = Context.GenericTag<WebSocketConnection>("WebSocketConnection")
+const WebSocketConnection = Context.GenericTag<WebSocketConnection>('WebSocketConnection')
 
 // Game message handler service
 interface GameMessageHandler {
   readonly handle: (ws: ServerWebSocket, message: unknown) => Effect.Effect<void, Error>
 }
 
-const GameMessageHandler = Context.GenericTag<GameMessageHandler>("GameMessageHandler")
+const GameMessageHandler = Context.GenericTag<GameMessageHandler>('GameMessageHandler')
 
 // Create WebSocket server
 const createGameServer = Effect.gen(function* (_) {
   const config = yield* Config.all([
-    Config.string("HOST").pipe(Config.withDefault("0.0.0.0")),
-    Config.number("PORT").pipe(Config.withDefault(3000))
+    Config.string('HOST').pipe(Config.withDefault('0.0.0.0')),
+    Config.number('PORT').pipe(Config.withDefault(3000)),
   ])
-  
+
   const [host, port] = config
   const messageHandler = yield* GameMessageHandler
-  
+
   const server = serve({
     hostname: host,
     port: port,
-    
+
     fetch(req, server) {
       const success = server.upgrade(req)
-      return success ? undefined : new Response("Upgrade required", { status: 426 })
+      return success ? undefined : new Response('Upgrade required', { status: 426 })
     },
-    
+
     websocket: {
       open(ws) {
-        console.log("Client connected")
+        console.log('Client connected')
       },
-      
+
       async message(ws, message) {
         const data = JSON.parse(message.toString())
         await Effect.runPromise(messageHandler.handle(ws, data))
       },
-      
+
       close(ws) {
-        console.log("Client disconnected")
-      }
-    }
+        console.log('Client disconnected')
+      },
+    },
   })
-  
+
   console.log(`Game server running on ws://${host}:${port}`)
   return server
 })
 
 // Run server
-const program = createGameServer.pipe(
-  Effect.provide(GameMessageHandlerLive)
-)
+const program = createGameServer.pipe(Effect.provide(GameMessageHandlerLive))
 
 Effect.runPromise(program)
 ```
 
 ---
 
-*Document Version: 1.0*
-*Last Updated: February 2026*
+_Document Version: 1.0_
+_Last Updated: February 2026_

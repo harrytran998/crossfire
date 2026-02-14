@@ -1,6 +1,6 @@
 ---
 description: Git workflow helper for branch management and common git operations
-argument-hint: "[command] [args]"
+argument-hint: '[command] [args]'
 ---
 
 # Git Branch Command
@@ -31,14 +31,18 @@ Simplifies git workflow with intelligent branch management.
 ## Commands
 
 ### create [feature-name]
+
 Creates feature branch with proper naming convention
+
 - Branch from: main/develop (based on config)
 - Naming: `feature/feature-name` or `feat/feature-name`
 - Sets upstream tracking
 - Shows branch creation confirmation
 
 ### sync
+
 Synchronizes current branch with remote
+
 - Fetch latest remote changes
 - Rebase on upstream (if configured)
 - Push local commits
@@ -46,28 +50,36 @@ Synchronizes current branch with remote
 - Show commit summary
 
 ### cleanup [--dry-run]
+
 Cleans up merged and stale branches
+
 - Lists branches merged into main
 - Removes local merged branches
 - Removes tracking references
 - Shows cleanup summary
 
 ### status
+
 Shows branch and sync status
+
 - Current branch and commit
 - Commits ahead/behind
 - Unpushed commits
 - Stashed changes
 
 ### rebase [target-branch]
+
 Interactive rebase for clean history
+
 - Rebase on target branch
 - Suggest squash/fixup opportunities
 - Preserve formatting
 - Handle conflicts
 
 ### publish
+
 Pushes branch and creates tracking
+
 - Set upstream to origin
 - Create PR (if configured)
 - Generate changelog entry

@@ -91,13 +91,6 @@
       "chmod\\s+000",
       "git\\s+push\\s+.*--force"
     ],
-    "lintTriggers": [
-      "\\.ts$",
-      "\\.tsx$",
-      "\\.js$",
-      "\\.jsx$",
-      "\\.json$",
-      "\\.css$"
-    ]
+    "lintTriggers": ["\\.ts$", "\\.tsx$", "\\.js$", "\\.jsx$", "\\.json$", "\\.css$"]
   }
 }

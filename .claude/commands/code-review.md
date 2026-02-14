@@ -1,6 +1,6 @@
 ---
 description: Request code review with analysis and suggestions
-argument-hint: "[file-or-pr-url]"
+argument-hint: '[file-or-pr-url]'
 ---
 
 # Code Review Command

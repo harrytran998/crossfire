@@ -1,6 +1,6 @@
 ---
 description: Run comprehensive security audit and vulnerability scan
-argument-hint: "[scope]"
+argument-hint: '[scope]'
 ---
 
 # Security Scan Command

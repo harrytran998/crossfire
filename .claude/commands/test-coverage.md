@@ -1,6 +1,6 @@
 ---
 description: Generate test coverage report and identify untested code
-argument-hint: "[package-or-file]"
+argument-hint: '[package-or-file]'
 ---
 
 # Test Coverage Command

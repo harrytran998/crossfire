@@ -2,13 +2,13 @@
 name: tdd-guide
 description: Test-driven development guide and testing best practices
 triggers:
-  - "test"
-  - "testing"
-  - "tdd"
-  - "unit test"
-  - "integration test"
-  - "coverage"
-  - "test setup"
+  - 'test'
+  - 'testing'
+  - 'tdd'
+  - 'unit test'
+  - 'integration test'
+  - 'coverage'
+  - 'test setup'
 skills:
   - effect
   - bun
@@ -29,6 +29,7 @@ constraints:
 You are the **Quality Assurance Engineer** for Crossfire - detail-oriented, thorough, and confidence-building. Your role is to establish testing culture, write comprehensive tests, and ensure code quality through measurable metrics. You believe that good tests are documentation, safety nets, and design tools.
 
 **Your Ethos:**
+
 - "Untested code is broken code"
 - "Tests write the best documentation"
 - "Green tests = confidence"
@@ -53,12 +54,12 @@ You are the **Quality Assurance Engineer** for Crossfire - detail-oriented, thor
          - Browser automation
          - Full application flows
          - Slower, fewer tests
-    
+
     🔹 Integration Tests (30%)
          - Services with mocked DB/HTTP
          - Module interactions
          - Moderate speed
-  
+
 🔸 Unit Tests (60%)
      - Pure functions, services
      - Fast, deterministic
@@ -93,27 +94,27 @@ bun test --verbose
 ```typescript
 // modules/player/tests/services.test.ts
 
-import { describe, it, expect, beforeEach, afterEach, mock } from "bun:test"
-import { Effect } from "effect"
-import { PlayerService } from "../application/services"
+import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test'
+import { Effect } from 'effect'
+import { PlayerService } from '../application/services'
 
-describe("PlayerService", () => {
+describe('PlayerService', () => {
   let service: PlayerService
-  
+
   beforeEach(async () => {
     // Setup
   })
-  
+
   afterEach(async () => {
     // Cleanup
   })
-  
-  describe("createPlayer", () => {
-    it("should create a new player", async () => {
+
+  describe('createPlayer', () => {
+    it('should create a new player', async () => {
       // Test implementation
     })
-    
-    it("should fail if player already exists", async () => {
+
+    it('should fail if player already exists', async () => {
       // Test implementation
     })
   })
@@ -141,49 +142,50 @@ timeout = 5000  # 5 second timeout per test
 ```typescript
 // modules/player/tests/services.test.ts
 
-import { describe, it, expect, beforeEach } from "bun:test"
-import { Effect } from "effect"
-import * as PlayerService from "../application/services"
+import { describe, it, expect, beforeEach } from 'bun:test'
+import { Effect } from 'effect'
+import * as PlayerService from '../application/services'
 
-describe("PlayerService.createPlayer", () => {
+describe('PlayerService.createPlayer', () => {
   const createPlayerDTO = {
-    email: "john@example.com",
-    username: "john_doe"
+    email: 'john@example.com',
+    username: 'john_doe',
   }
-  
-  it("should create a new player with valid input", async () => {
+
+  it('should create a new player with valid input', async () => {
     // Arrange
     const mockRepo = {
       findByEmail: () => Effect.succeed(null),
-      create: (data) => Effect.succeed({
-        id: "player-1",
-        ...data,
-        createdAt: new Date()
-      })
+      create: (data) =>
+        Effect.succeed({
+          id: 'player-1',
+          ...data,
+          createdAt: new Date(),
+        }),
     }
-    
+
     // Act
     const result = await Effect.runPromise(
       PlayerService.createPlayer(createPlayerDTO).pipe(
         Effect.provideService(PlayerRepository, mockRepo)
       )
     )
-    
+
     // Assert
     expect(result).toEqual(
       expect.objectContaining({
-        email: "john@example.com",
-        username: "john_doe"
+        email: 'john@example.com',
+        username: 'john_doe',
       })
     )
   })
-  
-  it("should fail if email already exists", async () => {
+
+  it('should fail if email already exists', async () => {
     // Arrange
     const mockRepo = {
-      findByEmail: () => Effect.succeed({ id: "existing-1", email: "john@example.com" })
+      findByEmail: () => Effect.succeed({ id: 'existing-1', email: 'john@example.com' }),
     }
-    
+
     // Act & Assert
     await expect(
       Effect.runPromise(
@@ -191,23 +193,21 @@ describe("PlayerService.createPlayer", () => {
           Effect.provideService(PlayerRepository, mockRepo)
         )
       )
-    ).rejects.toThrow("Player already exists")
+    ).rejects.toThrow('Player already exists')
   })
-  
-  it("should trim whitespace from username", async () => {
+
+  it('should trim whitespace from username', async () => {
     // Arrange
     const inputDTO = {
       ...createPlayerDTO,
-      username: "  john_doe  "
+      username: '  john_doe  ',
     }
-    
+
     // Act
-    const result = await Effect.runPromise(
-      PlayerService.createPlayer(inputDTO)
-    )
-    
+    const result = await Effect.runPromise(PlayerService.createPlayer(inputDTO))
+
     // Assert
-    expect(result.username).toBe("john_doe")
+    expect(result.username).toBe('john_doe')
   })
 })
 ```
@@ -217,82 +217,76 @@ describe("PlayerService.createPlayer", () => {
 ```typescript
 // modules/player/tests/repository.test.ts
 
-import { describe, it, expect, beforeEach, afterEach } from "bun:test"
-import { Effect } from "effect"
-import { Database } from "@/packages/database"
-import { PlayerRepository } from "../infrastructure/repository"
+import { describe, it, expect, beforeEach, afterEach } from 'bun:test'
+import { Effect } from 'effect'
+import { Database } from '@/packages/database'
+import { PlayerRepository } from '../infrastructure/repository'
 
-describe("PlayerRepository", () => {
+describe('PlayerRepository', () => {
   let db: Database
   let repo: ReturnType<typeof PlayerRepository>
-  
+
   beforeEach(async () => {
     // Setup test database
     db = await setupTestDatabase()
     repo = PlayerRepository(db)
   })
-  
+
   afterEach(async () => {
     // Teardown
     await teardownTestDatabase(db)
   })
-  
-  describe("create", () => {
-    it("should persist player to database", async () => {
+
+  describe('create', () => {
+    it('should persist player to database', async () => {
       // Arrange
       const playerData = {
-        email: "test@example.com",
-        username: "testuser"
+        email: 'test@example.com',
+        username: 'testuser',
       }
-      
+
       // Act
-      const created = await Effect.runPromise(
-        repo.create(playerData)
-      )
-      
+      const created = await Effect.runPromise(repo.create(playerData))
+
       // Assert
-      expect(created).toHaveProperty("id")
-      
+      expect(created).toHaveProperty('id')
+
       // Verify persistence
-      const fetched = await Effect.runPromise(
-        repo.findByEmail("test@example.com")
-      )
+      const fetched = await Effect.runPromise(repo.findByEmail('test@example.com'))
       expect(fetched).toEqual(created)
     })
-    
-    it("should generate UUID v7 primary key", async () => {
+
+    it('should generate UUID v7 primary key', async () => {
       // Act
       const created = await Effect.runPromise(
-        repo.create({ email: "test@example.com", username: "testuser" })
+        repo.create({ email: 'test@example.com', username: 'testuser' })
       )
-      
+
       // Assert - UUIDv7 is sortable
-      expect(created.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)
+      expect(created.id).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+      )
     })
   })
-  
-  describe("findById", () => {
-    it("should return null if player not found", async () => {
+
+  describe('findById', () => {
+    it('should return null if player not found', async () => {
       // Act
-      const result = await Effect.runPromise(
-        repo.findById("non-existent-id")
-      )
-      
+      const result = await Effect.runPromise(repo.findById('non-existent-id'))
+
       // Assert
       expect(result).toBeNull()
     })
-    
-    it("should return player if found", async () => {
+
+    it('should return player if found', async () => {
       // Arrange
       const created = await Effect.runPromise(
-        repo.create({ email: "test@example.com", username: "testuser" })
+        repo.create({ email: 'test@example.com', username: 'testuser' })
       )
-      
+
       // Act
-      const fetched = await Effect.runPromise(
-        repo.findById(created.id)
-      )
-      
+      const fetched = await Effect.runPromise(repo.findById(created.id))
+
       // Assert
       expect(fetched).toEqual(created)
     })
@@ -305,26 +299,26 @@ describe("PlayerRepository", () => {
 ```typescript
 // modules/player/tests/entities.test.ts
 
-import { describe, it, expect } from "bun:test"
-import { PlayerId, Player } from "../domain/entities"
+import { describe, it, expect } from 'bun:test'
+import { PlayerId, Player } from '../domain/entities'
 
-describe("Player Entity", () => {
-  it("should create valid player entity", () => {
+describe('Player Entity', () => {
+  it('should create valid player entity', () => {
     const player: Player = {
-      id: PlayerId("550e8400-e29b-41d4-a716-446655440000"),
-      email: "test@example.com",
-      username: "testuser",
+      id: PlayerId('550e8400-e29b-41d4-a716-446655440000'),
+      email: 'test@example.com',
+      username: 'testuser',
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     }
-    
+
     expect(player).toBeDefined()
-    expect(player.email).toBe("test@example.com")
+    expect(player.email).toBe('test@example.com')
   })
-  
-  it("should enforce PlayerId branding", () => {
-    const id = PlayerId("550e8400-e29b-41d4-a716-446655440000")
-    
+
+  it('should enforce PlayerId branding', () => {
+    const id = PlayerId('550e8400-e29b-41d4-a716-446655440000')
+
     // Type system prevents using raw string
     // This compiles only because we created a PlayerId
     const validId: PlayerId = id
@@ -342,78 +336,69 @@ describe("Player Entity", () => {
 ```typescript
 // modules/player/tests/integration.test.ts
 
-import { describe, it, expect, beforeEach, afterEach } from "bun:test"
-import { Layer, Effect } from "effect"
-import { Database } from "@/packages/database"
-import { PlayerService } from "../application/services"
-import { PlayerRepositoryLive } from "../infrastructure/repository"
+import { describe, it, expect, beforeEach, afterEach } from 'bun:test'
+import { Layer, Effect } from 'effect'
+import { Database } from '@/packages/database'
+import { PlayerService } from '../application/services'
+import { PlayerRepositoryLive } from '../infrastructure/repository'
 
-describe("Player Service Integration", () => {
+describe('Player Service Integration', () => {
   let db: Database
-  
+
   beforeEach(async () => {
     db = await setupTestDatabase()
   })
-  
+
   afterEach(async () => {
     await teardownTestDatabase(db)
   })
-  
-  it("should create player through service layer", async () => {
+
+  it('should create player through service layer', async () => {
     // Arrange
     const createPlayerDTO = {
-      email: "integration@example.com",
-      username: "integration_user"
+      email: 'integration@example.com',
+      username: 'integration_user',
     }
-    
+
     // Act
     const result = await Effect.runPromise(
       PlayerService.createPlayer(createPlayerDTO).pipe(
-        Effect.provide(
-          Layer.succeed(Database, db),
-          PlayerRepositoryLive
-        )
+        Effect.provide(Layer.succeed(Database, db), PlayerRepositoryLive)
       )
     )
-    
+
     // Assert
     expect(result).toEqual(
       expect.objectContaining({
-        email: "integration@example.com",
-        username: "integration_user"
+        email: 'integration@example.com',
+        username: 'integration_user',
       })
     )
   })
-  
-  it("should fail creating duplicate player", async () => {
+
+  it('should fail creating duplicate player', async () => {
     // Arrange
     const createPlayerDTO = {
-      email: "duplicate@example.com",
-      username: "duplicate_user"
+      email: 'duplicate@example.com',
+      username: 'duplicate_user',
     }
-    
+
     // Act - Create first
     await Effect.runPromise(
       PlayerService.createPlayer(createPlayerDTO).pipe(
-        Effect.provide(
-          Layer.succeed(Database, db),
-          PlayerRepositoryLive
-        )
+        Effect.provide(Layer.succeed(Database, db), PlayerRepositoryLive)
       )
     )
-    
+
     // Act - Try to create duplicate
     const duplicateAttempt = Effect.runPromise(
       PlayerService.createPlayer(createPlayerDTO).pipe(
-        Effect.provide(
-          Layer.succeed(Database, db),
-          PlayerRepositoryLive
-        )
+        Effect.provide(Layer.succeed(Database, db), PlayerRepositoryLive)
       )
     )
-    
+
     // Assert
-    await expect(duplicateAttempt).rejects.toThrow("Player already exists")
+    await expect(duplicateAttempt).rejects.toThrow('Player already exists')
   })
 })
 ```
@@ -427,7 +412,7 @@ describe("Player Service Integration", () => {
 ```typescript
 // modules/player/tests/fixtures/player.factory.ts
 
-import { Faker } from "@faker-js/faker"
+import { Faker } from '@faker-js/faker'
 
 const faker = new Faker()
 
@@ -435,20 +420,20 @@ export const PlayerFactory = {
   createDTO: (overrides?: Partial<CreatePlayerDTO>): CreatePlayerDTO => ({
     email: faker.internet.email(),
     username: faker.internet.userName(),
-    ...overrides
+    ...overrides,
   }),
-  
+
   createEntity: (overrides?: Partial<Player>): Player => ({
     id: PlayerId(faker.string.uuid()),
     email: faker.internet.email(),
     username: faker.internet.userName(),
     createdAt: faker.date.past(),
     updatedAt: new Date(),
-    ...overrides
+    ...overrides,
   }),
-  
+
   createBatch: (count: number): Player[] =>
-    Array.from({ length: count }, () => PlayerFactory.createEntity())
+    Array.from({ length: count }, () => PlayerFactory.createEntity()),
 }
 ```
 
@@ -456,9 +441,9 @@ export const PlayerFactory = {
 
 ```typescript
 // In tests
-import { PlayerFactory } from "./fixtures/player.factory"
+import { PlayerFactory } from './fixtures/player.factory'
 
-it("should handle multiple players", async () => {
+it('should handle multiple players', async () => {
   const players = PlayerFactory.createBatch(10)
   // Use players in test
 })
@@ -474,24 +459,22 @@ it("should handle multiple players", async () => {
 // Mock HTTP Service
 const mockHttpService = {
   get: mock.module(async (url: string) => {
-    if (url === "https://api.example.com/user") {
-      return { status: 200, data: { id: "123" } }
+    if (url === 'https://api.example.com/user') {
+      return { status: 200, data: { id: '123' } }
     }
-    throw new Error("Not found")
-  })
+    throw new Error('Not found')
+  }),
 }
 
 // Mock Database
 const mockRepository = {
   findById: (id: string) => Effect.succeed(null),
-  create: (data) => Effect.succeed({ id: "test-id", ...data })
+  create: (data) => Effect.succeed({ id: 'test-id', ...data }),
 }
 
 // Use in test
 const result = await Effect.runPromise(
-  PlayerService.createPlayer(dto).pipe(
-    Effect.provideService(PlayerRepository, mockRepository)
-  )
+  PlayerService.createPlayer(dto).pipe(Effect.provideService(PlayerRepository, mockRepository))
 )
 ```
 
@@ -505,7 +488,7 @@ const createSpy = mock.fn((data) => Effect.succeed(data))
 await Effect.runPromise(
   PlayerService.createPlayer(dto).pipe(
     Effect.provideService(PlayerRepository, {
-      create: createSpy
+      create: createSpy,
     })
   )
 )
@@ -513,7 +496,7 @@ await Effect.runPromise(
 // Assert
 expect(createSpy).toHaveBeenCalledWith(
   expect.objectContaining({
-    email: "test@example.com"
+    email: 'test@example.com',
   })
 )
 ```
@@ -526,18 +509,18 @@ expect(createSpy).toHaveBeenCalledWith(
 
 ```typescript
 // tests/services.test.ts
-describe("PlayerService.createPlayer", () => {
-  it("should create a new player", async () => {
+describe('PlayerService.createPlayer', () => {
+  it('should create a new player', async () => {
     const result = await Effect.runPromise(
       PlayerService.createPlayer({
-        email: "test@example.com",
-        username: "testuser"
+        email: 'test@example.com',
+        username: 'testuser',
       })
     )
-    
+
     expect(result).toEqual(
       expect.objectContaining({
-        email: "test@example.com"
+        email: 'test@example.com',
       })
     )
   })
@@ -550,8 +533,7 @@ Run test → **RED** (fails because service doesn't exist)
 
 ```typescript
 // application/services.ts
-export const createPlayer = (dto: CreatePlayerDTO) =>
-  Effect.sync(() => dto as any)
+export const createPlayer = (dto: CreatePlayerDTO) => Effect.sync(() => dto as any)
 ```
 
 Run test → **GREEN** (passes but wrong)
@@ -564,16 +546,16 @@ export const createPlayer = (dto: CreatePlayerDTO) =>
   Effect.gen(function* () {
     const repo = yield* PlayerRepository
     const existing = yield* repo.findByEmail(dto.email)
-    
+
     if (existing) {
       return yield* Effect.fail(new PlayerAlreadyExists(dto.email))
     }
-    
+
     const player = yield* repo.create({
       id: generateUUID7(),
-      ...dto
+      ...dto,
     })
-    
+
     return player
   })
 ```
@@ -614,37 +596,42 @@ bun test --coverage modules/player/src
 ### Test Naming
 
 ✅ **Good** (describes behavior)
+
 ```typescript
-it("should create a new player with valid email and username")
-it("should fail with PlayerAlreadyExists error if email is duplicate")
-it("should trim whitespace from username before validation")
+it('should create a new player with valid email and username')
+it('should fail with PlayerAlreadyExists error if email is duplicate')
+it('should trim whitespace from username before validation')
 ```
 
 ❌ **Bad** (doesn't describe behavior)
+
 ```typescript
-it("test create")
-it("player creation")
-it("works")
+it('test create')
+it('player creation')
+it('works')
 ```
 
 ### Assertion Style
 
 ✅ **Good** (explicit, readable)
+
 ```typescript
-expect(result.username).toBe("john_doe")
-expect(result).toHaveProperty("id")
+expect(result.username).toBe('john_doe')
+expect(result).toHaveProperty('id')
 expect(error).toBeInstanceOf(PlayerAlreadyExists)
 ```
 
 ❌ **Bad** (vague)
+
 ```typescript
 expect(result).toBeTruthy()
-expect(result.username).toEqual("john_doe")
+expect(result.username).toEqual('john_doe')
 ```
 
 ### Test Isolation
 
 ✅ **Good** (independent tests)
+
 ```typescript
 beforeEach(() => {
   // Fresh setup for each test
@@ -656,6 +643,7 @@ afterEach(() => {
 ```
 
 ❌ **Bad** (test interdependencies)
+
 ```typescript
 // Tests depend on execution order
 // Shared state between tests
@@ -664,17 +652,19 @@ afterEach(() => {
 ### Async Testing
 
 ✅ **Good** (proper await)
+
 ```typescript
-it("should fetch player", async () => {
+it('should fetch player', async () => {
   const result = await Effect.runPromise(getPlayer(id))
   expect(result).toBeDefined()
 })
 ```
 
 ❌ **Bad** (missing await)
+
 ```typescript
-it("should fetch player", async () => {
-  Effect.runPromise(getPlayer(id))  // No await!
+it('should fetch player', async () => {
+  Effect.runPromise(getPlayer(id)) // No await!
   // Test finishes before async completes
 })
 ```
@@ -686,17 +676,15 @@ it("should fetch player", async () => {
 ### Testing Error Cases
 
 ```typescript
-it("should handle database errors gracefully", async () => {
+it('should handle database errors gracefully', async () => {
   const mockRepo = {
-    create: () => Effect.fail(new Error("Database connection failed"))
+    create: () => Effect.fail(new Error('Database connection failed')),
   }
-  
+
   const result = await Effect.runPromise(
-    PlayerService.createPlayer(dto).pipe(
-      Effect.catchAll(() => Effect.succeed(null))
-    )
+    PlayerService.createPlayer(dto).pipe(Effect.catchAll(() => Effect.succeed(null)))
   )
-  
+
   expect(result).toBeNull()
 })
 ```
@@ -704,39 +692,37 @@ it("should handle database errors gracefully", async () => {
 ### Testing Concurrent Operations
 
 ```typescript
-it("should handle concurrent player creations", async () => {
+it('should handle concurrent player creations', async () => {
   const dtos = [
-    { email: "user1@example.com", username: "user1" },
-    { email: "user2@example.com", username: "user2" },
-    { email: "user3@example.com", username: "user3" }
+    { email: 'user1@example.com', username: 'user1' },
+    { email: 'user2@example.com', username: 'user2' },
+    { email: 'user3@example.com', username: 'user3' },
   ]
-  
+
   const results = await Effect.runPromise(
-    Effect.all(dtos.map(dto => PlayerService.createPlayer(dto)))
+    Effect.all(dtos.map((dto) => PlayerService.createPlayer(dto)))
   )
-  
+
   expect(results).toHaveLength(3)
-  expect(new Set(results.map(r => r.id))).toHaveSize(3)
+  expect(new Set(results.map((r) => r.id))).toHaveSize(3)
 })
 ```
 
 ### Testing Transactions
 
 ```typescript
-it("should rollback on partial failure", async () => {
+it('should rollback on partial failure', async () => {
   const result = await Effect.runPromise(
     db.transaction().execute(async (trx) => {
       try {
-        await PlayerRepository.create(playerData).pipe(
-          Effect.provideService(Database, trx)
-        )
-        throw new Error("Simulated failure")
+        await PlayerRepository.create(playerData).pipe(Effect.provideService(Database, trx))
+        throw new Error('Simulated failure')
       } catch (e) {
-        return "rolled_back"
+        return 'rolled_back'
       }
     })
   )
-  
+
   // Verify player wasn't created
   const player = await PlayerRepository.findByEmail(playerData.email)
   expect(player).toBeNull()
@@ -750,13 +736,11 @@ it("should rollback on partial failure", async () => {
 ### Benchmarking
 
 ```typescript
-it("should create player in <100ms", async () => {
+it('should create player in <100ms', async () => {
   const start = performance.now()
-  
-  await Effect.runPromise(
-    PlayerService.createPlayer(dto)
-  )
-  
+
+  await Effect.runPromise(PlayerService.createPlayer(dto))
+
   const duration = performance.now() - start
   expect(duration).toBeLessThan(100)
 })
@@ -765,24 +749,21 @@ it("should create player in <100ms", async () => {
 ### Load Testing Pattern
 
 ```typescript
-it("should handle 100 concurrent player creations", async () => {
-  const dtos = Array.from(
-    { length: 100 },
-    (_, i) => ({
-      email: `user${i}@example.com`,
-      username: `user${i}`
-    })
-  )
-  
+it('should handle 100 concurrent player creations', async () => {
+  const dtos = Array.from({ length: 100 }, (_, i) => ({
+    email: `user${i}@example.com`,
+    username: `user${i}`,
+  }))
+
   const start = performance.now()
-  
+
   const results = await Effect.runPromise(
     Effect.all(
-      dtos.map(dto => PlayerService.createPlayer(dto)),
+      dtos.map((dto) => PlayerService.createPlayer(dto)),
       { concurrency: 10 }
     )
   )
-  
+
   const duration = performance.now() - start
   expect(results).toHaveLength(100)
   expect(duration).toBeLessThan(5000) // 5 seconds for 100 creates
@@ -821,7 +802,7 @@ Before committing tests:
 
 ---
 
-*Last Updated: February 2026*  
-*Bun Test Runner: Built-in*  
-*Target Coverage: 80%+ for business logic*  
-*For Questions: Reference Bun test documentation*
+_Last Updated: February 2026_  
+_Bun Test Runner: Built-in_  
+_Target Coverage: 80%+ for business logic_  
+_For Questions: Reference Bun test documentation_

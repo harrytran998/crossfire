@@ -46,9 +46,10 @@ tasks:
       DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/crossfire"
 
   build:
-    command: "bun build src/index.ts --outdir dist"
-    description: "Build database package"
+    command: "tsdown"
+    description: "Build database package with tsdown"
     inputs:
       - "src/**/*"
+      - "tsdown.config.ts"
     outputs:
       - "dist/"
