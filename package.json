@@ -1,7 +1,6 @@
 {
   "name": "crossfire",
   "version": "0.1.0",
-  "type": "module",
   "private": true,
   "description": "Browser-Based Multiplayer FPS - Inspired by Crossfire",
   "license": "MIT",
@@ -12,21 +11,22 @@
       "packages/*"
     ]
   },
+  "type": "module",
   "scripts": {
-    "dev": "cd apps/server && bunx tsdown --watch",
-    "build": "cd packages/shared && bunx tsdown && cd ../database && bunx tsdown && cd ../../apps/server && bunx tsdown",
-    "test": "echo 'No tests yet' && exit 0",
+    "dev": "moon run server:dev",
+    "build": "moon run server:build",
+    "test": "moon run :test",
     "lint": "oxlint --type-aware",
     "lint:fix": "oxlint --fix --type-aware",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
-    "typecheck": "echo 'Type checking skipped' && exit 0",
+    "typecheck": "bun run lint",
     "clean": "rm -rf dist node_modules/.cache",
-    "db:migrate": "cd packages/database && migrate -database $DATABASE_URL -path migrations up",
-    "db:rollback": "cd packages/database && migrate -database $DATABASE_URL -path migrations down 1",
-    "db:seed": "bun run packages/database/scripts/seed.ts",
-    "db:generate": "cd packages/database && kysely-codegen --out-file src/types.ts",
-    "db:create": "cd packages/database && migrate create -ext sql -dir migrations -seq"
+    "db:migrate": "moon run database:migrate-up",
+    "db:rollback": "moon run database:migrate-down",
+    "db:seed": "moon run database:seed",
+    "db:generate": "moon run database:generate-types",
+    "db:create": "moon run database:create-migration"
   },
   "devDependencies": {
     "oxfmt": "^0.32.0",
