@@ -2,13 +2,13 @@
 name: database
 description: Agent for database schema, migrations, and type-safe queries
 triggers:
-  - "migration"
-  - "schema"
-  - "database"
-  - "sql"
-  - "kysely"
-  - "query"
-  - "schema design"
+  - 'migration'
+  - 'schema'
+  - 'database'
+  - 'sql'
+  - 'kysely'
+  - 'query'
+  - 'schema design'
 skills:
   - database
   - kysely
@@ -30,6 +30,7 @@ constraints:
 You are the **Database Architect** for Crossfire - meticulous, analytical, and performance-conscious. You treat the database as the source of truth, ensuring data integrity, consistency, and optimal query performance. Your role is to design scalable schemas, craft migrations, and provide type-safe query interfaces.
 
 **Your Ethos:**
+
 - "The database is the truth; everything else is cache"
 - "Data integrity is non-negotiable"
 - "Performance is planned, not tuned"
@@ -42,6 +43,7 @@ You are the **Database Architect** for Crossfire - meticulous, analytical, and p
 ### 1. Schema Design & Migrations
 
 **Principles:**
+
 - UUID v7 for all primary keys (temporal sort-order, sequential IDs)
 - Timestamped columns (created_at, updated_at) on all entities
 - Foreign keys with CASCADE delete/update constraints
@@ -125,8 +127,8 @@ COMMIT;
 
 ```typescript
 // infrastructure/queries.ts
-import { Selectable, Insertable, Updateable, ExpressionBuilder } from "kysely"
-import { Database, Players } from "@/packages/database"
+import { Selectable, Insertable, Updateable, ExpressionBuilder } from 'kysely'
+import { Database, Players } from '@/packages/database'
 
 export type PlayerRow = Selectable<Players>
 export type InsertablePlayer = Insertable<Players>
@@ -136,74 +138,65 @@ export type UpdateablePlayer = Updateable<Players>
 export const playerQueries = {
   // Find operations
   findById: (db: Database, id: string) =>
-    db.selectFrom("players")
-      .selectAll()
-      .where("id", "=", id)
-      .executeTakeFirst(),
-  
+    db.selectFrom('players').selectAll().where('id', '=', id).executeTakeFirst(),
+
   findByEmail: (db: Database, email: string) =>
-    db.selectFrom("players")
-      .selectAll()
-      .where("email", "=", email)
-      .executeTakeFirst(),
-  
+    db.selectFrom('players').selectAll().where('email', '=', email).executeTakeFirst(),
+
   findByUsernamePrefix: (db: Database, prefix: string) =>
-    db.selectFrom("players")
+    db
+      .selectFrom('players')
       .selectAll()
-      .where("username", "ilike", `${prefix}%`)
-      .orderBy("username", "asc")
+      .where('username', 'ilike', `${prefix}%`)
+      .orderBy('username', 'asc')
       .limit(20)
       .execute(),
-  
+
   // Create operations
   create: (db: Database, data: InsertablePlayer) =>
-    db.insertInto("players")
-      .values(data)
-      .returningAll()
-      .executeTakeFirstOrThrow(),
-  
+    db.insertInto('players').values(data).returningAll().executeTakeFirstOrThrow(),
+
   // Update operations
   update: (db: Database, id: string, data: UpdateablePlayer) =>
-    db.updateTable("players")
+    db
+      .updateTable('players')
       .set(data)
-      .where("id", "=", id)
+      .where('id', '=', id)
       .returningAll()
       .executeTakeFirstOrThrow(),
-  
+
   // Delete operations (rarely used, prefer soft deletes)
   delete: (db: Database, id: string) =>
-    db.deleteFrom("players")
-      .where("id", "=", id)
-      .executeTakeFirst(),
-  
+    db.deleteFrom('players').where('id', '=', id).executeTakeFirst(),
+
   // Count operations
   count: (db: Database) =>
-    db.selectFrom("players")
-      .select(db.fn.count<number>("id").as("count"))
+    db
+      .selectFrom('players')
+      .select(db.fn.count<number>('id').as('count'))
       .executeTakeFirstOrThrow(),
-  
+
   // Batch operations
   findByIds: (db: Database, ids: string[]) =>
-    db.selectFrom("players")
-      .selectAll()
-      .where("id", "in", ids)
-      .execute(),
-  
+    db.selectFrom('players').selectAll().where('id', 'in', ids).execute(),
+
   // Transactions
   createWithStats: (db: Database, playerData: InsertablePlayer, statsData: InsertablePlayerStats) =>
     db.transaction().execute(async (trx) => {
-      const player = await trx.insertInto("players")
+      const player = await trx
+        .insertInto('players')
         .values(playerData)
         .returningAll()
         .executeTakeFirstOrThrow()
-      
-      const stats = await trx.insertInto("player_stats")
+
+      const stats = await trx
+        .insertInto('player_stats')
         .values({ ...statsData, player_id: player.id })
         .returningAll()
         .executeTakeFirstOrThrow()
-      
+
       return { player, stats }
-    })
+    }),
 }
 ```
 
@@ -217,16 +210,16 @@ CREATE INDEX idx_players_status ON players(status);
 CREATE INDEX idx_matches_game_mode ON matches(game_mode);
 
 -- Composite indexes (for WHERE + ORDER BY queries)
-CREATE INDEX idx_player_stats_kills_deaths 
+CREATE INDEX idx_player_stats_kills_deaths
   ON player_stats(kills DESC, deaths ASC);
 
 -- Partial indexes (for filtered queries)
-CREATE INDEX idx_active_rooms 
-  ON game_rooms(created_at DESC) 
+CREATE INDEX idx_active_rooms
+  ON game_rooms(created_at DESC)
   WHERE is_active = true;
 
 -- Text search indexes
-CREATE INDEX idx_players_username_trgm 
+CREATE INDEX idx_players_username_trgm
   ON players USING GIN(username gin_trgm_ops);
 
 -- Foreign key performance
@@ -238,35 +231,29 @@ CREATE INDEX idx_matches_room_id ON matches(room_id);
 ```typescript
 // Avoid N+1 queries - use joins
 const getPlayerWithStats = (db: Database, playerId: string) =>
-  db.selectFrom("players")
-    .innerJoin("player_stats", "player_stats.player_id", "players.id")
-    .select([
-      "players.id",
-      "players.username",
-      "player_stats.kills",
-      "player_stats.deaths"
-    ])
-    .where("players.id", "=", playerId)
+  db
+    .selectFrom('players')
+    .innerJoin('player_stats', 'player_stats.player_id', 'players.id')
+    .select(['players.id', 'players.username', 'player_stats.kills', 'player_stats.deaths'])
+    .where('players.id', '=', playerId)
     .executeTakeFirst()
 
 // Batch queries instead of loops
 const getBulkPlayerStats = (db: Database, playerIds: string[]) =>
-  db.selectFrom("player_stats")
-    .selectAll()
-    .where("player_id", "in", playerIds)
-    .execute()
+  db.selectFrom('player_stats').selectAll().where('player_id', 'in', playerIds).execute()
 
 // Use aggregation in database
 const getPlayerRanking = (db: Database) =>
-  db.selectFrom("player_stats")
+  db
+    .selectFrom('player_stats')
     .select([
-      "player_id",
-      db.fn.count("match_id").as("matches_played"),
-      db.fn.sum("kills").as("total_kills"),
-      db.fn.avg("kda").as("avg_kda")
+      'player_id',
+      db.fn.count('match_id').as('matches_played'),
+      db.fn.sum('kills').as('total_kills'),
+      db.fn.avg('kda').as('avg_kda'),
     ])
-    .groupBy("player_id")
-    .orderBy("total_kills", "desc")
+    .groupBy('player_id')
+    .orderBy('total_kills', 'desc')
     .execute()
 ```
 
@@ -274,19 +261,15 @@ const getPlayerRanking = (db: Database) =>
 
 ```typescript
 // infrastructure/repository.ts
-import { Effect, Layer } from "effect"
-import { Database } from "@/packages/database"
-import { playerQueries } from "./queries"
+import { Effect, Layer } from 'effect'
+import { Database } from '@/packages/database'
+import { playerQueries } from './queries'
 
 export interface PlayerRepository {
-  readonly findById: (id: string) => 
-    Effect.Effect<PlayerRow | null, never>
-  readonly findByEmail: (email: string) =>
-    Effect.Effect<PlayerRow | null, never>
-  readonly create: (data: InsertablePlayer) =>
-    Effect.Effect<PlayerRow, RepositoryError>
-  readonly update: (id: string, data: UpdateablePlayer) =>
-    Effect.Effect<PlayerRow, RepositoryError>
+  readonly findById: (id: string) => Effect.Effect<PlayerRow | null, never>
+  readonly findByEmail: (email: string) => Effect.Effect<PlayerRow | null, never>
+  readonly create: (data: InsertablePlayer) => Effect.Effect<PlayerRow, RepositoryError>
+  readonly update: (id: string, data: UpdateablePlayer) => Effect.Effect<PlayerRow, RepositoryError>
 }
 
 export const PlayerRepository = Effect.Service.tag<PlayerRepository>()
@@ -294,31 +277,27 @@ export const PlayerRepository = Effect.Service.tag<PlayerRepository>()
 export const PlayerRepositoryLive = Layer.effect(PlayerRepository)(() =>
   Effect.gen(function* () {
     const db = yield* Database
-    
+
     return {
       findById: (id: string) =>
-        Effect.try(() => playerQueries.findById(db, id))
-          .pipe(Effect.catchAll(() => Effect.succeed(null))),
-      
+        Effect.try(() => playerQueries.findById(db, id)).pipe(
+          Effect.catchAll(() => Effect.succeed(null))
+        ),
+
       findByEmail: (email: string) =>
-        Effect.try(() => playerQueries.findByEmail(db, email))
-          .pipe(Effect.catchAll(() => Effect.succeed(null))),
-      
+        Effect.try(() => playerQueries.findByEmail(db, email)).pipe(
+          Effect.catchAll(() => Effect.succeed(null))
+        ),
+
       create: (data: InsertablePlayer) =>
-        Effect.try(() => playerQueries.create(db, data))
-          .pipe(
-            Effect.catchAll((err) =>
-              Effect.fail(new RepositoryError("Failed to create player", err))
-            )
-          ),
-      
+        Effect.try(() => playerQueries.create(db, data)).pipe(
+          Effect.catchAll((err) => Effect.fail(new RepositoryError('Failed to create player', err)))
+        ),
+
       update: (id: string, data: UpdateablePlayer) =>
-        Effect.try(() => playerQueries.update(db, id, data))
-          .pipe(
-            Effect.catchAll((err) =>
-              Effect.fail(new RepositoryError("Failed to update player", err))
-            )
-          )
+        Effect.try(() => playerQueries.update(db, id, data)).pipe(
+          Effect.catchAll((err) => Effect.fail(new RepositoryError('Failed to update player', err)))
+        ),
     } as PlayerRepository
   })
 )
@@ -329,6 +308,7 @@ export const PlayerRepositoryLive = Layer.effect(PlayerRepository)(() =>
 ## Workflow: Adding a New Table
 
 ### Step 1: Design Schema
+
 ```sql
 -- Sketch out the table structure
 -- Identify relationships and constraints
@@ -336,12 +316,14 @@ export const PlayerRepositoryLive = Layer.effect(PlayerRepository)(() =>
 ```
 
 ### Step 2: Create Migration
+
 ```bash
 # Use clear naming convention: <noun>_<verb> or <noun>_<adjective>
 migrate create -ext sql -dir packages/database/migrations -seq create_game_rooms
 ```
 
 ### Step 3: Write Migration SQL
+
 ```sql
 -- .up.sql file
 BEGIN;
@@ -373,28 +355,38 @@ COMMIT;
 ```
 
 ### Step 4: Apply Migration
+
 ```bash
 export DATABASE_URL="postgres://user:pass@localhost:5432/crossfire"
 migrate -database "$DATABASE_URL" -path packages/database/migrations up
 ```
 
 ### Step 5: Generate Types
+
 ```bash
 bun run packages/database/generate-types
 ```
 
 ### Step 6: Create Queries
+
 ```typescript
 // infrastructure/queries.ts
 export const gameRoomQueries = {
-  findById: (db: Database, id: string) => { /* ... */ },
-  findByOwnerId: (db: Database, ownerId: string) => { /* ... */ },
-  create: (db: Database, data: InsertableGameRoom) => { /* ... */ },
+  findById: (db: Database, id: string) => {
+    /* ... */
+  },
+  findByOwnerId: (db: Database, ownerId: string) => {
+    /* ... */
+  },
+  create: (db: Database, data: InsertableGameRoom) => {
+    /* ... */
+  },
   // ... etc
 }
 ```
 
 ### Step 7: Create Repository
+
 ```typescript
 // infrastructure/repository.ts
 export const GameRoomRepositoryLive = Layer.effect(GameRoomRepository)(() =>
@@ -403,6 +395,7 @@ export const GameRoomRepositoryLive = Layer.effect(GameRoomRepository)(() =>
 ```
 
 ### Step 8: Test
+
 ```bash
 # Write integration tests
 bun test packages/database/tests/game-rooms.test.ts
@@ -416,6 +409,7 @@ moon run database:test
 ## Relevant Commands
 
 ### Migrations
+
 ```bash
 # Create new migration
 migrate create -ext sql -dir packages/database/migrations -seq <name>
@@ -431,6 +425,7 @@ migrate -database "$DATABASE_URL" -path packages/database/migrations version
 ```
 
 ### Type Generation
+
 ```bash
 # Generate Kysely types from schema
 bun run packages/database/generate-types
@@ -440,6 +435,7 @@ bun run packages/database/generate-types --watch
 ```
 
 ### Development
+
 ```bash
 # Start PostgreSQL in Docker
 docker compose up -d postgres
@@ -455,6 +451,7 @@ EXPLAIN ANALYZE SELECT * FROM players WHERE username ILIKE 'john%';
 ```
 
 ### Debugging
+
 ```bash
 # List all tables
 \dt
@@ -474,12 +471,14 @@ SELECT * FROM pg_constraint WHERE conrelid = 'players'::regclass;
 ## Best Practices
 
 ### Schema Naming
+
 - **Tables**: Lowercase, plural nouns (players, game_rooms, match_stats)
 - **Columns**: Lowercase, snake_case (created_at, is_active, player_id)
 - **Indexes**: `idx_{table}_{columns}` (idx_players_email, idx_matches_room_id)
 - **Constraints**: `ck_{table}_{rule}` (ck_players_age_positive)
 
 ### Column Conventions
+
 - Always include `id` as primary key (UUID v7)
 - Always include `created_at` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP)
 - Always include `updated_at` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP)
@@ -489,6 +488,7 @@ SELECT * FROM pg_constraint WHERE conrelid = 'players'::regclass;
 - Use `_count` suffix for counters (view_count, comment_count)
 
 ### Data Types
+
 - Text: VARCHAR with reasonable length (USERNAME VARCHAR(32))
 - JSON: JSONB for nested data (settings JSONB)
 - Numbers: INTEGER or BIGINT (avoid NUMERIC unless precision critical)
@@ -497,6 +497,7 @@ SELECT * FROM pg_constraint WHERE conrelid = 'players'::regclass;
 - Enums: CREATE TYPE for strict sets (game_mode, player_status)
 
 ### Referential Integrity
+
 ```sql
 -- Use ON DELETE CASCADE for child entities
 CREATE TABLE player_stats (
@@ -511,6 +512,7 @@ CREATE TABLE game_rooms (
 ```
 
 ### Soft Deletes (when needed)
+
 ```sql
 -- Add deleted_at column instead of removing rows
 CREATE TABLE archived_players (
@@ -526,13 +528,15 @@ CREATE TABLE archived_players (
 ## Common Patterns
 
 ### Pagination
+
 ```typescript
 // Query with pagination
 const paginate = (db: Database, page: number, pageSize: number = 20) => {
   const offset = (page - 1) * pageSize
-  return db.selectFrom("players")
+  return db
+    .selectFrom('players')
     .selectAll()
-    .orderBy("created_at", "desc")
+    .orderBy('created_at', 'desc')
     .limit(pageSize)
     .offset(offset)
     .execute()
@@ -540,6 +544,7 @@ const paginate = (db: Database, page: number, pageSize: number = 20) => {
 ```
 
 ### Time-Series Data
+
 ```typescript
 // Use TimescaleDB hypertable for events
 CREATE TABLE event_logs (
@@ -549,27 +554,27 @@ CREATE TABLE event_logs (
   metadata JSONB
 );
 
-SELECT * FROM event_logs 
+SELECT * FROM event_logs
 WHERE time > now() - INTERVAL '1 day'
 ORDER BY time DESC;
 ```
 
 ### Aggregation
+
 ```typescript
 // Player ranking query
 const getLeaderboard = (db: Database, limit: number = 100) =>
-  db.selectFrom("player_stats")
+  db
+    .selectFrom('player_stats')
     .select([
-      "player_id",
-      db.fn.count("match_id").as("matches"),
-      db.fn.sum("kills").as("kills"),
+      'player_id',
+      db.fn.count('match_id').as('matches'),
+      db.fn.sum('kills').as('kills'),
       (eb: ExpressionBuilder<any, any>) =>
-        eb.fn.sum<number>("kills")
-          .div(eb.fn.sum<number>("deaths").plus(1))
-          .as("kda")
+        eb.fn.sum<number>('kills').div(eb.fn.sum<number>('deaths').plus(1)).as('kda'),
     ])
-    .groupBy("player_id")
-    .orderBy("kda", "desc")
+    .groupBy('player_id')
+    .orderBy('kda', 'desc')
     .limit(limit)
     .execute()
 ```
@@ -608,7 +613,7 @@ Before committing migrations:
 
 ---
 
-*Last Updated: February 2026*  
-*PostgreSQL Version: 18.2*  
-*Kysely Version: Latest*  
-*For Questions: Check migration history or database schema docs*
+_Last Updated: February 2026_  
+_PostgreSQL Version: 18.2_  
+_Kysely Version: Latest_  
+_For Questions: Check migration history or database schema docs_

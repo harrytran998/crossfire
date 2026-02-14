@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 env:
-  BUN_VERSION: "1.3.9"
+  BUN_VERSION: '1.3.9'
 
 jobs:
   lint:
@@ -21,9 +21,6 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: ${{ env.BUN_VERSION }}
-
-      - name: Setup Moon
-        uses: moonrepo/setup-moon@v1
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
@@ -61,14 +58,11 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
-      - name: Setup Moon
-        uses: moonrepo/setup-moon@v1
-
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
       - name: Run typecheck
-        run: moon run :typecheck
+        run: bun run typecheck
 
   test:
     name: Test
@@ -110,14 +104,11 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
-      - name: Setup Moon
-        uses: moonrepo/setup-moon@v1
-
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
       - name: Run tests
-        run: moon run :test
+        run: bun run test
 
   build:
     name: Build
@@ -132,11 +123,8 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
-      - name: Setup Moon
-        uses: moonrepo/setup-moon@v1
-
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
       - name: Build all packages
-        run: moon run :build
+        run: bun run build

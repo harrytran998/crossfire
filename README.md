@@ -21,15 +21,15 @@ Crossfire Web is a **browser-based multiplayer FPS** that brings classic Crossfi
 
 ## 🏗️ Tech Stack
 
-| Layer | Technology | Purpose |
-|-------|------------|---------|
-| **Runtime** | [Bun](https://bun.sh) | Ultra-fast JS runtime with native WebSocket |
-| **Framework** | [Effect](https://effect.website) | Functional programming, typed errors |
-| **3D Engine** | [Three.js](https://threejs.org) | 3D rendering with WebGPU support |
-| **Frontend** | React + TypeScript | UI components and state |
-| **Database** | PostgreSQL + TimescaleDB | Persistent data + time-series analytics |
-| **Cache** | Redis | Real-time state, sessions |
-| **Protocol** | MessagePack over WebSocket | Binary serialization |
+| Layer         | Technology                       | Purpose                                     |
+| ------------- | -------------------------------- | ------------------------------------------- |
+| **Runtime**   | [Bun](https://bun.sh)            | Ultra-fast JS runtime with native WebSocket |
+| **Framework** | [Effect](https://effect.website) | Functional programming, typed errors        |
+| **3D Engine** | [Three.js](https://threejs.org)  | 3D rendering with WebGPU support            |
+| **Frontend**  | React + TypeScript               | UI components and state                     |
+| **Database**  | PostgreSQL + TimescaleDB         | Persistent data + time-series analytics     |
+| **Cache**     | Redis                            | Real-time state, sessions                   |
+| **Protocol**  | MessagePack over WebSocket       | Binary serialization                        |
 
 ## 📁 Project Structure
 
@@ -75,37 +75,37 @@ bun dev
 
 ## 📖 Documentation
 
-| Document | Description |
-|----------|-------------|
-| [Product Requirements](./docs/01-product-requirements.md) | Product vision, user stories, success metrics |
-| [Game Features](./docs/02-game-features.md) | PVP modes, Zombie mode, weapons, progression |
-| [Technology Stack](./docs/03-technology-stack.md) | Bun + Effect + Bun WebSocket stack |
-| [System Architecture](./docs/04-system-architecture.md) | Client/server architecture, game loop, networking |
-| [Database Design](./docs/05-database-design.md) | PostgreSQL + TimescaleDB schemas |
-| [API & Network Protocol](./docs/06-api-network-protocol.md) | Complete REST + WebSocket API reference |
-| [Deployment](./docs/07-deployment-infrastructure.md) | Cloud infrastructure, Docker, Kubernetes |
-| [Development Roadmap](./docs/08-development-roadmap.md) | 7-month phased implementation |
-| [Security & Anti-Cheat](./docs/09-security.md) | Security architecture and anti-cheat design |
+| Document                                                    | Description                                       |
+| ----------------------------------------------------------- | ------------------------------------------------- |
+| [Product Requirements](./docs/01-product-requirements.md)   | Product vision, user stories, success metrics     |
+| [Game Features](./docs/02-game-features.md)                 | PVP modes, Zombie mode, weapons, progression      |
+| [Technology Stack](./docs/03-technology-stack.md)           | Bun + Effect + Bun WebSocket stack                |
+| [System Architecture](./docs/04-system-architecture.md)     | Client/server architecture, game loop, networking |
+| [Database Design](./docs/05-database-design.md)             | PostgreSQL + TimescaleDB schemas                  |
+| [API & Network Protocol](./docs/06-api-network-protocol.md) | Complete REST + WebSocket API reference           |
+| [Deployment](./docs/07-deployment-infrastructure.md)        | Cloud infrastructure, Docker, Kubernetes          |
+| [Development Roadmap](./docs/08-development-roadmap.md)     | 7-month phased implementation                     |
+| [Security & Anti-Cheat](./docs/09-security.md)              | Security architecture and anti-cheat design       |
 
 ## 🎯 Game Modes
 
 ### Phase 1: PVP Modes
 
-| Mode | Description | Players |
-|------|-------------|---------|
-| **Team Deathmatch** | Two teams compete for kill limit | 8v8 |
-| **Free for All** | Every player for themselves | 16 players |
-| **Search & Destroy** | Plant/defuse bomb objective | 5v5 |
-| **Elimination** | No respawn team elimination | 5v5 |
+| Mode                 | Description                      | Players    |
+| -------------------- | -------------------------------- | ---------- |
+| **Team Deathmatch**  | Two teams compete for kill limit | 8v8        |
+| **Free for All**     | Every player for themselves      | 16 players |
+| **Search & Destroy** | Plant/defuse bomb objective      | 5v5        |
+| **Elimination**      | No respawn team elimination      | 5v5        |
 
 ### Phase 2: Zombie Modes
 
-| Mode | Description | Players |
-|------|-------------|---------|
-| **Mutation Mode** | Survivors vs Infected mutants | 16 players |
-| **Hero Mode** | Special heroes vs mutants | 16 players |
-| **Zombie Mode (PVE)** | Co-op vs AI zombie hordes | 4-8 players |
-| **Challenge Mode** | Boss battles and objectives | 4-8 players |
+| Mode                  | Description                   | Players     |
+| --------------------- | ----------------------------- | ----------- |
+| **Mutation Mode**     | Survivors vs Infected mutants | 16 players  |
+| **Hero Mode**         | Special heroes vs mutants     | 16 players  |
+| **Zombie Mode (PVE)** | Co-op vs AI zombie hordes     | 4-8 players |
+| **Challenge Mode**    | Boss battles and objectives   | 4-8 players |
 
 ## 🔧 Development
 
@@ -137,25 +137,25 @@ bun typecheck    # Type check
 
 ### Database Strategy
 
-| Data Type | Database | Purpose |
-|-----------|----------|---------|
-| Player profiles, inventory | PostgreSQL | Persistent relational data |
-| Match history, stats | PostgreSQL | Historical records |
-| Real-time telemetry | TimescaleDB | Time-series analytics |
-| Game room state | Redis | In-memory real-time state |
-| Sessions, matchmaking | Redis | Ephemeral state |
+| Data Type                  | Database    | Purpose                    |
+| -------------------------- | ----------- | -------------------------- |
+| Player profiles, inventory | PostgreSQL  | Persistent relational data |
+| Match history, stats       | PostgreSQL  | Historical records         |
+| Real-time telemetry        | TimescaleDB | Time-series analytics      |
+| Game room state            | Redis       | In-memory real-time state  |
+| Sessions, matchmaking      | Redis       | Ephemeral state            |
 
 ## 🗓️ Roadmap
 
-| Phase | Timeline | Focus |
-|-------|----------|-------|
-| **Phase 0-1** | Weeks 1-5 | Auth, backend, WebSocket foundation |
-| **Phase 2** | Weeks 6-8 | Room system, matchmaking |
-| **Phase 3** | Weeks 9-12 | Game engine, physics, networking |
-| **Phase 4** | Weeks 13-16 | Combat system, weapons |
-| **Phase 5** | Weeks 17-20 | Game modes, match flow |
-| **Phase 6** | Weeks 21-24 | Social, progression, leaderboards |
-| **Phase 7** | Weeks 25-28 | Polish, optimization, launch |
+| Phase         | Timeline    | Focus                               |
+| ------------- | ----------- | ----------------------------------- |
+| **Phase 0-1** | Weeks 1-5   | Auth, backend, WebSocket foundation |
+| **Phase 2**   | Weeks 6-8   | Room system, matchmaking            |
+| **Phase 3**   | Weeks 9-12  | Game engine, physics, networking    |
+| **Phase 4**   | Weeks 13-16 | Combat system, weapons              |
+| **Phase 5**   | Weeks 17-20 | Game modes, match flow              |
+| **Phase 6**   | Weeks 21-24 | Social, progression, leaderboards   |
+| **Phase 7**   | Weeks 25-28 | Polish, optimization, launch        |
 
 ## 🤝 Contributing
 

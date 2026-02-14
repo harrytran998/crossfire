@@ -1,6 +1,7 @@
 # Clean Architecture Rules
 
 ## Core Principles
+
 - **Dependency Rule**: Inner layers must not depend on outer layers
 - **Layered Structure**: Entities → Usecases → Interface Adapters → Frameworks
 - **Stable Abstractions**: High-level policies stable; low-level details changeable
@@ -24,6 +25,7 @@
 ## DO ✅
 
 ### 1. Organize by Feature Modules
+
 ```typescript
 // DO: Feature-based structure
 src/
@@ -63,6 +65,7 @@ export class User {
 ```
 
 ### 2. Use Repository Pattern for Data Access
+
 ```typescript
 // DO: Define repository interface in domain
 export interface IUserRepository {
@@ -96,14 +99,15 @@ export class GetUserUsecase {
   ) {}
 
   execute(id: string): Effect.Effect<User, UserNotFound> {
-    return this.userRepo.findById(id).pipe(
-      Effect.tap(() => this.logger.info(`Retrieved user: ${id}`))
-    )
+    return this.userRepo
+      .findById(id)
+      .pipe(Effect.tap(() => this.logger.info(`Retrieved user: ${id}`)))
   }
 }
 ```
 
 ### 3. Usecases Orchestrate Business Logic
+
 ```typescript
 // DO: Usecase contains business rules
 export class CreateUserUsecase {
@@ -123,18 +127,14 @@ export class CreateUserUsecase {
     )
   }
 
-  private validateInput(
-    input: CreateUserInput
-  ): Effect.Effect<CreateUserInput, ValidationError> {
+  private validateInput(input: CreateUserInput): Effect.Effect<CreateUserInput, ValidationError> {
     if (!input.email.includes('@')) {
       return Effect.fail(new ValidationError('Invalid email'))
     }
     return Effect.succeed(input)
   }
 
-  private checkEmailExists(
-    email: string
-  ): Effect.Effect<CreateUserInput, EmailAlreadyExists> {
+  private checkEmailExists(email: string): Effect.Effect<CreateUserInput, EmailAlreadyExists> {
     return this.userRepo.findByEmail(email).pipe(
       Effect.flip,
       Effect.andThen(() => Effect.succeed({ email }))
@@ -143,20 +143,17 @@ export class CreateUserUsecase {
 
   private createUser(input: CreateUserInput): Effect.Effect<User, SaveError> {
     const user = new User(this.idGenerator.next(), input.email, input.name)
-    return this.userRepo.save(user).pipe(
-      Effect.as(user)
-    )
+    return this.userRepo.save(user).pipe(Effect.as(user))
   }
 
   private sendWelcomeEmail(user: User): Effect.Effect<User, EmailError> {
-    return this.emailService.sendWelcome(user).pipe(
-      Effect.as(user)
-    )
+    return this.emailService.sendWelcome(user).pipe(Effect.as(user))
   }
 }
 ```
 
 ### 4. Controllers Bridge HTTP and Usecases
+
 ```typescript
 // DO: Controller is thin adapter
 export class UserController {
@@ -168,17 +165,15 @@ export class UserController {
   create(req: Request): Effect.Effect<Response, HttpError> {
     const input = {
       email: req.body.email,
-      name: req.body.name
+      name: req.body.name,
     }
-    
+
     return this.createUserUsecase.execute(input).pipe(
-      Effect.map((user) => 
-        Response.json({ status: 'ok', data: user }, 201)
-      ),
-      Effect.catch('ValidationError', (err) => 
+      Effect.map((user) => Response.json({ status: 'ok', data: user }, 201)),
+      Effect.catch('ValidationError', (err) =>
         Effect.succeed(Response.json({ error: err.message }, 400))
       ),
-      Effect.catch('EmailAlreadyExists', () => 
+      Effect.catch('EmailAlreadyExists', () =>
         Effect.succeed(Response.json({ error: 'Email taken' }, 409))
       )
     )
@@ -186,33 +181,23 @@ export class UserController {
 
   getById(req: Request): Effect.Effect<Response, HttpError> {
     const id = req.params.id
-    
+
     return this.getUserUsecase.execute(id).pipe(
       Effect.map((user) => Response.json({ data: user })),
-      Effect.catch('UserNotFound', () => 
-        Effect.succeed(Response.json({ error: 'Not found' }, 404))
-      )
+      Effect.catch('UserNotFound', () => Effect.succeed(Response.json({ error: 'Not found' }, 404)))
     )
   }
 }
 ```
 
 ### 5. Dependency Injection at Module Boundary
+
 ```typescript
 // DO: Wire dependencies at entry point (main.ts)
-const AppLayer = Layer.merge(
-  DatabaseLayer,
-  LoggerLayer,
-  EmailServiceLayer
-).pipe(
+const AppLayer = Layer.merge(DatabaseLayer, LoggerLayer, EmailServiceLayer).pipe(
   Layer.andThen(
     Layer.effectDiscard(
-      Effect.all([
-        Effect.serviceWithEffect(
-          UserRepository,
-          (repo) => repo.initialize()
-        )
-      ])
+      Effect.all([Effect.serviceWithEffect(UserRepository, (repo) => repo.initialize())])
     )
   )
 )
@@ -221,22 +206,18 @@ const AppLayer = Layer.merge(
 const CreateUserUsecaseLive = Layer.effect(
   CreateUserUsecase,
   Effect.all([UserRepository, EmailService, IdGenerator]).pipe(
-    Effect.map(([repo, email, idGen]) => 
-      new CreateUserUsecase(repo, email, idGen)
-    )
+    Effect.map(([repo, email, idGen]) => new CreateUserUsecase(repo, email, idGen))
   )
 )
 
 // DO: Export layer for consumption
-export const UsecaseLayer = Layer.merge(
-  CreateUserUsecaseLive,
-  GetUserUsecaseLive
-)
+export const UsecaseLayer = Layer.merge(CreateUserUsecaseLive, GetUserUsecaseLive)
 ```
 
 ## DON'T ❌
 
 ### 1. Don't Let Framework Details Leak Into Domain
+
 ```typescript
 // DON'T: Domain depends on HTTP/DB libraries
 export class User {
@@ -264,6 +245,7 @@ export class User {
 ```
 
 ### 2. Don't Violate Dependency Rule
+
 ```typescript
 // DON'T: Inner layer depends on outer layer
 export class User {
@@ -288,17 +270,18 @@ export class UserController {
   constructor(private usecase: CreateUserUsecase) {}
 
   create(req: Request): Effect.Effect<Response, HttpError> {
-    return this.usecase.execute({
-      email: req.body.email,
-      name: req.body.name
-    }).pipe(
-      Effect.map((user) => Response.json(user))
-    )
+    return this.usecase
+      .execute({
+        email: req.body.email,
+        name: req.body.name,
+      })
+      .pipe(Effect.map((user) => Response.json(user)))
   }
 }
 ```
 
 ### 3. Don't Mix Concerns in Single Class
+
 ```typescript
 // DON'T: Mixing HTTP, DB, email, validation
 export class UserService {
@@ -324,6 +307,7 @@ export class UserService {
 ```
 
 ### 4. Don't Pass Framework Objects Into Domain
+
 ```typescript
 // DON'T: Request/Response objects leak
 export class CreateUserUsecase {
@@ -345,16 +329,15 @@ export class UserController {
   create(req: Request): Effect.Effect<Response, HttpError> {
     const input = {
       email: req.body.email,
-      name: req.body.name
+      name: req.body.name,
     }
-    return this.usecase.execute(input).pipe(
-      Effect.map((user) => Response.json(user))
-    )
+    return this.usecase.execute(input).pipe(Effect.map((user) => Response.json(user)))
   }
 }
 ```
 
 ### 5. Don't Create Circular Dependencies
+
 ```typescript
 // DON'T: A → B → A
 export class UserService {
@@ -384,8 +367,13 @@ export class OrderService {
 ```typescript
 // domain/User.ts - Pure entity
 export class User {
-  constructor(readonly id: string, readonly email: string) {}
-  isValid(): boolean { /* business rules */ }
+  constructor(
+    readonly id: string,
+    readonly email: string
+  ) {}
+  isValid(): boolean {
+    /* business rules */
+  }
 }
 
 // domain/IUserRepository.ts - Domain interface
@@ -397,38 +385,48 @@ export interface IUserRepository {
 // application/CreateUserUsecase.ts - Orchestration
 export class CreateUserUsecase {
   constructor(private repo: IUserRepository) {}
-  execute(input: Input): Effect.Effect<User, Error> { /* */ }
+  execute(input: Input): Effect.Effect<User, Error> {
+    /* */
+  }
 }
 
 // adapters/UserGateway.ts - Implementation
 export class UserGateway implements IUserRepository {
   constructor(private db: Database) {}
-  save(user: User): Effect.Effect<void, SaveError> { /* */ }
-  findById(id: string): Effect.Effect<User, UserNotFound> { /* */ }
+  save(user: User): Effect.Effect<void, SaveError> {
+    /* */
+  }
+  findById(id: string): Effect.Effect<User, UserNotFound> {
+    /* */
+  }
 }
 
 // adapters/UserController.ts - HTTP adapter
 export class UserController {
   constructor(private usecase: CreateUserUsecase) {}
-  create(req: Request): Effect.Effect<Response, HttpError> { /* */ }
+  create(req: Request): Effect.Effect<Response, HttpError> {
+    /* */
+  }
 }
 ```
 
 ## Integration with Skills
+
 - **Use with /git-master**: Architecture changes require thoughtful commits
 - **Use with /refactor**: Refactoring enforces clean architecture
 - **Use in TDD**: Architecture emerges from test requirements
 
 ## Rationale
 
-| Rule | Why |
-|------|-----|
-| Dependency Rule | Prevents tight coupling; enables testing |
-| Layered Structure | Clear responsibility boundaries |
-| Repository Pattern | Decouples business logic from data source |
-| Thin Controllers | Easy to test; framework-agnostic logic |
-| DI at Boundary | Explicit wiring; easy to swap implementations |
+| Rule               | Why                                           |
+| ------------------ | --------------------------------------------- |
+| Dependency Rule    | Prevents tight coupling; enables testing      |
+| Layered Structure  | Clear responsibility boundaries               |
+| Repository Pattern | Decouples business logic from data source     |
+| Thin Controllers   | Easy to test; framework-agnostic logic        |
+| DI at Boundary     | Explicit wiring; easy to swap implementations |
 
 ## References
+
 - Clean Architecture: https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html
 - Layered Architecture: https://www.oreilly.com/library/view/software-architecture-fundamentals/9781491998991/

@@ -8,7 +8,7 @@ export class DatabaseConfig extends Effect.Service<DatabaseConfig>()('DatabaseCo
     const name = yield* Config.string('DB_NAME').pipe(Config.withDefault('crossfire'))
     const user = yield* Config.string('DB_USER').pipe(Config.withDefault('postgres'))
     const password = yield* Config.redacted('DB_PASSWORD').pipe(
-      Config.withDefault(Redacted.make('postgres')),
+      Config.withDefault(Redacted.make('postgres'))
     )
     const poolMax = yield* Config.integer('DB_POOL_MAX').pipe(Config.withDefault(10))
 

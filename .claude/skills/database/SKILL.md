@@ -10,6 +10,7 @@ Combining PostgreSQL 18.2 (advanced relational database) with golang-migrate (mi
 ## Key Concepts
 
 ### PostgreSQL Features
+
 - ACID compliance
 - Advanced data types (JSONB, arrays, ranges)
 - Window functions and CTEs
@@ -17,6 +18,7 @@ Combining PostgreSQL 18.2 (advanced relational database) with golang-migrate (mi
 - Partitioning and indexing strategies
 
 ### golang-migrate
+
 - Version control for database schemas
 - Up and down migrations
 - Database driver agnostic
@@ -24,11 +26,13 @@ Combining PostgreSQL 18.2 (advanced relational database) with golang-migrate (mi
 - Source directory or remote migration support
 
 ### Migration Strategy
+
 Track schema changes as discrete, reversible migrations to maintain consistency across environments.
 
 ## Code Examples
 
 ### Migration File Structure
+
 ```bash
 migrations/
 ├── 001_initial_schema.up.sql
@@ -40,6 +44,7 @@ migrations/
 ```
 
 ### Initial Schema Migration
+
 ```sql
 -- migrations/001_initial_schema.up.sql
 CREATE TABLE users (
@@ -75,6 +80,7 @@ DROP TABLE IF EXISTS users;
 ```
 
 ### Add User Profile Column
+
 ```sql
 -- migrations/002_add_user_profile.up.sql
 ALTER TABLE users ADD COLUMN profile_data JSONB DEFAULT '{}';
@@ -93,6 +99,7 @@ ALTER TABLE users DROP COLUMN profile_data;
 ```
 
 ### Complex Migration with Constraints
+
 ```sql
 -- migrations/003_add_comments.up.sql
 CREATE TABLE comments (
@@ -103,7 +110,7 @@ CREATE TABLE comments (
   likes_count INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  
+
   CONSTRAINT check_content_not_empty CHECK (length(trim(content)) > 0)
 );
 
@@ -175,11 +182,11 @@ func runMigrations() error {
   if err != nil {
     return err
   }
-  
+
   if err := m.Up(); err != nil && err != migrate.ErrNoChange {
     return err
   }
-  
+
   log.Println("Migrations completed successfully")
   return nil
 }
@@ -188,9 +195,10 @@ func runMigrations() error {
 ### PostgreSQL Advanced Features
 
 #### Window Functions
+
 ```sql
 -- Get rank of posts by likes
-SELECT 
+SELECT
   id,
   title,
   like_count,
@@ -200,16 +208,17 @@ FROM posts;
 ```
 
 #### Common Table Expressions (CTEs)
+
 ```sql
 -- Find top users by post count
 WITH user_post_count AS (
-  SELECT 
+  SELECT
     user_id,
     COUNT(*) as post_count
   FROM posts
   GROUP BY user_id
 )
-SELECT 
+SELECT
   u.id,
   u.username,
   upc.post_count
@@ -220,9 +229,10 @@ LIMIT 10;
 ```
 
 #### JSONB Operations
+
 ```sql
 -- Store complex data in JSONB
-UPDATE users 
+UPDATE users
 SET profile_data = jsonb_set(
   profile_data,
   '{preferences,theme}',
@@ -231,7 +241,7 @@ SET profile_data = jsonb_set(
 WHERE id = 1;
 
 -- Query JSONB
-SELECT * FROM users 
+SELECT * FROM users
 WHERE profile_data->>'preferences'->>'theme' = 'dark';
 
 -- JSONB array operations
@@ -245,19 +255,20 @@ WHERE id = 1;
 ```
 
 #### Full-Text Search
+
 ```sql
 -- Create search vector
 ALTER TABLE posts ADD COLUMN search_vector tsvector;
 
 CREATE INDEX idx_posts_search ON posts USING GIN(search_vector);
 
-CREATE TRIGGER posts_search_update 
+CREATE TRIGGER posts_search_update
 BEFORE INSERT OR UPDATE ON posts
-FOR EACH ROW EXECUTE FUNCTION 
+FOR EACH ROW EXECUTE FUNCTION
 tsvector_update_trigger(search_vector, 'pg_catalog.english', title, content);
 
 -- Search posts
-SELECT * FROM posts 
+SELECT * FROM posts
 WHERE search_vector @@ plainto_tsquery('english', 'database');
 ```
 
@@ -265,31 +276,32 @@ WHERE search_vector @@ plainto_tsquery('english', 'database');
 
 ```typescript
 // TypeScript/Node.js example with Kysely
-import { Pool } from "pg";
+import { Pool } from 'pg'
 
 const pool = new Pool({
-  host: process.env.DB_HOST || "localhost",
-  port: parseInt(process.env.DB_PORT || "5432"),
+  host: process.env.DB_HOST || 'localhost',
+  port: parseInt(process.env.DB_PORT || '5432'),
   database: process.env.DB_NAME,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   max: 20, // Connection pool size
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
-});
+})
 
-pool.on("error", (err) => {
-  console.error("Unexpected error on idle client", err);
-});
+pool.on('error', (err) => {
+  console.error('Unexpected error on idle client', err)
+})
 
 export const db = new Kysely<Database>({
   dialect: new PostgresDialect({ pool }),
-});
+})
 ```
 
 ## Best Practices
 
 ### 1. Migration Design
+
 - One logical change per migration
 - Make migrations reversible when possible
 - Use descriptive names for migrations
@@ -297,6 +309,7 @@ export const db = new Kysely<Database>({
 - Avoid data loss in down migrations
 
 ### 2. Schema Design
+
 - Use appropriate data types (not everything is TEXT)
 - Add constraints (NOT NULL, UNIQUE, FOREIGN KEY)
 - Include timestamps (created_at, updated_at)
@@ -304,18 +317,21 @@ export const db = new Kysely<Database>({
 - Use SERIAL or BIGSERIAL for IDs
 
 ### 3. Performance
+
 - Add indexes for frequently queried columns
 - Use EXPLAIN ANALYZE to optimize queries
 - Consider partitioning for large tables
 - Monitor query performance
 
 ### 4. Data Integrity
+
 - Use foreign key constraints
 - Add CHECK constraints for valid data
 - Use transactions for related changes
 - Implement audit trails for sensitive data
 
 ### 5. Environment Management
+
 - Different connection strings per environment
 - Version controlled migration files
 - Document schema changes
@@ -324,6 +340,7 @@ export const db = new Kysely<Database>({
 ## Common Patterns
 
 ### Audit Trail Table
+
 ```sql
 -- Migration file
 CREATE TABLE audit_log (
@@ -342,10 +359,11 @@ CREATE INDEX idx_audit_log_timestamp ON audit_log(changed_at DESC);
 ```
 
 ### Soft Delete Pattern
+
 ```sql
 ALTER TABLE users ADD COLUMN deleted_at TIMESTAMP WITH TIME ZONE;
 
-CREATE INDEX idx_users_deleted_at ON users(deleted_at) 
+CREATE INDEX idx_users_deleted_at ON users(deleted_at)
 WHERE deleted_at IS NULL;
 
 -- Query active users
@@ -353,6 +371,7 @@ SELECT * FROM users WHERE deleted_at IS NULL;
 ```
 
 ### Versioning Table Pattern
+
 ```sql
 CREATE TABLE post_versions (
   id BIGSERIAL PRIMARY KEY,
@@ -362,7 +381,7 @@ CREATE TABLE post_versions (
   content TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   created_by BIGINT REFERENCES users(id),
-  
+
   UNIQUE(post_id, version_number)
 );
 ```

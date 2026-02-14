@@ -27,9 +27,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "effect": "^3.19.16",
     "@effect/sql": "^0.38.0",
     "@effect/sql-pg": "^0.39.0",
+    "effect": "^3.19.16",
     "kysely": "^0.28.11",
     "pg": "^8.18.0"
   },

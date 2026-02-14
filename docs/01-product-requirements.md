@@ -20,6 +20,7 @@ Build a **browser-based multiplayer First-Person Shooter (FPS)** game inspired b
 ### 1.3 Solution
 
 A web-based FPS platform that:
+
 - Runs entirely in browser (WebGL/WebGPU)
 - Supports real-time multiplayer with low latency
 - Provides room-based matchmaking for friends
@@ -31,12 +32,12 @@ A web-based FPS platform that:
 
 ### 2.1 User Personas
 
-| Persona | Description | Primary Needs |
-|---------|-------------|---------------|
-| **Casual Gamer** | Plays games occasionally for fun | Quick matches, no downloads, easy to join |
-| **Competitive Player** | Seeks ranked competitive play | Leaderboards, skill-based matchmaking, stats |
-| **Social Player** | Wants to play with friends | Private rooms, team play, voice chat |
-| **Streamer/Content Creator** | Creates gaming content | Spectator mode, replay system, highlights |
+| Persona                      | Description                      | Primary Needs                                |
+| ---------------------------- | -------------------------------- | -------------------------------------------- |
+| **Casual Gamer**             | Plays games occasionally for fun | Quick matches, no downloads, easy to join    |
+| **Competitive Player**       | Seeks ranked competitive play    | Leaderboards, skill-based matchmaking, stats |
+| **Social Player**            | Wants to play with friends       | Private rooms, team play, voice chat         |
+| **Streamer/Content Creator** | Creates gaming content           | Spectator mode, replay system, highlights    |
 
 ### 2.2 User Demographics
 
@@ -51,12 +52,12 @@ A web-based FPS platform that:
 
 ### 3.1 Business Goals
 
-| Goal | Metric | Target |
-|------|--------|--------|
+| Goal             | Metric                     | Target              |
+| ---------------- | -------------------------- | ------------------- |
 | User Acquisition | Monthly Active Users (MAU) | 10,000+ in 6 months |
-| Engagement | Average session duration | 30+ minutes |
-| Retention | 7-day retention rate | 40%+ |
-| Virality | Referral rate | 15%+ |
+| Engagement       | Average session duration   | 30+ minutes         |
+| Retention        | 7-day retention rate       | 40%+                |
+| Virality         | Referral rate              | 15%+                |
 
 ### 3.2 User Goals
 
@@ -67,12 +68,12 @@ A web-based FPS platform that:
 
 ### 3.3 Technical Goals
 
-| Goal | Metric | Target |
-|------|--------|--------|
-| Latency | Round-trip time | <100ms for regional players |
-| Uptime | Service availability | 99.5%+ |
-| Scalability | Concurrent players per server | 500+ |
-| Performance | Client FPS | 60 FPS stable |
+| Goal        | Metric                        | Target                      |
+| ----------- | ----------------------------- | --------------------------- |
+| Latency     | Round-trip time               | <100ms for regional players |
+| Uptime      | Service availability          | 99.5%+                      |
+| Scalability | Concurrent players per server | 500+                        |
+| Performance | Client FPS                    | 60 FPS stable               |
 
 ---
 
@@ -80,84 +81,84 @@ A web-based FPS platform that:
 
 ### 4.1 Authentication & Profiles (Priority: P0)
 
-| ID | User Story | Acceptance Criteria |
-|----|------------|---------------------|
-| US-001 | As a new user, I want to register quickly | Register with email/social login in <30 seconds |
-| US-002 | As a returning user, I want to log in easily | Support email, Google, Facebook login |
-| US-003 | As a player, I want to customize my profile | Set display name, avatar, country |
-| US-004 | As a player, I want to see my statistics | View K/D ratio, win rate, match history |
+| ID     | User Story                                   | Acceptance Criteria                             |
+| ------ | -------------------------------------------- | ----------------------------------------------- |
+| US-001 | As a new user, I want to register quickly    | Register with email/social login in <30 seconds |
+| US-002 | As a returning user, I want to log in easily | Support email, Google, Facebook login           |
+| US-003 | As a player, I want to customize my profile  | Set display name, avatar, country               |
+| US-004 | As a player, I want to see my statistics     | View K/D ratio, win rate, match history         |
 
 ### 4.2 Lobby & Matchmaking (Priority: P0)
 
-| ID | User Story | Acceptance Criteria |
-|----|------------|---------------------|
-| US-010 | As a player, I want to create a private room | Set room name, password, game mode, map |
-| US-011 | As a player, I want to join a public room | Browse available rooms with filters |
-| US-012 | As a player, I want quick matchmaking | Auto-match with similar skill players in <30 seconds |
-| US-013 | As a host, I want to invite friends | Share room code/link for easy joining |
-| US-014 | As a player, I want to see room details | View current players, map, mode before joining |
+| ID     | User Story                                   | Acceptance Criteria                                  |
+| ------ | -------------------------------------------- | ---------------------------------------------------- |
+| US-010 | As a player, I want to create a private room | Set room name, password, game mode, map              |
+| US-011 | As a player, I want to join a public room    | Browse available rooms with filters                  |
+| US-012 | As a player, I want quick matchmaking        | Auto-match with similar skill players in <30 seconds |
+| US-013 | As a host, I want to invite friends          | Share room code/link for easy joining                |
+| US-014 | As a player, I want to see room details      | View current players, map, mode before joining       |
 
 ### 4.3 Gameplay - Core (Priority: P0)
 
-| ID | User Story | Acceptance Criteria |
-|----|------------|---------------------|
+| ID     | User Story                              | Acceptance Criteria                                       |
+| ------ | --------------------------------------- | --------------------------------------------------------- |
 | US-020 | As a player, I want responsive controls | Movement, shooting feel instantaneous (client prediction) |
-| US-021 | As a player, I want fair gameplay | Server-authoritative, anti-cheat measures |
-| US-022 | As a player, I want smooth gameplay | 60 FPS, minimal network lag impact |
-| US-023 | As a player, I want clear hit feedback | Hit markers, kill confirmations, damage indicators |
-| US-024 | As a player, I want to switch weapons | Quick weapon switching with hotkeys |
+| US-021 | As a player, I want fair gameplay       | Server-authoritative, anti-cheat measures                 |
+| US-022 | As a player, I want smooth gameplay     | 60 FPS, minimal network lag impact                        |
+| US-023 | As a player, I want clear hit feedback  | Hit markers, kill confirmations, damage indicators        |
+| US-024 | As a player, I want to switch weapons   | Quick weapon switching with hotkeys                       |
 
 ### 4.4 Game Modes - PVP (Priority: P0)
 
-| ID | User Story | Acceptance Criteria |
-|----|------------|---------------------|
-| US-030 | As a player, I want to play Team Deathmatch | Two teams, first to reach kill limit wins |
-| US-031 | As a player, I want to play Search & Destroy | Bomb planting/defusing, round-based |
-| US-032 | As a player, I want to play Free for All | Every player for themselves, highest kills wins |
-| US-033 | As a player, I want to play Elimination | Team-based, no respawns per round |
+| ID     | User Story                                   | Acceptance Criteria                             |
+| ------ | -------------------------------------------- | ----------------------------------------------- |
+| US-030 | As a player, I want to play Team Deathmatch  | Two teams, first to reach kill limit wins       |
+| US-031 | As a player, I want to play Search & Destroy | Bomb planting/defusing, round-based             |
+| US-032 | As a player, I want to play Free for All     | Every player for themselves, highest kills wins |
+| US-033 | As a player, I want to play Elimination      | Team-based, no respawns per round               |
 
 ### 4.5 Weapons & Equipment (Priority: P1)
 
-| ID | User Story | Acceptance Criteria |
-|----|------------|---------------------|
-| US-040 | As a player, I want to select loadout | Choose primary, secondary, melee, grenades |
-| US-041 | As a player, I want to unlock new weapons | Earn through progression or achievements |
-| US-042 | As a player, I want weapon variety | Rifles, SMGs, snipers, shotguns, pistols |
-| US-043 | As a player, I want balanced weapons | No pay-to-win, skill-based gameplay |
+| ID     | User Story                                | Acceptance Criteria                        |
+| ------ | ----------------------------------------- | ------------------------------------------ |
+| US-040 | As a player, I want to select loadout     | Choose primary, secondary, melee, grenades |
+| US-041 | As a player, I want to unlock new weapons | Earn through progression or achievements   |
+| US-042 | As a player, I want weapon variety        | Rifles, SMGs, snipers, shotguns, pistols   |
+| US-043 | As a player, I want balanced weapons      | No pay-to-win, skill-based gameplay        |
 
 ### 4.6 Social Features (Priority: P1)
 
-| ID | User Story | Acceptance Criteria |
-|----|------------|---------------------|
-| US-050 | As a player, I want to add friends | Friend list with online status |
-| US-051 | As a player, I want to chat | In-game text chat (global, team, private) |
-| US-052 | As a player, I want voice communication | In-game voice chat (optional) |
-| US-053 | As a player, I want to report toxic players | Report system with moderation |
+| ID     | User Story                                  | Acceptance Criteria                       |
+| ------ | ------------------------------------------- | ----------------------------------------- |
+| US-050 | As a player, I want to add friends          | Friend list with online status            |
+| US-051 | As a player, I want to chat                 | In-game text chat (global, team, private) |
+| US-052 | As a player, I want voice communication     | In-game voice chat (optional)             |
+| US-053 | As a player, I want to report toxic players | Report system with moderation             |
 
 ### 4.7 Progression & Rewards (Priority: P1)
 
-| ID | User Story | Acceptance Criteria |
-|----|------------|---------------------|
-| US-060 | As a player, I want to level up | XP from matches, visible rank |
+| ID     | User Story                              | Acceptance Criteria             |
+| ------ | --------------------------------------- | ------------------------------- |
+| US-060 | As a player, I want to level up         | XP from matches, visible rank   |
 | US-061 | As a player, I want to see leaderboards | Global and friends leaderboards |
-| US-062 | As a player, I want achievements | Unlockable badges and titles |
-| US-063 | As a player, I want daily rewards | Login bonuses, daily challenges |
+| US-062 | As a player, I want achievements        | Unlockable badges and titles    |
+| US-063 | As a player, I want daily rewards       | Login bonuses, daily challenges |
 
 ### 4.8 Zombie/Mutation Mode (Priority: P2 - Future)
 
-| ID | User Story | Acceptance Criteria |
-|----|------------|---------------------|
-| US-070 | As a survivor, I want to survive mutant infection | 20-second prep time, defensive positions |
-| US-071 | As a mutant, I want to infect humans | Melee attack transforms humans after 3 seconds |
-| US-072 | As a player, I want to choose mutant class | Unlock classes by level: Dread, Slug, Maiden, Smoke, Assassin, Enchantress |
-| US-073 | As a player, I want hero transformation | Auto-transform when 2-3 survivors remain |
-| US-074 | As a survivor, I want supply crates | Crates drop every 30 seconds with items |
-| US-075 | As a survivor, I want mutation items | Use Mutation Spike, Grenade, Jacket, Medic Grenade |
-| US-076 | As a mutant, I want to evolve | Each infection gives evolution points, +200 HP per level |
-| US-077 | As a player, I want zombie PVE mode | Cooperative waves vs AI zombies with boss battles |
-| US-078 | As a player, I want zombie scoring | Performance grades: SS, S+, A, B, C based on deaths and accuracy |
-| US-079 | As a player, I want different zombie types | Face Shambler, Runner, Crawler, Spitter, Tank zombies |
-| US-080 | As a player, I want boss fights | Mini-boss every 3 waves, final boss at wave 10 |
+| ID     | User Story                                        | Acceptance Criteria                                                        |
+| ------ | ------------------------------------------------- | -------------------------------------------------------------------------- |
+| US-070 | As a survivor, I want to survive mutant infection | 20-second prep time, defensive positions                                   |
+| US-071 | As a mutant, I want to infect humans              | Melee attack transforms humans after 3 seconds                             |
+| US-072 | As a player, I want to choose mutant class        | Unlock classes by level: Dread, Slug, Maiden, Smoke, Assassin, Enchantress |
+| US-073 | As a player, I want hero transformation           | Auto-transform when 2-3 survivors remain                                   |
+| US-074 | As a survivor, I want supply crates               | Crates drop every 30 seconds with items                                    |
+| US-075 | As a survivor, I want mutation items              | Use Mutation Spike, Grenade, Jacket, Medic Grenade                         |
+| US-076 | As a mutant, I want to evolve                     | Each infection gives evolution points, +200 HP per level                   |
+| US-077 | As a player, I want zombie PVE mode               | Cooperative waves vs AI zombies with boss battles                          |
+| US-078 | As a player, I want zombie scoring                | Performance grades: SS, S+, A, B, C based on deaths and accuracy           |
+| US-079 | As a player, I want different zombie types        | Face Shambler, Runner, Crawler, Spitter, Tank zombies                      |
+| US-080 | As a player, I want boss fights                   | Mini-boss every 3 waves, final boss at wave 10                             |
 
 ---
 
@@ -165,45 +166,45 @@ A web-based FPS platform that:
 
 ### 5.1 Must Have (MVP - Phase 1)
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-001 | User registration and authentication | P0 |
-| FR-002 | Room creation and joining | P0 |
-| FR-003 | Team Deathmatch mode | P0 |
-| FR-004 | Free for All mode | P0 |
-| FR-005 | Basic weapon system (5+ weapons) | P0 |
-| FR-006 | Real-time gameplay synchronization | P0 |
-| FR-007 | Basic player statistics | P0 |
-| FR-008 | In-game chat (text) | P0 |
+| ID     | Requirement                          | Priority |
+| ------ | ------------------------------------ | -------- |
+| FR-001 | User registration and authentication | P0       |
+| FR-002 | Room creation and joining            | P0       |
+| FR-003 | Team Deathmatch mode                 | P0       |
+| FR-004 | Free for All mode                    | P0       |
+| FR-005 | Basic weapon system (5+ weapons)     | P0       |
+| FR-006 | Real-time gameplay synchronization   | P0       |
+| FR-007 | Basic player statistics              | P0       |
+| FR-008 | In-game chat (text)                  | P0       |
 
 ### 5.2 Should Have (Phase 1)
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-010 | Search & Destroy mode | P1 |
-| FR-011 | Elimination mode | P1 |
-| FR-012 | Extended weapon arsenal (15+ weapons) | P1 |
-| FR-013 | Friend system | P1 |
-| FR-014 | Player rankings and leaderboards | P1 |
-| FR-015 | Multiple maps (3+ maps) | P1 |
+| ID     | Requirement                           | Priority |
+| ------ | ------------------------------------- | -------- |
+| FR-010 | Search & Destroy mode                 | P1       |
+| FR-011 | Elimination mode                      | P1       |
+| FR-012 | Extended weapon arsenal (15+ weapons) | P1       |
+| FR-013 | Friend system                         | P1       |
+| FR-014 | Player rankings and leaderboards      | P1       |
+| FR-015 | Multiple maps (3+ maps)               | P1       |
 
 ### 5.3 Nice to Have (Phase 2+)
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-020 | Zombie/Mutation mode | P2 |
-| FR-021 | Voice chat | P2 |
-| FR-022 | Mutation Mode - 7 mutant classes | P2 |
-| FR-023 | Mutation Mode - 4 special items | P2 |
-| FR-024 | Mutation Mode - Evolution system | P2 |
-| FR-025 | Zombie PVE Mode - 5 zombie types | P2 |
-| FR-026 | Zombie PVE Mode - Boss battles | P2 |
-| FR-027 | Zombie Mode - Scoring system (SS-S-C) | P2 |
-| FR-028 | Zombie Mode - 4 dedicated maps | P2 |
-| FR-029 | Spectator mode | P2 |
-| FR-030 | Replay system | P2 |
-| FR-031 | Clan/Guild system | P2 |
-| FR-032 | Custom map editor | P3 |
+| ID     | Requirement                           | Priority |
+| ------ | ------------------------------------- | -------- |
+| FR-020 | Zombie/Mutation mode                  | P2       |
+| FR-021 | Voice chat                            | P2       |
+| FR-022 | Mutation Mode - 7 mutant classes      | P2       |
+| FR-023 | Mutation Mode - 4 special items       | P2       |
+| FR-024 | Mutation Mode - Evolution system      | P2       |
+| FR-025 | Zombie PVE Mode - 5 zombie types      | P2       |
+| FR-026 | Zombie PVE Mode - Boss battles        | P2       |
+| FR-027 | Zombie Mode - Scoring system (SS-S-C) | P2       |
+| FR-028 | Zombie Mode - 4 dedicated maps        | P2       |
+| FR-029 | Spectator mode                        | P2       |
+| FR-030 | Replay system                         | P2       |
+| FR-031 | Clan/Guild system                     | P2       |
+| FR-032 | Custom map editor                     | P3       |
 
 ---
 
@@ -211,49 +212,49 @@ A web-based FPS platform that:
 
 ### 6.1 Performance
 
-| ID | Requirement | Target |
-|----|-------------|--------|
-| NFR-001 | Client frame rate | 60 FPS minimum |
-| NFR-002 | Initial load time | <10 seconds on broadband |
-| NFR-003 | Network latency | <100ms round-trip for regional |
-| NFR-004 | Server tick rate | 20-30 Hz minimum |
-| NFR-005 | Asset loading | Progressive loading, playable within 5 seconds |
+| ID      | Requirement       | Target                                         |
+| ------- | ----------------- | ---------------------------------------------- |
+| NFR-001 | Client frame rate | 60 FPS minimum                                 |
+| NFR-002 | Initial load time | <10 seconds on broadband                       |
+| NFR-003 | Network latency   | <100ms round-trip for regional                 |
+| NFR-004 | Server tick rate  | 20-30 Hz minimum                               |
+| NFR-005 | Asset loading     | Progressive loading, playable within 5 seconds |
 
 ### 6.2 Scalability
 
-| ID | Requirement | Target |
-|----|-------------|--------|
-| NFR-010 | Concurrent users | 1,000+ per region |
-| NFR-011 | Concurrent game rooms | 100+ per server |
-| NFR-012 | Players per room | Up to 16 players |
-| NFR-013 | Horizontal scaling | Auto-scale based on load |
+| ID      | Requirement           | Target                   |
+| ------- | --------------------- | ------------------------ |
+| NFR-010 | Concurrent users      | 1,000+ per region        |
+| NFR-011 | Concurrent game rooms | 100+ per server          |
+| NFR-012 | Players per room      | Up to 16 players         |
+| NFR-013 | Horizontal scaling    | Auto-scale based on load |
 
 ### 6.3 Security
 
-| ID | Requirement | Description |
-|----|-------------|-------------|
-| NFR-020 | Authentication | JWT-based, secure password storage |
+| ID      | Requirement      | Description                             |
+| ------- | ---------------- | --------------------------------------- |
+| NFR-020 | Authentication   | JWT-based, secure password storage      |
 | NFR-021 | Input validation | All client inputs validated server-side |
-| NFR-022 | Anti-cheat | Server-authoritative, anomaly detection |
-| NFR-023 | Rate limiting | Prevent spam and DDoS |
-| NFR-024 | Data encryption | HTTPS for all communications |
+| NFR-022 | Anti-cheat       | Server-authoritative, anomaly detection |
+| NFR-023 | Rate limiting    | Prevent spam and DDoS                   |
+| NFR-024 | Data encryption  | HTTPS for all communications            |
 
 ### 6.4 Reliability
 
-| ID | Requirement | Target |
-|----|-------------|--------|
-| NFR-030 | Uptime | 99.5% availability |
-| NFR-031 | Data durability | No loss of player progress |
+| ID      | Requirement          | Target                                    |
+| ------- | -------------------- | ----------------------------------------- |
+| NFR-030 | Uptime               | 99.5% availability                        |
+| NFR-031 | Data durability      | No loss of player progress                |
 | NFR-032 | Graceful degradation | Reconnect support for dropped connections |
 
 ### 6.5 Compatibility
 
-| ID | Requirement | Support |
-|----|-------------|---------|
-| NFR-040 | Browsers | Chrome 90+, Firefox 88+, Safari 14+, Edge 90+ |
-| NFR-041 | Devices | Desktop (mouse + keyboard) |
-| NFR-042 | Screen | 1280x720 minimum resolution |
-| NFR-043 | Network | 1 Mbps minimum connection |
+| ID      | Requirement | Support                                       |
+| ------- | ----------- | --------------------------------------------- |
+| NFR-040 | Browsers    | Chrome 90+, Firefox 88+, Safari 14+, Edge 90+ |
+| NFR-041 | Devices     | Desktop (mouse + keyboard)                    |
+| NFR-042 | Screen      | 1280x720 minimum resolution                   |
+| NFR-043 | Network     | 1 Mbps minimum connection                     |
 
 ---
 
@@ -261,24 +262,24 @@ A web-based FPS platform that:
 
 ### 7.1 Key Performance Indicators (KPIs)
 
-| Metric | Description | Target (6 months) |
-|--------|-------------|-------------------|
-| DAU | Daily Active Users | 2,000+ |
-| MAU | Monthly Active Users | 10,000+ |
-| Session Duration | Average time per session | 30+ minutes |
-| Matches per User | Average matches per day | 5+ |
-| Retention D1 | Day 1 retention | 50%+ |
-| Retention D7 | Day 7 retention | 25%+ |
-| NPS | Net Promoter Score | 30+ |
+| Metric           | Description              | Target (6 months) |
+| ---------------- | ------------------------ | ----------------- |
+| DAU              | Daily Active Users       | 2,000+            |
+| MAU              | Monthly Active Users     | 10,000+           |
+| Session Duration | Average time per session | 30+ minutes       |
+| Matches per User | Average matches per day  | 5+                |
+| Retention D1     | Day 1 retention          | 50%+              |
+| Retention D7     | Day 7 retention          | 25%+              |
+| NPS              | Net Promoter Score       | 30+               |
 
 ### 7.2 Technical KPIs
 
-| Metric | Description | Target |
-|--------|-------------|--------|
-| Latency P95 | 95th percentile latency | <150ms |
-| Error Rate | API error rate | <0.1% |
-| Load Time | Time to interactive | <5 seconds |
-| FPS Drop | Frames below 60 FPS | <5% |
+| Metric      | Description             | Target     |
+| ----------- | ----------------------- | ---------- |
+| Latency P95 | 95th percentile latency | <150ms     |
+| Error Rate  | API error rate          | <0.1%      |
+| Load Time   | Time to interactive     | <5 seconds |
+| FPS Drop    | Frames below 60 FPS     | <5%        |
 
 ---
 
@@ -302,14 +303,14 @@ A web-based FPS platform that:
 
 ## 9. Risks & Mitigations
 
-| Risk | Impact | Likelihood | Mitigation |
-|------|--------|------------|------------|
-| High latency affects gameplay | High | Medium | Regional servers, client prediction |
-| Cheating/hacking | High | Medium | Server-authoritative, anti-cheat measures |
-| Low player count initially | High | Medium | Marketing, bot players for practice |
-| Browser compatibility issues | Medium | Low | Polyfills, graceful degradation |
-| Scope creep | Medium | Medium | Strict prioritization, phased approach |
-| Performance on low-end devices | Medium | Medium | Graphics quality settings, optimization |
+| Risk                           | Impact | Likelihood | Mitigation                                |
+| ------------------------------ | ------ | ---------- | ----------------------------------------- |
+| High latency affects gameplay  | High   | Medium     | Regional servers, client prediction       |
+| Cheating/hacking               | High   | Medium     | Server-authoritative, anti-cheat measures |
+| Low player count initially     | High   | Medium     | Marketing, bot players for practice       |
+| Browser compatibility issues   | Medium | Low        | Polyfills, graceful degradation           |
+| Scope creep                    | Medium | Medium     | Strict prioritization, phased approach    |
+| Performance on low-end devices | Medium | Medium     | Graphics quality settings, optimization   |
 
 ---
 
@@ -351,5 +352,5 @@ A web-based FPS platform that:
 
 ---
 
-*Document Version: 1.0*
-*Last Updated: February 2026*
+_Document Version: 1.0_
+_Last Updated: February 2026_

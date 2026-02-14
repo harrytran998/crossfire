@@ -1,6 +1,7 @@
 # Testing Conventions
 
 ## Core Principles
+
 - **Test-Driven Development (TDD)**: Write tests before implementation
 - **80% Coverage Target**: Aim for 80% code coverage; 100% on critical paths
 - **Effect Testing**: Use Effect.runSync/runPromise for Effect-based code
@@ -11,6 +12,7 @@
 ## DO ✅
 
 ### 1. TDD Workflow (Red-Green-Refactor)
+
 ```typescript
 // RED: Write failing test first
 describe('CreateUserUsecase', () => {
@@ -18,22 +20,26 @@ describe('CreateUserUsecase', () => {
     // Arrange
     const mockRepo = {
       save: jest.fn().mockResolvedValue(void 0),
-      findByEmail: jest.fn().mockRejectedValue(new UserNotFound())
+      findByEmail: jest.fn().mockRejectedValue(new UserNotFound()),
     }
     const usecase = new CreateUserUsecase(mockRepo)
 
     // Act
-    const result = await usecase.execute({
-      email: 'test@example.com',
-      name: 'Test User'
-    }).pipe(Effect.runPromise)
+    const result = await usecase
+      .execute({
+        email: 'test@example.com',
+        name: 'Test User',
+      })
+      .pipe(Effect.runPromise)
 
     // Assert
     expect(result).toBeDefined()
     expect(result.email).toBe('test@example.com')
-    expect(mockRepo.save).toHaveBeenCalledWith(expect.objectContaining({
-      email: 'test@example.com'
-    }))
+    expect(mockRepo.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: 'test@example.com',
+      })
+    )
   })
 })
 
@@ -70,31 +76,24 @@ export class CreateUserUsecase {
 ```
 
 ### 2. Effect Testing with Test Layers
+
 ```typescript
 // DO: Create test doubles
-const UserRepositoryTest = Layer.succeed(
-  UserRepository,
-  {
-    save: () => Effect.succeed(void 0),
-    findById: (id) => Effect.fail(new UserNotFound({ id }))
-  }
-)
+const UserRepositoryTest = Layer.succeed(UserRepository, {
+  save: () => Effect.succeed(void 0),
+  findById: (id) => Effect.fail(new UserNotFound({ id })),
+})
 
 // DO: Test effects with runSync
 describe('GetUserUsecase', () => {
   it('should return user when found', () => {
     const testUser = new User('123', 'test@example.com', 'Test')
-    
-    const UserRepositoryTest = Layer.succeed(
-      UserRepository,
-      {
-        save: () => Effect.succeed(void 0),
-        findById: (id) => 
-          id === '123' 
-            ? Effect.succeed(testUser)
-            : Effect.fail(new UserNotFound({ id }))
-      }
-    )
+
+    const UserRepositoryTest = Layer.succeed(UserRepository, {
+      save: () => Effect.succeed(void 0),
+      findById: (id) =>
+        id === '123' ? Effect.succeed(testUser) : Effect.fail(new UserNotFound({ id })),
+    })
 
     const result = GetUserUsecase.execute('123').pipe(
       Effect.provide(UserRepositoryTest),
@@ -106,19 +105,13 @@ describe('GetUserUsecase', () => {
 
   // DO: Test error cases
   it('should fail with UserNotFound when user missing', () => {
-    const UserRepositoryTest = Layer.succeed(
-      UserRepository,
-      {
-        save: () => Effect.succeed(void 0),
-        findById: () => Effect.fail(new UserNotFound({ id: '404' }))
-      }
-    )
+    const UserRepositoryTest = Layer.succeed(UserRepository, {
+      save: () => Effect.succeed(void 0),
+      findById: () => Effect.fail(new UserNotFound({ id: '404' })),
+    })
 
-    expect(() => 
-      GetUserUsecase.execute('404').pipe(
-        Effect.provide(UserRepositoryTest),
-        Effect.runSync
-      )
+    expect(() =>
+      GetUserUsecase.execute('404').pipe(Effect.provide(UserRepositoryTest), Effect.runSync)
     ).toThrow('UserNotFound')
   })
 })
@@ -126,9 +119,7 @@ describe('GetUserUsecase', () => {
 // DO: Test with async Effects
 describe('EmailService', () => {
   it('should send email successfully', async () => {
-    const result = await sendEmail('test@example.com', 'Subject', 'Body').pipe(
-      Effect.runPromise
-    )
+    const result = await sendEmail('test@example.com', 'Subject', 'Body').pipe(Effect.runPromise)
 
     expect(result).toEqual({ status: 'sent', messageId: expect.any(String) })
   })
@@ -136,6 +127,7 @@ describe('EmailService', () => {
 ```
 
 ### 3. Unit Testing with Mocks
+
 ```typescript
 // DO: Mock dependencies cleanly
 describe('OrderService', () => {
@@ -146,11 +138,11 @@ describe('OrderService', () => {
   beforeEach(() => {
     userRepo = {
       findById: jest.fn(),
-      save: jest.fn()
+      save: jest.fn(),
     }
     orderRepo = {
       save: jest.fn(),
-      findById: jest.fn()
+      findById: jest.fn(),
     }
     service = new OrderService(userRepo, orderRepo)
   })
@@ -161,7 +153,7 @@ describe('OrderService', () => {
     orderRepo.save.mockResolvedValue(void 0)
 
     const result = await service.createOrder('1', {
-      items: [{ id: 'item1', quantity: 1 }]
+      items: [{ id: 'item1', quantity: 1 }],
     })
 
     expect(result).toBeDefined()
@@ -179,7 +171,7 @@ describe('OrderService', () => {
     expect(orderRepo.save).toHaveBeenCalledWith(
       expect.objectContaining({
         userId: '1',
-        items: expect.any(Array)
+        items: expect.any(Array),
       })
     )
   })
@@ -187,6 +179,7 @@ describe('OrderService', () => {
 ```
 
 ### 4. Achieve 80% Coverage
+
 ```typescript
 // DO: Check coverage regularly
 // package.json
@@ -235,29 +228,23 @@ describe('User', () => {
 ```
 
 ### 5. Integration Testing
+
 ```typescript
 // DO: Test feature end-to-end with test layers
 describe('Create User Feature', () => {
   it('should create user with welcome email', async () => {
-    const TestLayer = Layer.merge(
-      UserRepositoryTestLive,
-      EmailServiceTestLive,
-      LoggerTestLive
-    )
+    const TestLayer = Layer.merge(UserRepositoryTestLive, EmailServiceTestLive, LoggerTestLive)
 
     const result = await CreateUserUsecase.execute({
       email: 'new@example.com',
-      name: 'New User'
-    }).pipe(
-      Effect.provide(TestLayer),
-      Effect.runPromise
-    )
+      name: 'New User',
+    }).pipe(Effect.provide(TestLayer), Effect.runPromise)
 
     expect(result.email).toBe('new@example.com')
     // Verify side effects happened
     expect(EmailServiceTestLive.lastSent).toEqual({
       to: 'new@example.com',
-      subject: expect.stringContaining('Welcome')
+      subject: expect.stringContaining('Welcome'),
     })
   })
 })
@@ -272,10 +259,7 @@ describe('Error Handling', () => {
       return 'success'
     })
 
-    const result = await flaky.pipe(
-      Effect.retry({ times: 2 }),
-      Effect.runPromise
-    )
+    const result = await flaky.pipe(Effect.retry({ times: 2 }), Effect.runPromise)
 
     expect(result).toBe('success')
     expect(attempts).toBe(2)
@@ -286,6 +270,7 @@ describe('Error Handling', () => {
 ## DON'T ❌
 
 ### 1. Don't Test Implementation Details
+
 ```typescript
 // DON'T: Testing internals
 it('should call findById before save', () => {
@@ -303,6 +288,7 @@ it('should return saved user', async () => {
 ```
 
 ### 2. Don't Write Tests for Getters/Setters
+
 ```typescript
 // DON'T: Trivial tests
 it('should get name', () => {
@@ -317,19 +303,17 @@ it('should validate name is not empty', () => {
 ```
 
 ### 3. Don't Make Tests Brittle
+
 ```typescript
 // DON'T: Over-specify mocks
-expect(mockFn).toHaveBeenCalledWith(
-  exactly('this', 'exact', 'order', 'matters')
-)
+expect(mockFn).toHaveBeenCalledWith(exactly('this', 'exact', 'order', 'matters'))
 
 // Instead, use matchers
-expect(mockFn).toHaveBeenCalledWith(
-  expect.objectContaining({ email: expect.any(String) })
-)
+expect(mockFn).toHaveBeenCalledWith(expect.objectContaining({ email: expect.any(String) }))
 ```
 
 ### 4. Don't Skip Error Cases
+
 ```typescript
 // DON'T: Only test happy path
 it('should create user', () => {
@@ -339,9 +323,7 @@ it('should create user', () => {
 
 // Instead, test errors too
 it('should fail with invalid email', () => {
-  expect(() => 
-    usecase.execute({ email: 'invalid', name: 'Test' })
-  ).toThrow('ValidationError')
+  expect(() => usecase.execute({ email: 'invalid', name: 'Test' })).toThrow('ValidationError')
 })
 
 it('should fail when email exists', () => {
@@ -351,6 +333,7 @@ it('should fail when email exists', () => {
 ```
 
 ### 5. Don't Use sleep() or Timeouts
+
 ```typescript
 // DON'T: Flaky timing
 it('should process queue', (done) => {
@@ -363,16 +346,17 @@ it('should process queue', (done) => {
 
 // Instead, use explicit signaling
 it('should process queue', async () => {
-  const processed = new Promise(resolve => {
+  const processed = new Promise((resolve) => {
     processQueue().then(() => resolve(true))
   })
-  
+
   const result = await processed
   expect(result).toBe(true)
 })
 ```
 
 ### 6. Don't Test Third-Party Libraries
+
 ```typescript
 // DON'T: Testing Express behavior
 it('should set status code 201', () => {
@@ -405,7 +389,7 @@ describe('CreateUserUsecase', () => {
   beforeEach(() => {
     mockRepo = {
       save: jest.fn(),
-      findByEmail: jest.fn()
+      findByEmail: jest.fn(),
     }
     usecase = new CreateUserUsecase(mockRepo)
   })
@@ -413,11 +397,13 @@ describe('CreateUserUsecase', () => {
   describe('execute', () => {
     it('should create user with valid input', async () => {
       mockRepo.findByEmail.mockRejectedValue(new UserNotFound())
-      
-      const result = await usecase.execute({
-        email: 'test@example.com',
-        name: 'Test'
-      }).pipe(Effect.runPromise)
+
+      const result = await usecase
+        .execute({
+          email: 'test@example.com',
+          name: 'Test',
+        })
+        .pipe(Effect.runPromise)
 
       expect(result.email).toBe('test@example.com')
     })
@@ -426,10 +412,12 @@ describe('CreateUserUsecase', () => {
       mockRepo.findByEmail.mockResolvedValue(existingUser)
 
       expect(() =>
-        usecase.execute({
-          email: 'existing@example.com',
-          name: 'Test'
-        }).pipe(Effect.runSync)
+        usecase
+          .execute({
+            email: 'existing@example.com',
+            name: 'Test',
+          })
+          .pipe(Effect.runSync)
       ).toThrow('EmailAlreadyExists')
     })
   })
@@ -437,10 +425,12 @@ describe('CreateUserUsecase', () => {
   describe('validation', () => {
     it('should reject invalid email', async () => {
       expect(() =>
-        usecase.execute({
-          email: 'invalid',
-          name: 'Test'
-        }).pipe(Effect.runSync)
+        usecase
+          .execute({
+            email: 'invalid',
+            name: 'Test',
+          })
+          .pipe(Effect.runSync)
       ).toThrow('ValidationError')
     })
   })
@@ -465,21 +455,23 @@ npm run test:coverage
 ```
 
 ## Integration with Skills
+
 - **Use with /git-master**: Tests should pass before commits
 - **Use with /refactor**: Run tests after refactoring to ensure correctness
 - **Use with TDD**: Red → Green → Refactor workflow
 
 ## Rationale
 
-| Practice | Why |
-|----------|-----|
-| TDD | Drives design; ensures testability |
-| 80% coverage | Catches bugs; cost-effective |
+| Practice       | Why                                       |
+| -------------- | ----------------------------------------- |
+| TDD            | Drives design; ensures testability        |
+| 80% coverage   | Catches bugs; cost-effective              |
 | Effect testing | Ensures effects work correctly; type-safe |
-| Unit first | Fast feedback; isolates issues |
-| Mocks for deps | Tests independent; no side effects |
+| Unit first     | Fast feedback; isolates issues            |
+| Mocks for deps | Tests independent; no side effects        |
 
 ## References
+
 - Jest Documentation: https://jestjs.io/
 - Testing Library: https://testing-library.com/
 - Effect Testing: https://effect.website/docs/guides/testing

@@ -53,18 +53,21 @@ constraints:
 
 3. **Module Structure**
    Follow the module pattern:
-   ```
-   modules/{module}/
-   ├── domain/
-   ├── application/
-   ├── infrastructure/
-   └── presentation/
-   ```
+```
+
+modules/{module}/
+├── domain/
+├── application/
+├── infrastructure/
+└── presentation/
+
+```
+
 ```
 
 ### 1.2 Database Agent
 
-```yaml
+````yaml
 # .claude/agents/database.md
 ---
 name: database
@@ -101,14 +104,15 @@ constraints:
    ```bash
    # Create migration
    migrate create -ext sql -dir packages/database/migrations -seq <name>
-   
+
    # Apply migrations
    moon run database:migrate
-   
+
    # Generate types
    moon run database:generate-types
-   ```
-```
+````
+
+````
 
 ### 1.3 DevOps Agent
 
@@ -149,14 +153,15 @@ constraints:
    ```bash
    # Start local infrastructure
    docker compose up -d
-   
+
    # Run CI locally
    moon ci
-   
+
    # Check affected projects
    moon query affected
-   ```
-```
+````
+
+````
 
 ---
 
@@ -174,7 +179,7 @@ bun run lint-staged
 
 # Type check changed files
 moon run :typecheck --affected
-```
+````
 
 ### 2.2 Pre-push Hook
 
@@ -207,47 +212,47 @@ npx --no -- commitlint --edit "$1"
 
 ### 3.1 Moonrepo Commands
 
-| Command | Description |
-|---------|-------------|
-| `moon setup` | Initialize workspace and install dependencies |
-| `moon run <project>:<task>` | Run task in project |
-| `moon run :<task>` | Run task in all projects |
-| `moon ci` | Run all CI tasks |
-| `moon check` | Run build + test in project |
-| `moon check --all` | Run build + test in all projects |
-| `moon query affected` | List changed projects |
-| `moon sync` | Sync workspace configs |
-| `moon tasks` | List all tasks |
-| `moon task-graph` | View task dependency graph |
+| Command                     | Description                                   |
+| --------------------------- | --------------------------------------------- |
+| `moon setup`                | Initialize workspace and install dependencies |
+| `moon run <project>:<task>` | Run task in project                           |
+| `moon run :<task>`          | Run task in all projects                      |
+| `moon ci`                   | Run all CI tasks                              |
+| `moon check`                | Run build + test in project                   |
+| `moon check --all`          | Run build + test in all projects              |
+| `moon query affected`       | List changed projects                         |
+| `moon sync`                 | Sync workspace configs                        |
+| `moon tasks`                | List all tasks                                |
+| `moon task-graph`           | View task dependency graph                    |
 
 ### 3.2 Database Commands
 
-| Command | Description |
-|---------|-------------|
-| `moon run database:migrate` | Apply pending migrations |
-| `moon run database:rollback` | Rollback last migration |
-| `moon run database:seed` | Run seed scripts |
-| `moon run database:generate-types` | Generate Kysely types |
+| Command                            | Description              |
+| ---------------------------------- | ------------------------ |
+| `moon run database:migrate`        | Apply pending migrations |
+| `moon run database:rollback`       | Rollback last migration  |
+| `moon run database:seed`           | Run seed scripts         |
+| `moon run database:generate-types` | Generate Kysely types    |
 
 ### 3.3 Development Commands
 
-| Command | Description |
-|---------|-------------|
+| Command               | Description              |
+| --------------------- | ------------------------ |
 | `moon run server:dev` | Start development server |
-| `moon run :lint` | Lint all projects |
-| `moon run :format` | Format all projects |
-| `moon run :typecheck` | Type check all projects |
-| `moon run :test` | Run all tests |
-| `moon run :build` | Build all projects |
+| `moon run :lint`      | Lint all projects        |
+| `moon run :format`    | Format all projects      |
+| `moon run :typecheck` | Type check all projects  |
+| `moon run :test`      | Run all tests            |
+| `moon run :build`     | Build all projects       |
 
 ### 3.4 Docker Commands
 
-| Command | Description |
-|---------|-------------|
-| `docker compose up -d` | Start infrastructure |
-| `docker compose down` | Stop infrastructure |
-| `docker compose logs -f` | View logs |
-| `docker compose ps` | List services |
+| Command                  | Description          |
+| ------------------------ | -------------------- |
+| `docker compose up -d`   | Start infrastructure |
+| `docker compose down`    | Stop infrastructure  |
+| `docker compose logs -f` | View logs            |
+| `docker compose ps`      | List services        |
 
 ---
 
@@ -255,23 +260,23 @@ npx --no -- commitlint --edit "$1"
 
 ### 4.1 Built-in Skills
 
-| Skill | Description | Tools |
-|-------|-------------|-------|
-| `effect` | Effect framework patterns | Effect, Effect Schema, Layer |
-| `bun` | Bun runtime and ecosystem | Bun, TypeScript |
-| `database` | PostgreSQL + Kysely | Kysely, golang-migrate |
-| `docker` | Containerization | Docker, Docker Compose |
-| `git-master` | Version control | Git, GitHub |
-| `playwright` | Browser testing | Playwright |
-| `librarian` | Documentation | Research, writing |
+| Skill        | Description               | Tools                        |
+| ------------ | ------------------------- | ---------------------------- |
+| `effect`     | Effect framework patterns | Effect, Effect Schema, Layer |
+| `bun`        | Bun runtime and ecosystem | Bun, TypeScript              |
+| `database`   | PostgreSQL + Kysely       | Kysely, golang-migrate       |
+| `docker`     | Containerization          | Docker, Docker Compose       |
+| `git-master` | Version control           | Git, GitHub                  |
+| `playwright` | Browser testing           | Playwright                   |
+| `librarian`  | Documentation             | Research, writing            |
 
 ### 4.2 Project-Specific Skills
 
-| Skill | Description | Modules |
-|-------|-------------|---------|
-| `clean-architecture` | Modular Clean Architecture | Domain, Application, Infrastructure, Presentation |
-| `event-driven` | Event-driven design patterns | Event Bus, Domain Events |
-| `realtime-gaming` | Real-time game development | WebSocket, State Sync, Lag Compensation |
+| Skill                | Description                  | Modules                                           |
+| -------------------- | ---------------------------- | ------------------------------------------------- |
+| `clean-architecture` | Modular Clean Architecture   | Domain, Application, Infrastructure, Presentation |
+| `event-driven`       | Event-driven design patterns | Event Bus, Domain Events                          |
+| `realtime-gaming`    | Real-time game development   | WebSocket, State Sync, Lag Compensation           |
 
 ---
 
@@ -428,18 +433,18 @@ moon run :build --affected
 
 ## 7. Configuration Files Summary
 
-| File | Purpose |
-|------|---------|
-| `.moon/workspace.yml` | Workspace configuration |
-| `.moon/toolchains.yml` | Bun/TypeScript toolchain |
-| `.moon/tasks/all.yml` | Global inherited tasks |
-| `apps/server/moon.yml` | Server project tasks |
-| `packages/database/moon.yml` | Database project tasks |
-| `packages/shared/moon.yml` | Shared package tasks |
-| `.husky/pre-commit` | Pre-commit hooks |
-| `.husky/pre-push` | Pre-push hooks |
-| `oxlint.config.ts` | Oxlint configuration |
-| `.oxfmtrc.json` | Oxfmt configuration |
+| File                         | Purpose                  |
+| ---------------------------- | ------------------------ |
+| `.moon/workspace.yml`        | Workspace configuration  |
+| `.moon/toolchains.yml`       | Bun/TypeScript toolchain |
+| `.moon/tasks/all.yml`        | Global inherited tasks   |
+| `apps/server/moon.yml`       | Server project tasks     |
+| `packages/database/moon.yml` | Database project tasks   |
+| `packages/shared/moon.yml`   | Shared package tasks     |
+| `.husky/pre-commit`          | Pre-commit hooks         |
+| `.husky/pre-push`            | Pre-push hooks           |
+| `oxlint.config.ts`           | Oxlint configuration     |
+| `.oxfmtrc.json`              | Oxfmt configuration      |
 
 ---
 
@@ -447,12 +452,12 @@ moon run :build --affected
 
 ### Required Tools
 
-| Tool | Version | Install |
-|------|---------|---------|
-| Bun | 1.3.9+ | `curl -fsSL https://bun.sh/install | bash` |
-| Moonrepo | Latest | `curl -fsSL https://moonrepo.dev/install.sh | bash` |
-| golang-migrate | 4.19+ | `brew install golang-migrate` |
-| Docker | Latest | Docker Desktop |
+| Tool           | Version | Install                                     |
+| -------------- | ------- | ------------------------------------------- | ----- |
+| Bun            | 1.3.9+  | `curl -fsSL https://bun.sh/install          | bash` |
+| Moonrepo       | Latest  | `curl -fsSL https://moonrepo.dev/install.sh | bash` |
+| golang-migrate | 4.19+   | `brew install golang-migrate`               |
+| Docker         | Latest  | Docker Desktop                              |
 
 ### Environment Variables (.env)
 
@@ -475,6 +480,6 @@ BETTER_AUTH_URL="http://localhost:3000"
 
 ---
 
-*Document Version: 1.0*  
-*Created: February 2026*  
-*Related: EXECUTION_PLAN.md, TODO.md*
+_Document Version: 1.0_  
+_Created: February 2026_  
+_Related: EXECUTION_PLAN.md, TODO.md_

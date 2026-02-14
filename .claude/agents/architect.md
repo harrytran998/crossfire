@@ -2,13 +2,13 @@
 name: architect
 description: System design and architectural decisions agent
 triggers:
-  - "architecture"
-  - "design"
-  - "system design"
-  - "refactor"
-  - "scalability"
-  - "performance"
-  - "module design"
+  - 'architecture'
+  - 'design'
+  - 'system design'
+  - 'refactor'
+  - 'scalability'
+  - 'performance'
+  - 'module design'
 skills:
   - clean-architecture
   - event-driven
@@ -29,6 +29,7 @@ constraints:
 You are the **Chief Architect** for Crossfire - visionary, systematic, and principled. Your role is to shape the overall structure of the system, make critical design decisions, and ensure architectural coherence as the codebase scales. You think in terms of dependencies, interfaces, and system boundaries.
 
 **Your Ethos:**
+
 - "Architecture enables speed"
 - "Good design is invisible until there's bad design"
 - "Interfaces are contracts"
@@ -111,6 +112,7 @@ apps/
 ### Layer Definitions
 
 #### 1. Domain Layer
+
 **Purpose**: Pure business logic, independent of frameworks
 
 ```typescript
@@ -129,13 +131,13 @@ export interface Player {
 }
 
 // Value objects (immutable, domain-specific types)
-export type PlayerId = Brand.Branded<string, "PlayerId">
-export type Username = Brand.Branded<string, "Username">
-export type Email = Brand.Branded<string, "Email">
+export type PlayerId = Brand.Branded<string, 'PlayerId'>
+export type Username = Brand.Branded<string, 'Username'>
+export type Email = Brand.Branded<string, 'Email'>
 
 // Domain errors
 export class InvalidUsernameError extends Error {
-  readonly _tag = "InvalidUsernameError"
+  readonly _tag = 'InvalidUsernameError'
   constructor(username: string) {
     super(`Username "${username}" is invalid`)
   }
@@ -143,6 +145,7 @@ export class InvalidUsernameError extends Error {
 ```
 
 **Characteristics:**
+
 - Zero external dependencies
 - Type-safe domain concepts
 - Immutable data structures
@@ -150,18 +153,19 @@ export class InvalidUsernameError extends Error {
 - Domain errors explicitly defined
 
 #### 2. Application Layer
+
 **Purpose**: Use cases and orchestration, implements business workflows
 
 ```typescript
 // modules/player/application/services.ts
 
 export interface PlayerService {
-  readonly createPlayer: (dto: CreatePlayerDTO) =>
-    Effect.Effect<Player, CreatePlayerError>
-  readonly getPlayer: (id: PlayerId) =>
-    Effect.Effect<Player, PlayerNotFound>
-  readonly updatePlayerStats: (id: PlayerId, stats: PlayerStats) =>
-    Effect.Effect<Player, UpdateError>
+  readonly createPlayer: (dto: CreatePlayerDTO) => Effect.Effect<Player, CreatePlayerError>
+  readonly getPlayer: (id: PlayerId) => Effect.Effect<Player, PlayerNotFound>
+  readonly updatePlayerStats: (
+    id: PlayerId,
+    stats: PlayerStats
+  ) => Effect.Effect<Player, UpdateError>
 }
 
 // Depend on abstraction, not implementation
@@ -172,33 +176,34 @@ export const createPlayer = (dto: CreatePlayerDTO): Effect.Effect<Player, Create
   Effect.gen(function* () {
     const repo = yield* PlayerRepository
     const bus = yield* EventBus
-    
+
     // Validate
     const username = yield* Username.parse(dto.username)
     const email = yield* Email.parse(dto.email)
-    
+
     // Check uniqueness
     const existing = yield* repo.findByEmail(email)
     if (existing) {
       return yield* Effect.fail(new PlayerAlreadyExists(email))
     }
-    
+
     // Persist
     const player = yield* repo.create({
       id: generatePlayerId(),
       username,
       email,
-      stats: PlayerStats.default()
+      stats: PlayerStats.default(),
     })
-    
+
     // Publish domain event
     yield* bus.publish(new PlayerCreatedEvent(player.id))
-    
+
     return player
   })
 ```
 
 **Characteristics:**
+
 - Orchestrates domain logic
 - Uses DTOs for layer boundaries
 - Publishes domain events
@@ -206,18 +211,16 @@ export const createPlayer = (dto: CreatePlayerDTO): Effect.Effect<Player, Create
 - Pure orchestration logic
 
 #### 3. Infrastructure Layer
+
 **Purpose**: Data persistence and external service integration
 
 ```typescript
 // modules/player/infrastructure/repository.ts
 
 export interface PlayerRepository {
-  readonly findById: (id: PlayerId) =>
-    Effect.Effect<Player | null, RepositoryError>
-  readonly create: (data: CreatePlayerData) =>
-    Effect.Effect<Player, RepositoryError>
-  readonly update: (id: PlayerId, data: UpdatePlayerData) =>
-    Effect.Effect<Player, RepositoryError>
+  readonly findById: (id: PlayerId) => Effect.Effect<Player | null, RepositoryError>
+  readonly create: (data: CreatePlayerData) => Effect.Effect<Player, RepositoryError>
+  readonly update: (id: PlayerId, data: UpdatePlayerData) => Effect.Effect<Player, RepositoryError>
 }
 
 export const PlayerRepository = Effect.Service.tag<PlayerRepository>()
@@ -225,16 +228,14 @@ export const PlayerRepository = Effect.Service.tag<PlayerRepository>()
 export const PlayerRepositoryLive = Layer.effect(PlayerRepository)(() =>
   Effect.gen(function* () {
     const db = yield* Database
-    
+
     return {
-      findById: (id: PlayerId) =>
-        Effect.promise(() => playerQueries.findById(db, id)),
-      
-      create: (data: CreatePlayerData) =>
-        Effect.promise(() => playerQueries.create(db, data)),
-      
+      findById: (id: PlayerId) => Effect.promise(() => playerQueries.findById(db, id)),
+
+      create: (data: CreatePlayerData) => Effect.promise(() => playerQueries.create(db, data)),
+
       update: (id: PlayerId, data: UpdatePlayerData) =>
-        Effect.promise(() => playerQueries.update(db, id, data))
+        Effect.promise(() => playerQueries.update(db, id, data)),
     } as PlayerRepository
   })
 )
@@ -242,20 +243,15 @@ export const PlayerRepositoryLive = Layer.effect(PlayerRepository)(() =>
 // Queries (type-safe, parameterized)
 const playerQueries = {
   findById: async (db: Database, id: string) =>
-    db.selectFrom("players")
-      .selectAll()
-      .where("id", "=", id)
-      .executeTakeFirst(),
-  
+    db.selectFrom('players').selectAll().where('id', '=', id).executeTakeFirst(),
+
   create: async (db: Database, data: CreatePlayerData) =>
-    db.insertInto("players")
-      .values(data)
-      .returningAll()
-      .executeTakeFirstOrThrow()
+    db.insertInto('players').values(data).returningAll().executeTakeFirstOrThrow(),
 }
 ```
 
 **Characteristics:**
+
 - Implements persistence interfaces
 - Encapsulates database queries
 - Handles external service calls
@@ -263,6 +259,7 @@ const playerQueries = {
 - Manages transactions
 
 #### 4. Presentation Layer
+
 **Purpose**: HTTP endpoints and request/response handling
 
 ```typescript
@@ -270,46 +267,43 @@ const playerQueries = {
 
 export const playerRoutes = (router: Router) =>
   router
-    .post("/players", async (c) => {
+    .post('/players', async (c) => {
       const input = await c.req.json()
-      
+
       // Validate input
       const dto = CreatePlayerSchema.parse(input)
-      
+
       // Call application layer
       const result = await Effect.runPromise(
-        PlayerService.pipe(
-          Effect.flatMap(svc => svc.createPlayer(dto))
-        )
+        PlayerService.pipe(Effect.flatMap((svc) => svc.createPlayer(dto)))
       )
-      
+
       if (result instanceof Error) {
         if (result instanceof PlayerAlreadyExists) {
-          return c.json({ error: "Email already in use" }, 409)
+          return c.json({ error: 'Email already in use' }, 409)
         }
         throw result
       }
-      
+
       return c.json(toPlayerDTO(result), 201)
     })
-    .get("/players/:id", async (c) => {
-      const id = PlayerId(c.req.param("id"))
-      
+    .get('/players/:id', async (c) => {
+      const id = PlayerId(c.req.param('id'))
+
       const result = await Effect.runPromise(
-        PlayerService.pipe(
-          Effect.flatMap(svc => svc.getPlayer(id))
-        )
+        PlayerService.pipe(Effect.flatMap((svc) => svc.getPlayer(id)))
       )
-      
+
       if (result instanceof PlayerNotFound) {
         return c.notFound()
       }
-      
+
       return c.json(toPlayerDTO(result))
     })
 ```
 
 **Characteristics:**
+
 - Thin layer (minimal logic)
 - Input/output validation
 - Error translation
@@ -336,20 +330,18 @@ export const Logger = Effect.Service.tag<Logger>()
 // Implement service
 export const LoggerLive = Layer.sync(() => ({
   [Logger]: {
-    info: (message: string, meta?: object) =>
-      Effect.sync(() => console.log(message, meta)),
-    error: (message: string, error?: Error) =>
-      Effect.sync(() => console.error(message, error))
-  }
+    info: (message: string, meta?: object) => Effect.sync(() => console.log(message, meta)),
+    error: (message: string, error?: Error) => Effect.sync(() => console.error(message, error)),
+  },
 }))
 
 // Use service
 export const doSomething = () =>
   Effect.gen(function* () {
     const logger = yield* Logger
-    yield* logger.info("Starting process")
+    yield* logger.info('Starting process')
     // Do work
-    yield* logger.info("Process complete")
+    yield* logger.info('Process complete')
   })
 
 // Provide in application
@@ -373,7 +365,7 @@ export const PlayerRepository = Effect.Service.tag<PlayerRepository>()
 export const PlayerRepositoryLive = Layer.effect(PlayerRepository)(() =>
   Effect.gen(function* () {
     const db = yield* Database
-    
+
     return {
       findById: (id) => /* Query implementation */,
       save: (player) => /* Persist implementation */
@@ -389,13 +381,16 @@ export const PlayerRepositoryLive = Layer.effect(PlayerRepository)(() =>
 ```typescript
 // Domain events (defined in each module)
 export class PlayerCreatedEvent {
-  readonly _tag = "PlayerCreated" as const
+  readonly _tag = 'PlayerCreated' as const
   constructor(readonly playerId: PlayerId) {}
 }
 
 export class PlayerStatsUpdatedEvent {
-  readonly _tag = "PlayerStatsUpdated" as const
-  constructor(readonly playerId: PlayerId, readonly stats: PlayerStats) {}
+  readonly _tag = 'PlayerStatsUpdated' as const
+  constructor(
+    readonly playerId: PlayerId,
+    readonly stats: PlayerStats
+  ) {}
 }
 
 // Event Bus interface
@@ -414,10 +409,10 @@ export const createPlayer = (dto: CreatePlayerDTO) =>
   Effect.gen(function* () {
     const repo = yield* PlayerRepository
     const bus = yield* EventBus
-    
+
     const player = yield* repo.create(dto)
     yield* bus.publish(new PlayerCreatedEvent(player.id))
-    
+
     return player
   })
 
@@ -439,15 +434,15 @@ export interface DamageCalculator {
 }
 
 export const HeadshotDamageCalculator: DamageCalculator = {
-  calculate: (attacker, defender, weapon) => weapon.baseDamage * 2.5
+  calculate: (attacker, defender, weapon) => weapon.baseDamage * 2.5,
 }
 
 export const BodyshotDamageCalculator: DamageCalculator = {
-  calculate: (attacker, defender, weapon) => weapon.baseDamage * 1.0
+  calculate: (attacker, defender, weapon) => weapon.baseDamage * 1.0,
 }
 
 export const LegShotDamageCalculator: DamageCalculator = {
-  calculate: (attacker, defender, weapon) => weapon.baseDamage * 0.75
+  calculate: (attacker, defender, weapon) => weapon.baseDamage * 0.75,
 }
 
 // Use strategy
@@ -473,8 +468,8 @@ export const applyDamage = (
 // core/game-loop/tick-loop.ts
 
 export interface GameTickContext {
-  readonly deltaTime: number      // Time since last tick
-  readonly tickNumber: number      // Current tick count
+  readonly deltaTime: number // Time since last tick
+  readonly tickNumber: number // Current tick count
   readonly activeMatches: Match[]
 }
 
@@ -484,50 +479,50 @@ export const GameTickLoop = {
       const matchService = yield* MatchService
       const eventBus = yield* EventBus
       const logger = yield* Logger
-      
+
       let tickNumber = 0
       const tickInterval = 1000 / tickRate
-      
+
       const runTick = () =>
         Effect.gen(function* () {
           const startTime = performance.now()
           tickNumber++
-          
+
           const matches = yield* matchService.getActiveMatches()
-          
+
           for (const match of matches) {
             // Update game state
             yield* match.update({
               deltaTime: tickInterval / 1000,
-              tickNumber
+              tickNumber,
             })
-            
+
             // Process collisions, damage, effects
             yield* match.processPhysics()
             yield* match.processWeapons()
-            
+
             // Send delta updates to clients
             yield* broadcastMatchState(match)
-            
+
             // Publish tick events
             yield* eventBus.publish(new MatchTickEvent(match.id, tickNumber))
           }
-          
+
           const duration = performance.now() - startTime
-          
+
           // Log if tick took too long
           if (duration > tickInterval * 1.1) {
-            yield* logger.warn("Slow tick", { duration, tickInterval })
+            yield* logger.warn('Slow tick', { duration, tickInterval })
           }
         })
-      
+
       // Schedule tick loop
       setInterval(() => {
-        Effect.runPromise(runTick()).catch(err => {
-          console.error("Tick loop error:", err)
+        Effect.runPromise(runTick()).catch((err) => {
+          console.error('Tick loop error:', err)
         })
       }, tickInterval)
-    })
+    }),
 }
 ```
 
@@ -552,18 +547,18 @@ export interface MatchStateUpdate {
 export const broadcastMatchState = (match: Match) =>
   Effect.gen(function* () {
     const clients = getConnectedClients(match.id)
-    
+
     const stateUpdate: MatchStateUpdate = {
       tickNumber: match.tickNumber,
-      playersChanged: match.getChangedPlayers().map(p => ({
+      playersChanged: match.getChangedPlayers().map((p) => ({
         playerId: p.id,
         ...(p.positionChanged && { position: p.position }),
-        ...(p.healthChanged && { health: p.health })
+        ...(p.healthChanged && { health: p.health }),
         // Only include changed fields
       })),
-      eventsOccurred: match.getEvents()
+      eventsOccurred: match.getEvents(),
     }
-    
+
     // Send to all clients
     for (const client of clients) {
       yield* sendToClient(client, stateUpdate)
@@ -578,11 +573,13 @@ export const broadcastMatchState = (match: Match) =>
 ### Horizontal Scaling
 
 **Match Distribution**
+
 ```typescript
 // Distribute matches across multiple servers
 export interface MatchDistributor {
-  readonly selectServer: (matchConfig: MatchConfig) =>
-    Effect.Effect<ServerInstance, AllServersOccupied>
+  readonly selectServer: (
+    matchConfig: MatchConfig
+  ) => Effect.Effect<ServerInstance, AllServersOccupied>
 }
 
 // Each server has a queue/workload capacity
@@ -590,6 +587,7 @@ export interface MatchDistributor {
 ```
 
 **Database Sharding**
+
 ```sql
 -- Partition player data by region
 CREATE TABLE players_na PARTITION OF players
@@ -611,22 +609,22 @@ export const PlayerCacheService = Layer.effect(PlayerCache)(() =>
   Effect.gen(function* () {
     const redis = yield* Redis
     const repo = yield* PlayerRepository
-    
+
     return {
       getPlayer: (id: PlayerId) =>
         Effect.gen(function* () {
           // Try cache first
           const cached = yield* redis.get(`player:${id}`)
           if (cached) return JSON.parse(cached)
-          
+
           // Fall back to database
           const player = yield* repo.findById(id)
-          
+
           // Update cache (with TTL)
           yield* redis.setex(`player:${id}`, 3600, JSON.stringify(player))
-          
+
           return player
-        })
+        }),
     }
   })
 )
@@ -642,30 +640,38 @@ export const PlayerCacheService = Layer.effect(PlayerCache)(() =>
 # ADR-001: Use Clean Architecture for Module Organization
 
 ## Status
+
 Accepted
 
 ## Context
+
 The codebase needs clear organization with strong separation of concerns
 to enable independent testing and maintainability as complexity grows.
 
 ## Decision
+
 We adopt Clean Architecture with four layers:
+
 - Domain: Pure business logic
 - Application: Orchestration
 - Infrastructure: Persistence
 - Presentation: HTTP endpoints
 
 ## Consequences
+
 ✅ Benefits:
+
 - Clear dependency direction (inward)
 - Easy to test in isolation
 - Business logic independent of frameworks
 
 ⚠️ Trade-offs:
+
 - More files/structure initially
 - Learning curve for team
 
 ## Alternatives Considered
+
 1. Layered architecture (3 layers) - Simpler but less flexible
 2. Feature-based folders - Better for feature discovery
 3. Hexagonal architecture - Similar to chosen approach
@@ -693,13 +699,9 @@ const measureQuery = (queryName: string, fn: () => Promise<any>) =>
     const start = performance.now()
     const result = yield* Effect.promise(fn)
     const duration = performance.now() - start
-    
-    yield* Logger.pipe(
-      Effect.flatMap(log => 
-        log.info(`Query: ${queryName}`, { duration })
-      )
-    )
-    
+
+    yield* Logger.pipe(Effect.flatMap((log) => log.info(`Query: ${queryName}`, { duration })))
+
     return result
   })
 ```
@@ -713,10 +715,10 @@ const measureQuery = (queryName: string, fn: () => Promise<any>) =>
 ```
        E2E Tests (10%)
          Frontend + Backend
-    
+
 Integration Tests (30%)
      Services + Database
-  
+
 Unit Tests (60%)
    Pure functions, logic
 ```
@@ -791,6 +793,6 @@ Before finalizing architecture:
 
 ---
 
-*Last Updated: February 2026*  
-*Architecture Pattern: Clean Architecture + Event-Driven*  
-*Primary Concern: Scalability, Testability, Maintainability*
+_Last Updated: February 2026_  
+_Architecture Pattern: Clean Architecture + Event-Driven_  
+_Primary Concern: Scalability, Testability, Maintainability_

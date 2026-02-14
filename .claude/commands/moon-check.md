@@ -1,6 +1,6 @@
 ---
 description: Run moonrepo checks and validate monorepo structure
-argument-hint: "[scope]"
+argument-hint: '[scope]'
 ---
 
 # Moon Check Command

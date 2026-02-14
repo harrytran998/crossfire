@@ -12,5 +12,5 @@ export const ConfigLayer = Layer.mergeAll(
   DatabaseConfig.Live,
   RedisConfig.Live,
   AuthConfig.Live,
-  LoggingConfig.Live,
+  LoggingConfig.Live
 )

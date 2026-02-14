@@ -28,13 +28,13 @@ export const RedisServiceLive = Effect.gen(function* (_) {
 
   yield* Effect.tryPromise({
     try: () => client.ping(),
-    catch: error => new RedisError({ message: 'Failed to connect to Redis', cause: error }),
+    catch: (error) => new RedisError({ message: 'Failed to connect to Redis', cause: error }),
   })
 
   const get = (key: string): Effect.Effect<string | null, RedisError> =>
     Effect.tryPromise({
       try: () => client.get(key),
-      catch: error => new RedisError({ message: `Failed to get key: ${key}`, cause: error }),
+      catch: (error) => new RedisError({ message: `Failed to get key: ${key}`, cause: error }),
     })
 
   const set = (key: string, value: string, ttl?: number): Effect.Effect<void, RedisError> =>
@@ -46,7 +46,7 @@ export const RedisServiceLive = Effect.gen(function* (_) {
           await client.set(key, value)
         }
       },
-      catch: error => new RedisError({ message: `Failed to set key: ${key}`, cause: error }),
+      catch: (error) => new RedisError({ message: `Failed to set key: ${key}`, cause: error }),
     })
 
   const del = (key: string): Effect.Effect<void, RedisError> =>
@@ -54,7 +54,7 @@ export const RedisServiceLive = Effect.gen(function* (_) {
       try: async () => {
         await client.del(key)
       },
-      catch: error => new RedisError({ message: `Failed to delete key: ${key}`, cause: error }),
+      catch: (error) => new RedisError({ message: `Failed to delete key: ${key}`, cause: error }),
     })
 
   const hset = (key: string, field: string, value: string): Effect.Effect<void, RedisError> =>
@@ -62,19 +62,19 @@ export const RedisServiceLive = Effect.gen(function* (_) {
       try: async () => {
         await client.hset(key, field, value)
       },
-      catch: error => new RedisError({ message: `Failed to hset ${key}:${field}`, cause: error }),
+      catch: (error) => new RedisError({ message: `Failed to hset ${key}:${field}`, cause: error }),
     })
 
   const hget = (key: string, field: string): Effect.Effect<string | null, RedisError> =>
     Effect.tryPromise({
       try: () => client.hget(key, field),
-      catch: error => new RedisError({ message: `Failed to hget ${key}:${field}`, cause: error }),
+      catch: (error) => new RedisError({ message: `Failed to hget ${key}:${field}`, cause: error }),
     })
 
   const hgetall = (key: string): Effect.Effect<Record<string, string>, RedisError> =>
     Effect.tryPromise({
       try: () => client.hgetall(key),
-      catch: error => new RedisError({ message: `Failed to hgetall ${key}`, cause: error }),
+      catch: (error) => new RedisError({ message: `Failed to hgetall ${key}`, cause: error }),
     })
 
   const expire = (key: string, seconds: number): Effect.Effect<void, RedisError> =>
@@ -82,15 +82,10 @@ export const RedisServiceLive = Effect.gen(function* (_) {
       try: async () => {
         await client.expire(key, seconds)
       },
-      catch: error => new RedisError({ message: `Failed to expire ${key}`, cause: error }),
+      catch: (error) => new RedisError({ message: `Failed to expire ${key}`, cause: error }),
     })
 
-  yield* Effect.addFinalizer(() =>
-    Effect.promise(() => client.quit()).pipe(Effect.orDie)
-  )
+  yield* Effect.addFinalizer(() => Effect.promise(() => client.quit()).pipe(Effect.orDie))
 
   return RedisService.of({ client, get, set, del, hset, hget, hgetall, expire })
-}).pipe(
-  Effect.provide(RedisConfig.Live),
-  Layer.scoped(RedisService)
-)
+}).pipe(Effect.provide(RedisConfig.Live), Layer.scoped(RedisService))

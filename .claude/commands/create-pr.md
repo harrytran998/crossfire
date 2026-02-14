@@ -9,6 +9,7 @@ $ARGUMENTS
 ```
 
 You **MUST** consider the user input before proceeding (if not empty). The user input may contain:
+
 - A summary of changes made
 - Specific commit message preferences
 - Target branch (defaults to `main`)
@@ -24,22 +25,22 @@ This project follows the Angular commit convention. Commit messages must match:
 
 ### Commit Types
 
-| Type | Description | Appears in Changelog |
-|------|-------------|---------------------|
-| `feat` | New feature | Yes |
-| `fix` | Bug fix | Yes |
-| `perf` | Performance improvement | Yes |
-| `docs` | Documentation only | No |
-| `style` | Code style (formatting, semicolons) | No |
-| `refactor` | Code refactoring (no feature/fix) | No |
-| `test` | Adding/updating tests | No |
-| `build` | Build system or dependencies | No |
-| `ci` | CI configuration | No |
-| `chore` | Maintenance tasks | No |
-| `types` | TypeScript type definitions | No |
-| `wip` | Work in progress | No |
-| `dx` | Developer experience improvements | No |
-| `workflow` | Workflow changes | No |
+| Type       | Description                         | Appears in Changelog |
+| ---------- | ----------------------------------- | -------------------- |
+| `feat`     | New feature                         | Yes                  |
+| `fix`      | Bug fix                             | Yes                  |
+| `perf`     | Performance improvement             | Yes                  |
+| `docs`     | Documentation only                  | No                   |
+| `style`    | Code style (formatting, semicolons) | No                   |
+| `refactor` | Code refactoring (no feature/fix)   | No                   |
+| `test`     | Adding/updating tests               | No                   |
+| `build`    | Build system or dependencies        | No                   |
+| `ci`       | CI configuration                    | No                   |
+| `chore`    | Maintenance tasks                   | No                   |
+| `types`    | TypeScript type definitions         | No                   |
+| `wip`      | Work in progress                    | No                   |
+| `dx`       | Developer experience improvements   | No                   |
+| `workflow` | Workflow changes                    | No                   |
 
 ### Commit Message Rules
 
@@ -114,6 +115,7 @@ git commit -m "<type>(<scope>): <description>"
 ```
 
 **Guidelines for splitting commits:**
+
 - One commit per logical change
 - Keep commits atomic and reviewable
 - Each commit should leave the codebase in a working state
@@ -182,6 +184,7 @@ Brief description of what this PR accomplishes. Focus on the "why" not just the 
 ## Testing
 
 Describe how changes were verified:
+
 - Unit tests added/updated
 - Manual testing steps
 - Edge cases considered

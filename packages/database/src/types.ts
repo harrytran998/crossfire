@@ -1,2 +1,1 @@
-export interface Database {
-}
+export interface Database {}

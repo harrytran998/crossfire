@@ -570,13 +570,13 @@
 
 ### 6.2 Anti-Cheat Measures
 
-| Threat | Detection | Prevention |
-|--------|-----------|------------|
-| Speed Hack | Server validates movement speed | Reject impossible positions |
-| Aimbot | Statistical analysis of accuracy | Server-side hit validation |
-| Wall Hack | Server validates line of sight | Only send visible enemies |
-| Rate Hack | Input frequency monitoring | Rate limit actions |
-| Memory Edit | Server-authoritative state | Never trust client values |
+| Threat      | Detection                        | Prevention                  |
+| ----------- | -------------------------------- | --------------------------- |
+| Speed Hack  | Server validates movement speed  | Reject impossible positions |
+| Aimbot      | Statistical analysis of accuracy | Server-side hit validation  |
+| Wall Hack   | Server validates line of sight   | Only send visible enemies   |
+| Rate Hack   | Input frequency monitoring       | Rate limit actions          |
+| Memory Edit | Server-authoritative state       | Never trust client values   |
 
 ---
 
@@ -584,13 +584,13 @@
 
 ### 7.1 Monitoring Stack
 
-| Component | Tool | Purpose |
-|-----------|------|---------|
-| Metrics | Prometheus + Grafana | System & game metrics |
-| Logging | Loki + Grafana | Centralized logging |
-| Tracing | Jaeger | Distributed tracing |
-| APM | Sentry | Error tracking |
-| Uptime | Pingdom/UptimeRobot | Availability monitoring |
+| Component | Tool                 | Purpose                 |
+| --------- | -------------------- | ----------------------- |
+| Metrics   | Prometheus + Grafana | System & game metrics   |
+| Logging   | Loki + Grafana       | Centralized logging     |
+| Tracing   | Jaeger               | Distributed tracing     |
+| APM       | Sentry               | Error tracking          |
+| Uptime    | Pingdom/UptimeRobot  | Availability monitoring |
 
 ### 7.2 Key Metrics
 
@@ -630,5 +630,5 @@
 
 ---
 
-*Document Version: 1.0*
-*Last Updated: February 2026*
+_Document Version: 1.0_
+_Last Updated: February 2026_

@@ -10,21 +10,25 @@ Moonrepo is a fast build system and task runner for monorepos. It provides effic
 ## Key Concepts
 
 ### Workspace Graph
+
 - Tracks dependencies between projects
 - Enables incremental builds and tests
 - Optimizes task execution order
 
 ### Task Pipeline
+
 - Runs tasks in dependency order
 - Caches task outputs
 - Parallelizes independent tasks
 
 ### File-Based Hashing
+
 - Detects which files changed
 - Only runs affected tasks
 - Speeds up CI/CD pipelines
 
 ### Configuration as Code
+
 - Define workflows in YAML or TypeScript
 - Version-controlled task definitions
 - Flexible and composable
@@ -32,13 +36,14 @@ Moonrepo is a fast build system and task runner for monorepos. It provides effic
 ## Code Examples
 
 ### moon.yml Configuration
+
 ```yaml
 # Root moon.yml
 workspace:
   # Inherit all TypeScript config
   typescript:
     root: tsconfig.json
-  
+
   # Inherit all ESLint config
   eslint:
     root: .eslintrc.js
@@ -46,7 +51,7 @@ workspace:
   # Node package manager
   node:
     packageManager: bun
-    version: "1.3.0"
+    version: '1.3.0'
 
   # VCS provider for change detection
   vcs:
@@ -55,47 +60,48 @@ workspace:
 # Define workspace projects
 projects:
   globs:
-    - "apps/*"
-    - "packages/*"
-    - "tools/*"
+    - 'apps/*'
+    - 'packages/*'
+    - 'tools/*'
 
 # Define custom tasks
 tasks:
   typecheck:
     command: tsc --noEmit
     inputs:
-      - "src/**/*.ts"
-      - "tsconfig.json"
+      - 'src/**/*.ts'
+      - 'tsconfig.json'
     outputs:
-      - ".typecheck"
+      - '.typecheck'
     cache: true
 
   lint:
     command: eslint .
     inputs:
-      - "src/**/*.ts"
-      - ".eslintrc.js"
+      - 'src/**/*.ts'
+      - '.eslintrc.js'
 
   test:
     command: bun test
     inputs:
-      - "src/**/*.test.ts"
+      - 'src/**/*.test.ts'
     outputs:
-      - "coverage"
+      - 'coverage'
     cache: true
 
   build:
     command: bun build ./src/index.ts
     inputs:
-      - "src/**/*.ts"
+      - 'src/**/*.ts'
     outputs:
-      - "dist"
+      - 'dist'
     cache: true
     deps:
-      - "typecheck"
+      - 'typecheck'
 ```
 
 ### Project-Level moon.yml
+
 ```yaml
 # apps/web/moon.yml
 project:
@@ -113,23 +119,23 @@ tasks:
   build:
     command: next build
     inputs:
-      - "src/**/*.{ts,tsx}"
-      - "public/**/*"
-      - "next.config.js"
+      - 'src/**/*.{ts,tsx}'
+      - 'public/**/*'
+      - 'next.config.js'
     outputs:
-      - ".next"
-      - "dist"
+      - '.next'
+      - 'dist'
     cache: true
 
   test:
     command: jest
     inputs:
-      - "src/**/*.test.{ts,tsx}"
+      - 'src/**/*.test.{ts,tsx}'
     outputs:
-      - "coverage"
+      - 'coverage'
     cache: true
 
-# Task dependencies
+  # Task dependencies
   lint:
     extends: root/lint
 
@@ -149,6 +155,7 @@ dependencies:
 ```
 
 ### Package-Level moon.yml
+
 ```yaml
 # packages/ui/moon.yml
 project:
@@ -161,18 +168,18 @@ tasks:
   build:
     command: tsc --declaration
     inputs:
-      - "src/**/*.tsx"
-      - "tsconfig.json"
+      - 'src/**/*.tsx'
+      - 'tsconfig.json'
     outputs:
-      - "dist"
+      - 'dist'
     cache: true
 
   test:
     command: jest
     inputs:
-      - "src/**/*.test.tsx"
+      - 'src/**/*.test.tsx'
     outputs:
-      - "coverage"
+      - 'coverage'
     cache: true
 
   storybook:
@@ -181,44 +188,46 @@ tasks:
 ```
 
 ### Moonfile.ts (Advanced Configuration)
+
 ```typescript
 // moonfile.ts
-import { defineWorkspace } from "@moonrepo/core";
+import { defineWorkspace } from '@moonrepo/core'
 
 export default defineWorkspace({
   projects: {
-    globs: ["apps/*", "packages/*"],
+    globs: ['apps/*', 'packages/*'],
   },
 
   tasks: {
     build: {
-      command: "bun build",
-      inputs: ["src/**/*.ts"],
-      outputs: ["dist"],
+      command: 'bun build',
+      inputs: ['src/**/*.ts'],
+      outputs: ['dist'],
       cache: true,
     },
 
     test: {
-      command: "bun test",
-      inputs: ["src/**/*.test.ts"],
+      command: 'bun test',
+      inputs: ['src/**/*.test.ts'],
       cache: true,
     },
 
     // Conditional task execution
-    "release-check": {
-      command: "bun release-check",
-      platform: ["linux", "macos"],
+    'release-check': {
+      command: 'bun release-check',
+      platform: ['linux', 'macos'],
       // Only run if files changed
-      inputs: ["src/**/*", "package.json"],
+      inputs: ['src/**/*', 'package.json'],
     },
   },
 
   // Task inheritance
-  extends: ["@moonrepo/base"],
-});
+  extends: ['@moonrepo/base'],
+})
 ```
 
 ### CLI Commands
+
 ```bash
 # Run task in specific project
 moon run web:build
@@ -261,6 +270,7 @@ moon run :build --json
 ```
 
 ### CI Integration
+
 ```yaml
 # .github/workflows/ci.yml
 name: CI
@@ -303,6 +313,7 @@ jobs:
 ```
 
 ### Cache Configuration
+
 ```yaml
 # moon.yml
 workspace:
@@ -324,7 +335,7 @@ tasks:
     # But exclude certain inputs from cache key
     cacheableOutputs:
       - dist
-      - "!dist/tmp"
+      - '!dist/tmp'
 
   deploy:
     # Don't cache this task
@@ -333,6 +344,7 @@ tasks:
 ```
 
 ### Project Dependency Graph
+
 ```bash
 # View dependency graph
 moon graph :build
@@ -351,10 +363,11 @@ moon graph :build
 ```
 
 ### Scripting with moon.yml
+
 ```yaml
 # moon.yml
 tasks:
-  "prepare-release":
+  'prepare-release':
     command: |
       set -e
       moon run :typecheck
@@ -365,13 +378,13 @@ tasks:
       git add .
       git commit -m "chore: prepare release"
 
-  "deploy-staging":
+  'deploy-staging':
     command: |
       ENVIRONMENT=staging bun scripts/deploy.ts
     env:
       AWS_REGION: us-east-1
 
-  "db-migrate":
+  'db-migrate':
     command: |
       cd apps/api
       bun migrate
@@ -379,6 +392,7 @@ tasks:
 ```
 
 ### Workspace Structure with moon
+
 ```
 .
 ├── moon.yml                    # Workspace config
@@ -420,30 +434,35 @@ tasks:
 ## Best Practices
 
 ### 1. Task Definition
+
 - Keep tasks focused and atomic
 - Define clear inputs and outputs
 - Use caching for deterministic tasks
 - Avoid side effects in cached tasks
 
 ### 2. Dependency Management
+
 - Keep dependency graph clean
 - Use dependency scopes (peer, dev, prod)
 - Avoid circular dependencies
 - Document inter-project dependencies
 
 ### 3. Performance
+
 - Use `--affected` in CI to run only changed projects
 - Leverage remote caching for CI/CD
 - Keep tasks incremental when possible
 - Use task dependencies to optimize execution order
 
 ### 4. Configuration
+
 - Use workspace-level configuration for common tasks
 - Override in project-level config when needed
 - Keep Configuration DRY
 - Version control all configuration
 
 ### 5. CI/CD Integration
+
 - Detect affected projects early
 - Run checks in parallel
 - Cache dependencies and build outputs
@@ -452,6 +471,7 @@ tasks:
 ## Common Patterns
 
 ### Multi-Package Build Pipeline
+
 ```yaml
 # Root moon.yml
 tasks:
@@ -464,7 +484,7 @@ tasks:
     desc: Full CI pipeline
 
   # Pre-release checks
-  "pre-release":
+  'pre-release':
     command: |
       moon run :typecheck
       moon run :lint
@@ -475,6 +495,7 @@ tasks:
 ```
 
 ### Workspace Script
+
 ```bash
 #!/bin/bash
 # scripts/run-affected.sh
@@ -487,19 +508,14 @@ done
 ```
 
 ### Versioning Strategy
+
 ```yaml
 # packages/*/package.json
-{
-  "name": "@myapp/ui",
-  "version": "1.0.0",
-  "workspaces": [
-    "packages/*",
-    "apps/*"
-  ]
-}
+{ 'name': '@myapp/ui', 'version': '1.0.0', 'workspaces': ['packages/*', 'apps/*'] }
 ```
 
 ### Monorepo Release Flow
+
 ```bash
 # 1. Detect changes
 moon affected --base main --head HEAD

@@ -7,6 +7,7 @@
 ## 1. Overview
 
 This document outlines the deployment strategy and cloud infrastructure for the Crossfire web game, designed for:
+
 - **High Availability**: 99.5%+ uptime
 - **Low Latency**: <100ms for regional players
 - **Scalability**: Auto-scaling based on player load
@@ -72,27 +73,27 @@ This document outlines the deployment strategy and cloud infrastructure for the 
 
 ### 3.1 Cloud Provider Options
 
-| Provider | Recommendation | Cost | Notes |
-|----------|---------------|------|-------|
-| **AWS** | ✅ Primary | $$ | Most features, global regions |
-| **GCP** | ✅ Alternative | $$ | Great Kubernetes, gaming solutions |
-| **Azure** | ⚠️ Alternative | $$ | Good enterprise integration |
-| **Railway/Render** | ⚠️ MVP/Dev | $ | Simple, limited scaling |
-| **Fly.io** | ⚠️ Edge-focused | $ | Global edge deployment |
+| Provider           | Recommendation  | Cost | Notes                              |
+| ------------------ | --------------- | ---- | ---------------------------------- |
+| **AWS**            | ✅ Primary      | $$   | Most features, global regions      |
+| **GCP**            | ✅ Alternative  | $$   | Great Kubernetes, gaming solutions |
+| **Azure**          | ⚠️ Alternative  | $$   | Good enterprise integration        |
+| **Railway/Render** | ⚠️ MVP/Dev      | $    | Simple, limited scaling            |
+| **Fly.io**         | ⚠️ Edge-focused | $    | Global edge deployment             |
 
 ### 3.2 Recommended Stack
 
-| Layer | Technology | Purpose |
-|-------|------------|---------|
-| **CDN** | Cloudflare | Static assets, DDoS protection |
-| **Load Balancer** | Cloudflare / Cloud LB | SSL termination, routing |
-| **Container Orchestration** | Kubernetes (GKE/EKS) | Game server management |
-| **Game Server Hosting** | Agones (optional) | Dedicated game server orchestration |
-| **Database** | Managed PostgreSQL | Persistent data |
-| **Cache** | Managed Redis | Real-time state, sessions |
-| **Monitoring** | Prometheus + Grafana | Metrics & alerting |
-| **Logging** | Loki + Grafana | Centralized logging |
-| **Secrets** | Cloud Secret Manager | API keys, credentials |
+| Layer                       | Technology            | Purpose                             |
+| --------------------------- | --------------------- | ----------------------------------- |
+| **CDN**                     | Cloudflare            | Static assets, DDoS protection      |
+| **Load Balancer**           | Cloudflare / Cloud LB | SSL termination, routing            |
+| **Container Orchestration** | Kubernetes (GKE/EKS)  | Game server management              |
+| **Game Server Hosting**     | Agones (optional)     | Dedicated game server orchestration |
+| **Database**                | Managed PostgreSQL    | Persistent data                     |
+| **Cache**                   | Managed Redis         | Real-time state, sessions           |
+| **Monitoring**              | Prometheus + Grafana  | Metrics & alerting                  |
+| **Logging**                 | Loki + Grafana        | Centralized logging                 |
+| **Secrets**                 | Cloud Secret Manager  | API keys, credentials               |
 
 ---
 
@@ -192,11 +193,11 @@ services:
       POSTGRES_PASSWORD: crossfire_dev
       POSTGRES_DB: crossfire
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U crossfire"]
+      test: ['CMD-SHELL', 'pg_isready -U crossfire']
       interval: 5s
       timeout: 5s
       retries: 5
@@ -205,11 +206,11 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
       timeout: 5s
       retries: 5
@@ -226,7 +227,7 @@ services:
       - HOST=0.0.0.0
       - PORT=3000
     ports:
-      - "3000:3000"
+      - '3000:3000'
     depends_on:
       postgres:
         condition: service_healthy
@@ -246,7 +247,7 @@ services:
       - VITE_API_URL=http://localhost:3000
       - VITE_WS_URL=ws://localhost:3000
     ports:
-      - "5173:5173"
+      - '5173:5173'
     volumes:
       - ./packages/client:/app/packages/client
       - ./packages/shared:/app/packages/shared
@@ -283,12 +284,12 @@ metadata:
   name: game-server-config
   namespace: crossfire-game
 data:
-  NODE_ENV: "production"
-  HOST: "0.0.0.0"
-  PORT: "3000"
-  TICK_RATE: "30"
-  MAX_ROOMS: "100"
-  REDIS_URL: "redis://redis-service:6379"
+  NODE_ENV: 'production'
+  HOST: '0.0.0.0'
+  PORT: '3000'
+  TICK_RATE: '30'
+  MAX_ROOMS: '100'
+  REDIS_URL: 'redis://redis-service:6379'
 ```
 
 ### 5.3 Secret
@@ -302,9 +303,9 @@ metadata:
   namespace: crossfire-game
 type: Opaque
 stringData:
-  DATABASE_URL: "postgresql://user:pass@postgres-service:5432/crossfire"
-  JWT_SECRET: "your-jwt-secret-here"
-  API_KEY: "your-api-key-here"
+  DATABASE_URL: 'postgresql://user:pass@postgres-service:5432/crossfire'
+  JWT_SECRET: 'your-jwt-secret-here'
+  API_KEY: 'your-api-key-here'
 ```
 
 ### 5.4 Deployment (Game Server)
@@ -338,11 +339,11 @@ spec:
                 name: game-server-secrets
           resources:
             requests:
-              memory: "256Mi"
-              cpu: "250m"
+              memory: '256Mi'
+              cpu: '250m'
             limits:
-              memory: "512Mi"
-              cpu: "500m"
+              memory: '512Mi'
+              cpu: '500m'
           livenessProbe:
             httpGet:
               path: /health
@@ -464,20 +465,20 @@ spec:
 
 **Recommended: Use managed PostgreSQL service**
 
-| Provider | Service | Notes |
-|----------|---------|-------|
-| AWS | RDS PostgreSQL | Automated backups, scaling |
-| GCP | Cloud SQL | Integrated with GKE |
-| Azure | Database for PostgreSQL | Enterprise features |
-| Railway | PostgreSQL | Simple, good for MVP |
+| Provider | Service                 | Notes                      |
+| -------- | ----------------------- | -------------------------- |
+| AWS      | RDS PostgreSQL          | Automated backups, scaling |
+| GCP      | Cloud SQL               | Integrated with GKE        |
+| Azure    | Database for PostgreSQL | Enterprise features        |
+| Railway  | PostgreSQL              | Simple, good for MVP       |
 
 ### 6.2 Redis (Managed)
 
-| Provider | Service | Notes |
-|----------|---------|-------|
-| AWS | ElastiCache | Cluster mode available |
-| GCP | Memorystore | Integrated with GKE |
-| Upstash | Serverless Redis | Pay per request |
+| Provider | Service          | Notes                  |
+| -------- | ---------------- | ---------------------- |
+| AWS      | ElastiCache      | Cluster mode available |
+| GCP      | Memorystore      | Integrated with GKE    |
+| Upstash  | Serverless Redis | Pay per request        |
 
 ---
 
@@ -505,16 +506,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
-        
+
       - name: Install dependencies
         run: bun install
-        
+
       - name: Run tests
         run: bun test
-        
+
       - name: Type check
         run: bun run typecheck
 
@@ -522,21 +523,21 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
-    
+
     permissions:
       contents: read
       packages: write
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Login to Container Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Build and push server
         uses: docker/build-push-action@v5
         with:
@@ -544,7 +545,7 @@ jobs:
           file: Dockerfile.server
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_SERVER }}:${{ github.sha }}
-          
+
       - name: Build and push client
         uses: docker/build-push-action@v5
         with:
@@ -558,21 +559,21 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     environment: production
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Configure kubectl
         uses: azure/k8s-set-context@v3
         with:
           kubeconfig: ${{ secrets.KUBE_CONFIG }}
-          
+
       - name: Deploy to Kubernetes
         run: |
           kubectl set image deployment/game-server \
             game-server=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_SERVER }}:${{ github.sha }} \
             -n crossfire-game
-            
+
       - name: Wait for rollout
         run: |
           kubectl rollout status deployment/game-server -n crossfire-game --timeout=300s
@@ -594,20 +595,20 @@ const register = new Registry()
 const connectedPlayers = new Counter({
   name: 'game_connected_players_total',
   help: 'Total connected players',
-  registers: [register]
+  registers: [register],
 })
 
 const activeRooms = new Counter({
   name: 'game_active_rooms_total',
   help: 'Total active game rooms',
-  registers: [register]
+  registers: [register],
 })
 
 const messageLatency = new Histogram({
   name: 'game_message_latency_seconds',
   help: 'Message processing latency',
   buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1],
-  registers: [register]
+  registers: [register],
 })
 
 // Expose metrics endpoint
@@ -620,6 +621,7 @@ app.get('/metrics', async (req, res) => {
 ### 8.2 Grafana Dashboard
 
 Key metrics to monitor:
+
 - **Connection count**: Active WebSocket connections
 - **Room count**: Active game rooms
 - **CPU/Memory**: Server resource usage
@@ -633,24 +635,24 @@ Key metrics to monitor:
 
 ### 9.1 MVP (100-500 players)
 
-| Service | Provider | Monthly Cost |
-|---------|----------|--------------|
-| Compute (2 vCPU, 4GB) | Railway/Render | $20-50 |
-| PostgreSQL | Supabase/Railway | $0-25 |
-| Redis | Upstash | $0-30 |
-| CDN | Cloudflare | $0 |
-| **Total** | | **$20-105/month** |
+| Service               | Provider         | Monthly Cost      |
+| --------------------- | ---------------- | ----------------- |
+| Compute (2 vCPU, 4GB) | Railway/Render   | $20-50            |
+| PostgreSQL            | Supabase/Railway | $0-25             |
+| Redis                 | Upstash          | $0-30             |
+| CDN                   | Cloudflare       | $0                |
+| **Total**             |                  | **$20-105/month** |
 
 ### 9.2 Production (1000-10000 players)
 
-| Service | Provider | Monthly Cost |
-|---------|----------|--------------|
-| Kubernetes (3 nodes) | GKE/EKS | $150-300 |
-| PostgreSQL (Managed) | Cloud SQL | $50-150 |
-| Redis (Managed) | Memorystore | $50-100 |
-| CDN + Load Balancer | Cloudflare | $20-50 |
-| Monitoring | Grafana Cloud | $0-50 |
-| **Total** | | **$270-650/month** |
+| Service              | Provider      | Monthly Cost       |
+| -------------------- | ------------- | ------------------ |
+| Kubernetes (3 nodes) | GKE/EKS       | $150-300           |
+| PostgreSQL (Managed) | Cloud SQL     | $50-150            |
+| Redis (Managed)      | Memorystore   | $50-100            |
+| CDN + Load Balancer  | Cloudflare    | $20-50             |
+| Monitoring           | Grafana Cloud | $0-50              |
+| **Total**            |               | **$270-650/month** |
 
 ---
 
@@ -677,5 +679,5 @@ Key metrics to monitor:
 
 ---
 
-*Document Version: 1.0*
-*Last Updated: February 2026*
+_Document Version: 1.0_
+_Last Updated: February 2026_

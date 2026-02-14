@@ -16,5 +16,15 @@ export default defineConfig({
     'typescript/no-explicit-any': 'warn',
     'unicorn/prefer-node-protocol': 'error',
   },
-  ignorePatterns: ['node_modules', 'dist', 'build', '.moon', '.claude', 'coverage', '*.config.js', '*.config.ts', 'scripts'],
+  ignorePatterns: [
+    'node_modules',
+    'dist',
+    'build',
+    '.moon',
+    '.claude',
+    'coverage',
+    '*.config.js',
+    '*.config.ts',
+    'scripts',
+  ],
 })

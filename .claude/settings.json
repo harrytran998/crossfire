@@ -10,11 +10,7 @@
       "Bash(git push --force *)",
       "Bash(git reset --force *)"
     ],
-    "ask": [
-      "Bash(rm -rf *)",
-      "Bash(curl *)",
-      "Bash(sudo *)",
-    ],
+    "ask": ["Bash(rm -rf *)", "Bash(curl *)", "Bash(sudo *)"],
     "defaultMode": "bypassPermissions"
   },
   "model": "opus"

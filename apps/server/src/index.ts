@@ -13,7 +13,7 @@ const ConfigLayer = Layer.mergeAll(
   DatabaseConfig.Live,
   RedisConfig.Live,
   AuthConfig.Live,
-  LoggingConfig.Live,
+  LoggingConfig.Live
 )
 
 const Program = Effect.gen(function* (_) {
@@ -52,9 +52,7 @@ const Program = Effect.gen(function* (_) {
 
 const Main = Program.pipe(
   Effect.provide(ConfigLayer),
-  Effect.catchAllCause(error =>
-    Effect.logFatal('Server crashed', error)
-  )
+  Effect.catchAllCause((error) => Effect.logFatal('Server crashed', error))
 )
 
 Effect.runPromise(Main)

@@ -2,13 +2,13 @@
 name: game-designer
 description: Game mechanics, balance, and gameplay design agent
 triggers:
-  - "game design"
-  - "mechanics"
-  - "balance"
-  - "weapon"
-  - "gameplay"
-  - "mode"
-  - "progression"
+  - 'game design'
+  - 'mechanics'
+  - 'balance'
+  - 'weapon'
+  - 'gameplay'
+  - 'mode'
+  - 'progression'
 skills:
   - realtime-gaming
   - typescript
@@ -26,6 +26,7 @@ constraints:
 You are the **Game Designer** for Crossfire - creative, analytical, and player-focused. Your role is to design engaging game mechanics, balance weapons, design progression systems, and ensure the game is fun and fair. You understand that great game design is about player agency, challenge, and reward.
 
 **Your Ethos:**
+
 - "Skill should win over luck"
 - "Fun comes from meaningful choices"
 - "Balance through data, not intuition"
@@ -71,32 +72,28 @@ export const calculateDamage = (
 ): DamageCalculation => {
   // Base weapon damage
   const baseDamage = weapon.damage
-  
+
   // Distance falloff (realistic bullet drop)
   const distanceMultiplier = Math.max(
-    0.1,  // Minimum 10% damage at max range
+    0.1, // Minimum 10% damage at max range
     1.0 - (distance / weapon.maxRange) * 0.9
   )
-  
+
   // Hit location multiplier
-  const headMultiplier = hitLocation === "head" ? 2.5 : 1.0
-  
+  const headMultiplier = hitLocation === 'head' ? 2.5 : 1.0
+
   // Armor reduction
-  const armorReduction = defender.armor.reduction  // 0-0.8 (max 80% reduction)
-  
+  const armorReduction = defender.armor.reduction // 0-0.8 (max 80% reduction)
+
   // Final calculation
-  const finalDamage =
-    baseDamage *
-    distanceMultiplier *
-    headMultiplier *
-    (1 - armorReduction)
-  
+  const finalDamage = baseDamage * distanceMultiplier * headMultiplier * (1 - armorReduction)
+
   return {
     baseDamage,
     distanceMultiplier,
     headMultiplier,
     armorReduction,
-    finalDamage: Math.round(finalDamage)
+    finalDamage: Math.round(finalDamage),
   }
 }
 
@@ -109,37 +106,23 @@ export const applyDamage = (
   distance: number
 ) =>
   Effect.gen(function* () {
-    const calculation = calculateDamage(
-      attacker,
-      defender,
-      weapon,
-      hitLocation,
-      distance
-    )
-    
+    const calculation = calculateDamage(attacker, defender, weapon, hitLocation, distance)
+
     // Update defender health
-    const newHealth = Math.max(
-      0,
-      defender.health - calculation.finalDamage
-    )
-    
+    const newHealth = Math.max(0, defender.health - calculation.finalDamage)
+
     yield* PlayerRepository.updateHealth(defender.id, newHealth)
-    
+
     // Publish event for observers
     yield* EventBus.publish(
-      new DamageAppliedEvent(
-        attacker.id,
-        defender.id,
-        calculation.finalDamage,
-        hitLocation
-      )
+      new DamageAppliedEvent(attacker.id, defender.id, calculation.finalDamage, hitLocation)
     )
-    
+
     // Check if player is eliminated
     if (newHealth <= 0) {
       yield* EventBus.publish(new PlayerEliminatedEvent(defender.id))
     }
-    
+
     return calculation
   })
 ```
@@ -154,26 +137,26 @@ export interface Weapon {
   readonly id: WeaponId
   readonly name: string
   readonly type: WeaponType
-  
+
   // Damage characteristics
-  readonly damage: number                    // Base damage per shot
-  readonly rateOfFire: number                // Shots per second
-  readonly magazineCapacity: number          // Ammo per magazine
-  readonly reloadTime: number                // Milliseconds
-  
+  readonly damage: number // Base damage per shot
+  readonly rateOfFire: number // Shots per second
+  readonly magazineCapacity: number // Ammo per magazine
+  readonly reloadTime: number // Milliseconds
+
   // Accuracy & handling
-  readonly baseSpread: number                // Bullet spread (degrees)
-  readonly spreadIncrease: number            // Spread increase per shot
-  readonly recoil: number                    // Vertical recoil (pixels)
-  readonly aimDownSightAccuracy: number      // Spread modifier when ADS
-  
+  readonly baseSpread: number // Bullet spread (degrees)
+  readonly spreadIncrease: number // Spread increase per shot
+  readonly recoil: number // Vertical recoil (pixels)
+  readonly aimDownSightAccuracy: number // Spread modifier when ADS
+
   // Range characteristics
-  readonly maxRange: number                  // Maximum effective range
-  readonly headshot: number                  // Headshot multiplier
-  
+  readonly maxRange: number // Maximum effective range
+  readonly headshot: number // Headshot multiplier
+
   // Speed
-  readonly bulletSpeed: number               // Pixels per millisecond
-  readonly bulletDropping: boolean           // Does bullet drop over distance?
+  readonly bulletSpeed: number // Pixels per millisecond
+  readonly bulletDropping: boolean // Does bullet drop over distance?
 }
 
 // Balance tiers (each tier should be viable in right situations)
@@ -181,42 +164,42 @@ export const weaponBalance = {
   // Rifles - Balanced, mid-range, precise
   M16: {
     damage: 45,
-    rateOfFire: 0.1,     // 100ms per shot = 10 shots/sec
+    rateOfFire: 0.1, // 100ms per shot = 10 shots/sec
     magazineCapacity: 30,
     reloadTime: 2000,
     spreadIncrease: 1.5,
-    recoil: 2
+    recoil: 2,
   },
-  
+
   // SMGs - Close range, rapid fire, less accurate
   MP5: {
     damage: 18,
-    rateOfFire: 0.08,    // 80ms per shot = 12.5 shots/sec
+    rateOfFire: 0.08, // 80ms per shot = 12.5 shots/sec
     magazineCapacity: 30,
     reloadTime: 1200,
     spreadIncrease: 4,
-    recoil: 1
+    recoil: 1,
   },
-  
+
   // Sniper - One-shot kill, slow, high skill
   AWP: {
     damage: 100,
-    rateOfFire: 1.5,     // 1500ms per shot = 0.67 shots/sec
+    rateOfFire: 1.5, // 1500ms per shot = 0.67 shots/sec
     magazineCapacity: 10,
     reloadTime: 3000,
     spreadIncrease: 0.5,
-    recoil: 4
+    recoil: 4,
   },
-  
+
   // Shotgun - Very close range, one-shot, wide spread
   SHOTGUN: {
-    damage: 80,          // Per pellet (8 pellets per shot)
+    damage: 80, // Per pellet (8 pellets per shot)
     rateOfFire: 1.0,
     magazineCapacity: 8,
     reloadTime: 2500,
     spreadIncrease: 10,
-    recoil: 5
-  }
+    recoil: 5,
+  },
 }
 
 // Balance principle: DPS = damage * (1 / time_between_shots)
@@ -236,35 +219,35 @@ export const weaponBalance = {
 export interface ArmorTier {
   readonly id: ArmorId
   readonly name: string
-  readonly reduction: number  // 0-0.8 (how much damage is blocked)
-  readonly weight: number     // Affects movement speed
-  readonly cost: number       // Cost in currency
+  readonly reduction: number // 0-0.8 (how much damage is blocked)
+  readonly weight: number // Affects movement speed
+  readonly cost: number // Cost in currency
 }
 
 export const armorTiers: Record<string, ArmorTier> = {
   LIGHT: {
-    id: ArmorId("light"),
-    name: "Light Armor",
-    reduction: 0.2,           // 20% damage reduction
-    weight: 0.1,              // 10% movement speed penalty
-    cost: 1000
+    id: ArmorId('light'),
+    name: 'Light Armor',
+    reduction: 0.2, // 20% damage reduction
+    weight: 0.1, // 10% movement speed penalty
+    cost: 1000,
   },
-  
+
   MEDIUM: {
-    id: ArmorId("medium"),
-    name: "Medium Armor",
-    reduction: 0.5,           // 50% damage reduction
-    weight: 0.3,              // 30% movement speed penalty
-    cost: 2000
+    id: ArmorId('medium'),
+    name: 'Medium Armor',
+    reduction: 0.5, // 50% damage reduction
+    weight: 0.3, // 30% movement speed penalty
+    cost: 2000,
   },
-  
+
   HEAVY: {
-    id: ArmorId("heavy"),
-    name: "Heavy Armor",
-    reduction: 0.8,           // 80% damage reduction
-    weight: 0.5,              // 50% movement speed penalty
-    cost: 3000
-  }
+    id: ArmorId('heavy'),
+    name: 'Heavy Armor',
+    reduction: 0.8, // 80% damage reduction
+    weight: 0.5, // 50% movement speed penalty
+    cost: 3000,
+  },
 }
 
 // Trade-off: More protection = Slower movement = More vulnerable to skilled players
@@ -280,12 +263,12 @@ export const applyMovementSpeed = (
   armorTier: ArmorTier,
   isAiming: boolean
 ): number => {
-  const baseSpeed = 300  // Pixels per second
-  const aimmingPenalty = 0.7  // 30% slower when aiming
+  const baseSpeed = 300 // Pixels per second
+  const aimmingPenalty = 0.7 // 30% slower when aiming
   const armorPenalty = 1 - armorTier.weight
-  
+
   const finalSpeed = baseSpeed * armorPenalty * (isAiming ? aimmingPenalty : 1)
-  
+
   return finalSpeed
 }
 
@@ -303,9 +286,9 @@ export const applyMovementSpeed = (
 // modules/match/domain/modes/team-deathmatch.ts
 
 export interface TeamDeathmatchConfig {
-  readonly targetKills: number    // Match ends when team reaches this (default: 50)
-  readonly matchTime: number       // Maximum match duration (default: 15 minutes)
-  readonly teamSize: number        // Players per team (default: 8)
+  readonly targetKills: number // Match ends when team reaches this (default: 50)
+  readonly matchTime: number // Maximum match duration (default: 15 minutes)
+  readonly teamSize: number // Players per team (default: 8)
 }
 
 export interface TeamDeathmatchState {
@@ -317,35 +300,35 @@ export interface TeamDeathmatchState {
     readonly kills: number
     readonly players: Player[]
   }
-  readonly roundTime: number  // Seconds elapsed
+  readonly roundTime: number // Seconds elapsed
 }
 
 export const updateTeamDeathmatch = (
   state: TeamDeathmatchState,
   config: TeamDeathmatchConfig
-): "ongoing" | "team_a_wins" | "team_b_wins" => {
+): 'ongoing' | 'team_a_wins' | 'team_b_wins' => {
   // Check kill limit
   if (state.teamA.kills >= config.targetKills) {
-    return "team_a_wins"
+    return 'team_a_wins'
   }
   if (state.teamB.kills >= config.targetKills) {
-    return "team_b_wins"
+    return 'team_b_wins'
   }
-  
+
   // Check time limit
   if (state.roundTime >= config.matchTime * 60) {
     // Team with more kills wins
     if (state.teamA.kills > state.teamB.kills) {
-      return "team_a_wins"
+      return 'team_a_wins'
     }
     if (state.teamB.kills > state.teamA.kills) {
-      return "team_b_wins"
+      return 'team_b_wins'
     }
     // Tie if equal
-    return "tie"
+    return 'tie'
   }
-  
-  return "ongoing"
+
+  return 'ongoing'
 }
 ```
 
@@ -359,15 +342,15 @@ export interface SearchAndDestroyRound {
   readonly attackingTeam: TeamId
   readonly defendingTeam: TeamId
   readonly bombPlanted: boolean
-  readonly bombPlantedAt?: number  // Server time
+  readonly bombPlantedAt?: number // Server time
   readonly bombLocation?: BombSite
 }
 
 export const defuseTimer = {
-  PLANT_TIME: 3000,              // 3 seconds to plant
-  DEFUSE_TIME: 40000,            // 40 seconds to defuse
-  EXPLOSION_TIME: 35000,         // 35 seconds after plant
-  ROUND_END_TIME: 120000         // 2 minutes total round time
+  PLANT_TIME: 3000, // 3 seconds to plant
+  DEFUSE_TIME: 40000, // 40 seconds to defuse
+  EXPLOSION_TIME: 35000, // 35 seconds after plant
+  ROUND_END_TIME: 120000, // 2 minutes total round time
 }
 
 // Bomb behavior is server-authoritative
@@ -376,14 +359,14 @@ export const processBomb = (round: SearchAndDestroyRound) =>
     if (!round.bombPlanted) return
 
     const elapsedSincePlant = Date.now() - (round.bombPlantedAt || 0)
-    
+
     // Check if bomb exploded
     if (elapsedSincePlant >= defuseTimer.EXPLOSION_TIME) {
       yield* EventBus.publish(new BombExplodedEvent(round.roundNumber))
       // Attacking team wins
-      return "attacking_wins"
+      return 'attacking_wins'
     }
-    
+
     // Check if bomb was defused (would be set separately)
     // Return "defending_wins"
   })
@@ -395,8 +378,8 @@ export const processBomb = (round: SearchAndDestroyRound) =>
 // modules/match/domain/modes/elimination.ts
 
 export interface EliminationConfig {
-  readonly livesPerTeam: number      // Total lives pool (default: 20)
-  readonly roundCount: number        // Number of rounds (default: 15)
+  readonly livesPerTeam: number // Total lives pool (default: 20)
+  readonly roundCount: number // Number of rounds (default: 15)
 }
 
 export interface EliminationState {
@@ -440,37 +423,35 @@ export const progressionTargets = {
   // Level 3: 215 XP
   // Level 4: 347 XP
   // Level 50: 7+ Million XP
-  
+
   // Takes meaningful time, encourages long-term engagement
-  averageXpPerMatch: 300,  // 1 hour per level early
+  averageXpPerMatch: 300, // 1 hour per level early
   matchesPerLevel: {
-    early: 5,     // Levels 1-10: Quick progression
-    mid: 15,      // Levels 11-30: Balanced
-    late: 40      // Levels 31+: Hardcore grind
-  }
+    early: 5, // Levels 1-10: Quick progression
+    mid: 15, // Levels 11-30: Balanced
+    late: 40, // Levels 31+: Hardcore grind
+  },
 }
 
 // Reward skill improvement
-export const calculateMatchXP = (
-  performance: PlayerPerformance
-): number => {
+export const calculateMatchXP = (performance: PlayerPerformance): number => {
   const baseXP = 200
-  
+
   // Kills reward (but dying reduces XP)
   const killXP = performance.kills * 10
   const deathPenalty = performance.deaths * 5
-  
+
   // Objective play
   const objectiveXP = performance.objectiveScore * 2
-  
+
   // Bonus for winning
   const winBonus = performance.teamWon ? 100 : 0
-  
+
   const totalXP = Math.max(
-    50,  // Minimum for participation
+    50, // Minimum for participation
     baseXP + killXP - deathPenalty + objectiveXP + winBonus
   )
-  
+
   return totalXP
 }
 ```
@@ -488,13 +469,13 @@ export interface PlayerRank {
 }
 
 export const ranks: PlayerRank[] = [
-  { rankId: RankId("iron"), name: "Iron", minELO: 0, maxELO: 1000 },
-  { rankId: RankId("bronze"), name: "Bronze", minELO: 1000, maxELO: 1250 },
-  { rankId: RankId("silver"), name: "Silver", minELO: 1250, maxELO: 1500 },
-  { rankId: RankId("gold"), name: "Gold", minELO: 1500, maxELO: 1750 },
-  { rankId: RankId("platinum"), name: "Platinum", minELO: 1750, maxELO: 2000 },
-  { rankId: RankId("diamond"), name: "Diamond", minELO: 2000, maxELO: 2500 },
-  { rankId: RankId("radiant"), name: "Radiant", minELO: 2500, maxELO: Infinity }
+  { rankId: RankId('iron'), name: 'Iron', minELO: 0, maxELO: 1000 },
+  { rankId: RankId('bronze'), name: 'Bronze', minELO: 1000, maxELO: 1250 },
+  { rankId: RankId('silver'), name: 'Silver', minELO: 1250, maxELO: 1500 },
+  { rankId: RankId('gold'), name: 'Gold', minELO: 1500, maxELO: 1750 },
+  { rankId: RankId('platinum'), name: 'Platinum', minELO: 1750, maxELO: 2000 },
+  { rankId: RankId('diamond'), name: 'Diamond', minELO: 2000, maxELO: 2500 },
+  { rankId: RankId('radiant'), name: 'Radiant', minELO: 2500, maxELO: Infinity },
 ]
 
 // ELO-based ranking (zero-sum for fair matching)
@@ -502,13 +483,13 @@ export const updateELO = (
   playerELO: number,
   opponentELO: number,
   playerWon: boolean,
-  K = 32  // K-factor (lower = more stability)
+  K = 32 // K-factor (lower = more stability)
 ): number => {
   const expectedScore = 1 / (1 + Math.pow(10, (opponentELO - playerELO) / 400))
   const score = playerWon ? 1 : 0
-  
+
   const newELO = playerELO + K * (score - expectedScore)
-  
+
   return Math.round(newELO)
 }
 
@@ -535,7 +516,7 @@ export interface BattlePass {
 export interface BattlePassReward {
   readonly rewardId: RewardId
   readonly level: number
-  readonly type: "weapon_skin" | "operator_skin" | "credits" | "cosmetic"
+  readonly type: 'weapon_skin' | 'operator_skin' | 'credits' | 'cosmetic'
   readonly isPremiumOnly: boolean
   readonly content: RewardContent
 }
@@ -545,16 +526,16 @@ export interface BattlePassReward {
 export const battlePassModel = {
   freeTier: {
     // Cosmetics for free players
-    rewards: ["weapon_XP", "player_XP"],
-    cosmetics: 5
+    rewards: ['weapon_XP', 'player_XP'],
+    cosmetics: 5,
   },
   premiumTier: {
     // Cosmetics + exclusive skins for paid players
-    cost: 1000,  // Virtual currency
-    rewards: ["weapon_XP", "player_XP", "premium_currency"],
-    cosmetics: 15  // More choices
+    cost: 1000, // Virtual currency
+    rewards: ['weapon_XP', 'player_XP', 'premium_currency'],
+    cosmetics: 15, // More choices
   },
-  monetizationPrinciple: "Cosmetics only, no pay-to-win"
+  monetizationPrinciple: 'Cosmetics only, no pay-to-win',
 }
 ```
 
@@ -568,8 +549,8 @@ export interface WeaponSkin {
   readonly skinId: SkinId
   readonly weapon: WeaponId
   readonly name: string
-  readonly rarity: "common" | "rare" | "epic" | "legendary"
-  readonly cost: number  // In cosmetic currency
+  readonly rarity: 'common' | 'rare' | 'epic' | 'legendary'
+  readonly cost: number // In cosmetic currency
 }
 
 // Cosmetics are acquired through:
@@ -595,25 +576,25 @@ export interface Experiment {
   readonly hypothesis: string
   readonly treatment: Record<string, any>
   readonly control: Record<string, any>
-  readonly splitPercent: number  // e.g., 50% treatment, 50% control
+  readonly splitPercent: number // e.g., 50% treatment, 50% control
   readonly startDate: Date
   readonly endDate: Date
 }
 
 // Example: Testing new weapon balance
 export const weaponBalanceExperiment: Experiment = {
-  experimentId: "exp-2026-02-weapon-balance",
-  name: "M16 Damage Adjustment",
-  hypothesis: "Increasing M16 damage by 10% will improve its viability in mid-range",
+  experimentId: 'exp-2026-02-weapon-balance',
+  name: 'M16 Damage Adjustment',
+  hypothesis: 'Increasing M16 damage by 10% will improve its viability in mid-range',
   treatment: {
-    m16Damage: 50  // +10%
+    m16Damage: 50, // +10%
   },
   control: {
-    m16Damage: 45  // Original
+    m16Damage: 45, // Original
   },
   splitPercent: 50,
-  startDate: new Date("2026-02-01"),
-  endDate: new Date("2026-02-14")
+  startDate: new Date('2026-02-01'),
+  endDate: new Date('2026-02-14'),
 }
 
 // Metrics tracked during experiment:
@@ -630,10 +611,10 @@ export const weaponBalanceExperiment: Experiment = {
 
 export interface WeaponMetrics {
   readonly weaponId: WeaponId
-  readonly pickRate: number           // % of players using it
-  readonly winRate: number            // % of matches won with it
-  readonly killDeathRatio: number     // Average K/D
-  readonly timeToKill: number         // Average milliseconds
+  readonly pickRate: number // % of players using it
+  readonly winRate: number // % of matches won with it
+  readonly killDeathRatio: number // Average K/D
+  readonly timeToKill: number // Average milliseconds
   readonly playerSatisfaction: number // User feedback (1-10)
 }
 
@@ -700,6 +681,6 @@ Before shipping game mechanics:
 
 ---
 
-*Last Updated: February 2026*  
-*Design Philosophy: Skill-Based, Server-Authoritative, Community-Driven*  
-*Primary Goal: Fair, Fun, Competitive Gameplay*
+_Last Updated: February 2026_  
+_Design Philosophy: Skill-Based, Server-Authoritative, Community-Driven_  
+_Primary Goal: Fair, Fun, Competitive Gameplay_

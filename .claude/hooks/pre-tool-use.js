@@ -5,13 +5,13 @@
  * - Warns on dangerous bash commands
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('fs')
+const path = require('path')
 
 // Load configuration
 function loadConfig() {
-  const configPath = path.join(__dirname, 'hooks.json');
-  return JSON.parse(fs.readFileSync(configPath, 'utf8'));
+  const configPath = path.join(__dirname, 'hooks.json')
+  return JSON.parse(fs.readFileSync(configPath, 'utf8'))
 }
 
 /**
@@ -20,23 +20,23 @@ function loadConfig() {
  */
 function detectSecrets(toolContext) {
   if (toolContext.toolName !== 'bash' || !toolContext.command.includes('git commit')) {
-    return { allowed: true };
+    return { allowed: true }
   }
 
-  const config = loadConfig();
-  const secretPatterns = config.config.secretPatterns;
+  const config = loadConfig()
+  const secretPatterns = config.config.secretPatterns
 
   // Check for secrets in the command
-  const commandStr = toolContext.command;
-  
+  const commandStr = toolContext.command
+
   for (const pattern of secretPatterns) {
-    const regex = new RegExp(pattern);
+    const regex = new RegExp(pattern)
     if (regex.test(commandStr)) {
       return {
         allowed: false,
         error: `🚨 SECRET DETECTED: Commit blocked due to potential secret exposure. Pattern matched: ${pattern}`,
-        handler: 'secret-detector'
-      };
+        handler: 'secret-detector',
+      }
     }
   }
 
@@ -44,14 +44,14 @@ function detectSecrets(toolContext) {
   if (commandStr.includes('git commit') && !commandStr.includes('--allow-empty')) {
     try {
       // This would require additional file system access in real implementation
-      const stagedFilesCheck = `git diff --cached`;
+      const stagedFilesCheck = `git diff --cached`
       // Pattern matching would happen on actual file contents
     } catch (err) {
       // Silently continue if unable to check
     }
   }
 
-  return { allowed: true };
+  return { allowed: true }
 }
 
 /**
@@ -60,22 +60,22 @@ function detectSecrets(toolContext) {
  */
 function detectDangerousCommands(toolContext) {
   if (toolContext.toolName !== 'bash') {
-    return { allowed: true, warnings: [] };
+    return { allowed: true, warnings: [] }
   }
 
-  const config = loadConfig();
-  const dangerousPatterns = config.config.dangerousCommands;
-  const warnings = [];
+  const config = loadConfig()
+  const dangerousPatterns = config.config.dangerousCommands
+  const warnings = []
 
-  const command = toolContext.command;
+  const command = toolContext.command
 
   for (const pattern of dangerousPatterns) {
-    const regex = new RegExp(pattern);
+    const regex = new RegExp(pattern)
     if (regex.test(command)) {
       warnings.push({
         severity: 'high',
-        message: `⚠️  DANGEROUS COMMAND: This command matches a dangerous pattern and could cause data loss: ${pattern}`
-      });
+        message: `⚠️  DANGEROUS COMMAND: This command matches a dangerous pattern and could cause data loss: ${pattern}`,
+      })
     }
   }
 
@@ -83,22 +83,24 @@ function detectDangerousCommands(toolContext) {
   if (command.includes('sudo') && !command.includes('sudo -u')) {
     warnings.push({
       severity: 'medium',
-      message: '⚠️  ELEVATED PRIVILEGES: This command uses sudo. Ensure this is intentional.'
-    });
+      message: '⚠️  ELEVATED PRIVILEGES: This command uses sudo. Ensure this is intentional.',
+    })
   }
 
   if (command.includes('git push') && command.includes('--force')) {
     warnings.push({
       severity: 'high',
-      message: '⚠️  FORCE PUSH: This will overwrite remote history. Ensure you have reviewed all changes.'
-    });
+      message:
+        '⚠️  FORCE PUSH: This will overwrite remote history. Ensure you have reviewed all changes.',
+    })
   }
 
   if (command.length > 10000) {
     warnings.push({
       severity: 'medium',
-      message: '⚠️  VERY LONG COMMAND: This command is unusually long and may contain unintended operations.'
-    });
+      message:
+        '⚠️  VERY LONG COMMAND: This command is unusually long and may contain unintended operations.',
+    })
   }
 
   if (warnings.length > 0) {
@@ -106,43 +108,43 @@ function detectDangerousCommands(toolContext) {
       allowed: true,
       warnings: warnings,
       handler: 'dangerous-commands',
-      requiresConfirmation: warnings.some(w => w.severity === 'high')
-    };
+      requiresConfirmation: warnings.some((w) => w.severity === 'high'),
+    }
   }
 
-  return { allowed: true };
+  return { allowed: true }
 }
 
 /**
  * Main pre-tool-use handler
  */
 function preToolUse(toolContext) {
-  console.log(`\n📋 [PRE-TOOL-USE] Validating: ${toolContext.toolName}`);
+  console.log(`\n📋 [PRE-TOOL-USE] Validating: ${toolContext.toolName}`)
 
-  const secretCheck = detectSecrets(toolContext);
+  const secretCheck = detectSecrets(toolContext)
   if (!secretCheck.allowed) {
-    return secretCheck;
+    return secretCheck
   }
 
-  const dangerousCheck = detectDangerousCommands(toolContext);
+  const dangerousCheck = detectDangerousCommands(toolContext)
   if (!dangerousCheck.allowed) {
-    return dangerousCheck;
+    return dangerousCheck
   }
 
   if (dangerousCheck.warnings && dangerousCheck.warnings.length > 0) {
-    dangerousCheck.warnings.forEach(w => {
-      console.log(`   ${w.message}`);
-    });
+    dangerousCheck.warnings.forEach((w) => {
+      console.log(`   ${w.message}`)
+    })
     if (dangerousCheck.requiresConfirmation) {
-      console.log('   ⏸️  User confirmation may be required to proceed.');
+      console.log('   ⏸️  User confirmation may be required to proceed.')
     }
   }
 
-  return { allowed: true };
+  return { allowed: true }
 }
 
 module.exports = {
   preToolUse,
   detectSecrets,
-  detectDangerousCommands
-};
+  detectDangerousCommands,
+}
