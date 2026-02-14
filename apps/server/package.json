@@ -19,8 +19,8 @@
     "@effect/platform": "^0.94.4",
     "@effect/platform-bun": "^0.87.1",
     "@effect/experimental": "^0.58.0",
-    "@effect/sql": "^0.38.0",
-    "@effect/sql-pg": "^0.39.0",
+    "@effect/sql": "^0.49.0",
+    "@effect/sql-pg": "^0.50.3",
     "better-auth": "^1.4.18",
     "ioredis": "^5.9.3",
     "msgpackr": "^1.11.8"
