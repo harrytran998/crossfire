@@ -1,63 +1,63 @@
-$schema: 'https://moonrepo.dev/schemas/project.json'
+$schema: "https://moonrepo.dev/schemas/project.json"
 
-type: 'application'
-language: 'typescript'
+type: "application"
+language: "typescript"
 
 env:
-  NODE_ENV: 'development'
-  DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/crossfire'
-  REDIS_URL: 'redis://localhost:6379'
+  NODE_ENV: "development"
+  DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/crossfire"
+  REDIS_URL: "redis://localhost:6379"
 
 tasks:
   dev:
-    command: 'bun run src/index.ts'
-    description: 'Start development server with hot reload'
+    command: "bun run src/index.ts"
+    description: "Start development server with hot reload"
     local: true
     deps:
-      - 'shared:build'
+      - "shared:build"
     env:
-      NODE_ENV: 'development'
+      NODE_ENV: "development"
 
   build:
-    command: 'bunx tsdown'
-    description: 'Build server for production with tsdown'
+    command: "tsdown"
+    description: "Build server for production with tsdown"
     deps:
-      - 'shared:build'
-      - 'database:build'
+      - "shared:build"
+      - "database:build"
     inputs:
-      - 'src/**/*'
-      - 'tsdown.config.ts'
-      - 'package.json'
+      - "src/**/*"
+      - "tsdown.config.ts"
+      - "package.json"
     outputs:
-      - 'dist/'
+      - "dist/"
     env:
-      NODE_ENV: 'production'
+      NODE_ENV: "production"
 
   start:
-    command: 'bun run dist/index.js'
-    description: 'Start production server'
+    command: "bun run dist/index.js"
+    description: "Start production server"
     deps:
-      - '~:build'
+      - "~:build"
     env:
-      NODE_ENV: 'production'
+      NODE_ENV: "production"
 
   test:
-    command: 'bun test tests/'
-    description: 'Run server tests'
+    command: "bun test tests/"
+    description: "Run server tests"
     deps:
-      - 'shared:build'
+      - "shared:build"
     inputs:
-      - 'src/**/*'
-      - 'tests/**/*'
+      - "src/**/*"
+      - "tests/**/*"
     env:
-      NODE_ENV: 'test'
+      NODE_ENV: "test"
 
   migrate:
-    command: 'migrate -database $DATABASE_URL -path ../packages/database/migrations up'
-    description: 'Run database migrations'
+    command: "migrate -database $DATABASE_URL -path ../packages/database/migrations up"
+    description: "Run database migrations"
     deps:
-      - 'database:generate-types'
+      - "database:generate-types"
 
   seed:
-    command: 'bun run ../packages/database/scripts/seed.ts'
-    description: 'Seed database with initial data'
+    command: "bun run ../packages/database/scripts/seed.ts"
+    description: "Seed database with initial data"

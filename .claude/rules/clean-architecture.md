@@ -12,7 +12,7 @@
 
 ```
 ┌─────────────────────────────────────────────┐
-│  Frameworks & Drivers (Express, Prisma)     │
+│  Frameworks & Drivers (Express)     │
 ├─────────────────────────────────────────────┤
 │  Interface Adapters (Controllers, Gateways) │
 ├─────────────────────────────────────────────┤

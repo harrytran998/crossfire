@@ -41,8 +41,8 @@ Bun is an all-in-one JavaScript runtime designed as a faster alternative to Node
 ;[install]
 registry = 'https://registry.npmjs.org/'
 
-// Using bunx for CLI tools
-// $ bunx prisma migrate deploy
+// Using for CLI tools
+// $ migrate deploy
 ```
 
 ### Server Creation

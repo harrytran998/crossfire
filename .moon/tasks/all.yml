@@ -1,53 +1,53 @@
-$schema: 'https://moonrepo.dev/schemas/tasks.json'
+$schema: "https://moonrepo.dev/schemas/tasks.json"
 
 tasks:
   lint:
-    command: 'oxlint'
-    description: 'Lint source files with oxlint'
+    command: "oxlint"
+    description: "Lint source files with oxlint"
 
   lint-fix:
-    command: 'oxlint --fix'
-    description: 'Lint and auto-fix issues with oxlint'
+    command: "oxlint --fix"
+    description: "Lint and auto-fix issues with oxlint"
 
   format:
-    command: 'oxfmt --write'
-    description: 'Format source files with oxfmt'
+    command: "oxfmt --write"
+    description: "Format source files with oxfmt"
 
   format-check:
-    command: 'oxfmt --check'
-    description: 'Check formatting without making changes'
+    command: "oxfmt --check"
+    description: "Check formatting without making changes"
 
   typecheck:
-    command: 'bun tsc --noEmit'
-    description: 'Type check TypeScript files'
+    command: "bun tsc --noEmit"
+    description: "Type check TypeScript files"
     env:
-      NODE_ENV: 'development'
+      NODE_ENV: "development"
 
   build:
-    command: 'bunx tsdown'
-    description: 'Build the project with tsdown'
+    command: "tsdown"
+    description: "Build the project with tsdown"
     env:
-      NODE_ENV: 'production'
+      NODE_ENV: "production"
 
   test:
-    command: 'bun test'
-    description: 'Run tests with Bun test runner'
+    command: "bun test"
+    description: "Run tests with Bun test runner"
     env:
-      NODE_ENV: 'test'
+      NODE_ENV: "test"
 
   test-watch:
-    command: 'bun test --watch'
-    description: 'Run tests in watch mode'
+    command: "bun test --watch"
+    description: "Run tests in watch mode"
     local: true
     env:
-      NODE_ENV: 'test'
+      NODE_ENV: "test"
 
   dev:
-    description: 'Start development server'
+    description: "Start development server"
     local: true
     env:
-      NODE_ENV: 'development'
+      NODE_ENV: "development"
 
   clean:
-    command: 'rm -rf dist node_modules/.cache'
-    description: 'Clean build artifacts'
+    command: "rm -rf dist node_modules/.cache"
+    description: "Clean build artifacts"

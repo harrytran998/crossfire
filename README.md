@@ -40,7 +40,7 @@ crossfire/
 │   └── server/          # Bun + Effect backend
 ├── packages/
 │   ├── shared/          # Shared types and utilities
-│   └── database/        # Prisma schema and migrations
+│   └── database/        # schema and migrations
 ├── docs/               # Documentation
 │   ├── 01-product-requirements.md
 │   ├── 02-game-features.md
