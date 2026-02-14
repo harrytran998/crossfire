@@ -1,17 +1,25 @@
 # Database Schema Design
 
-## Crossfire Web Game - PostgreSQL Schema
+## Crossfire Web Game - PostgreSQL 18.2 Schema
 
 ---
 
 ## 1. Overview
 
-This document defines the complete PostgreSQL database schema for the Crossfire web game, supporting:
+This document defines the complete PostgreSQL 18.2 database schema for the Crossfire web game, supporting:
 - Player management and authentication
 - Game rooms and matchmaking
 - Match history and statistics
 - Weapons and inventory system
 - Progression and leaderboards
+
+### PostgreSQL 18 Features Used
+
+| Feature | Usage | Benefit |
+|---------|-------|---------|
+| **UUID v7** | Primary keys | Time-ordered, sortable IDs |
+| **Async I/O** | Automatic | 2-3x faster reads |
+| **Improved btree** | Indexes | Better query performance |
 
 ---
 
@@ -19,9 +27,26 @@ This document defines the complete PostgreSQL database schema for the Crossfire 
 
 ```sql
 -- Enable required extensions
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";  -- For text search
+CREATE EXTENSION IF NOT EXISTS "timescaledb";  -- For telemetry (if available)
+
+-- PostgreSQL 18 has built-in UUID v7 support
+-- No need for uuid-ossp or pgcrypto for UUID generation
+```
+
+### UUID v7 vs UUID v4
+
+```sql
+-- OLD (PostgreSQL 16): Random UUID v4 - not sortable by time
+id UUID PRIMARY KEY DEFAULT uuidv7()
+
+-- NEW (PostgreSQL 18): Time-ordered UUID v7 - sorts chronologically
+id UUID PRIMARY KEY DEFAULT uuidv7()
+
+-- Benefits:
+-- 1. Naturally ordered by insertion time
+-- 2. Better btree index performance (less page splits)
+-- 3. Can extract timestamp from UUID for debugging
 ```
 
 ---
@@ -33,7 +58,7 @@ CREATE EXTENSION IF NOT EXISTS "pg_trgm";  -- For text search
 ```sql
 -- Users table (authentication credentials)
 CREATE TABLE users (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuidv7(),  -- PostgreSQL 18 UUID v7
     username VARCHAR(32) NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
@@ -53,7 +78,7 @@ CREATE TABLE users (
 
 -- Sessions table
 CREATE TABLE sessions (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     refresh_token VARCHAR(255) NOT NULL UNIQUE,
     ip_address INET,
@@ -80,7 +105,7 @@ CREATE INDEX idx_sessions_active ON sessions (user_id, expires_at)
 ```sql
 -- Players table (game profile)
 CREATE TABLE players (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     
     -- Profile info
@@ -186,7 +211,7 @@ CREATE TABLE player_progression (
 
 -- XP gain history
 CREATE TABLE xp_history (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
     player_id UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
     
     -- Source
@@ -226,7 +251,7 @@ CREATE TYPE weapon_rarity AS ENUM (
 
 -- Weapons master table
 CREATE TABLE weapons (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
     weapon_key VARCHAR(64) NOT NULL UNIQUE,
     name VARCHAR(128) NOT NULL,
     description TEXT,
@@ -259,7 +284,7 @@ CREATE TABLE weapons (
 
 -- Weapon attachments
 CREATE TABLE weapon_attachments (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
     weapon_id UUID REFERENCES weapons(id) ON DELETE CASCADE,
     
     attachment_type VARCHAR(32) NOT NULL, -- 'scope', 'barrel', 'magazine', 'grip', 'stock'
@@ -287,7 +312,7 @@ CREATE INDEX idx_attachments_weapon ON weapon_attachments (weapon_id);
 ```sql
 -- Maps table
 CREATE TABLE maps (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
     map_key VARCHAR(64) NOT NULL UNIQUE,
     name VARCHAR(128) NOT NULL,
     description TEXT,
@@ -317,7 +342,7 @@ INSERT INTO maps (map_key, name, max_players, supported_modes, size_category) VA
 ```sql
 -- Player inventory (owned weapons)
 CREATE TABLE player_inventory (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
     player_id UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
     weapon_id UUID NOT NULL REFERENCES weapons(id),
     
@@ -331,7 +356,7 @@ CREATE TABLE player_inventory (
 
 -- Player loadouts
 CREATE TABLE player_loadouts (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
     player_id UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
     
     -- Loadout config
@@ -516,7 +541,7 @@ CREATE TYPE game_mode AS ENUM (
 
 -- Room configurations (templates)
 CREATE TABLE room_configs (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
     name VARCHAR(64) NOT NULL,
     game_mode game_mode NOT NULL,
     
@@ -546,7 +571,7 @@ INSERT INTO room_configs (name, game_mode, min_players, max_players, time_limit_
 
 -- Active game rooms (also stored in Redis for real-time)
 CREATE TABLE game_rooms (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
     config_id UUID NOT NULL REFERENCES room_configs(id),
     map_id UUID NOT NULL REFERENCES maps(id),
     host_player_id UUID NOT NULL REFERENCES players(id),
@@ -568,7 +593,7 @@ CREATE TABLE game_rooms (
 
 -- Room participants
 CREATE TABLE room_participants (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
     room_id UUID NOT NULL REFERENCES game_rooms(id) ON DELETE CASCADE,
     player_id UUID NOT NULL REFERENCES players(id),
     
@@ -596,7 +621,7 @@ CREATE INDEX idx_participants_player ON room_participants (player_id, joined_at 
 ```sql
 -- Matches (completed games)
 CREATE TABLE matches (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
     room_id UUID REFERENCES game_rooms(id),
     
     -- Match info
@@ -617,7 +642,7 @@ CREATE TABLE matches (
 
 -- Match participants (per-player stats)
 CREATE TABLE match_participants (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
     match_id UUID NOT NULL REFERENCES matches(id) ON DELETE CASCADE,
     player_id UUID NOT NULL REFERENCES players(id),
     
@@ -653,7 +678,7 @@ CREATE TABLE match_participants (
 
 -- Match weapon usage
 CREATE TABLE match_weapon_usage (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
     match_participant_id UUID NOT NULL REFERENCES match_participants(id) ON DELETE CASCADE,
     weapon_id UUID NOT NULL REFERENCES weapons(id),
     
@@ -683,7 +708,7 @@ CREATE INDEX idx_weapon_usage_participant ON match_weapon_usage (match_participa
 ```sql
 -- Friendships
 CREATE TABLE friendships (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
     requester_id UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
     addressee_id UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
     
@@ -712,7 +737,7 @@ CREATE TYPE leaderboard_period AS ENUM ('daily', 'weekly', 'monthly', 'all_time'
 
 -- Leaderboard definitions
 CREATE TABLE leaderboards (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
     name VARCHAR(128) NOT NULL,
     metric_key VARCHAR(32) NOT NULL, -- 'kills', 'wins', 'score', 'kd_ratio'
     period_type leaderboard_period NOT NULL,
@@ -727,7 +752,7 @@ CREATE TABLE leaderboards (
 
 -- Leaderboard entries (updated by background job)
 CREATE TABLE leaderboard_entries (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
     leaderboard_id UUID NOT NULL REFERENCES leaderboards(id) ON DELETE CASCADE,
     player_id UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
     
@@ -791,7 +816,7 @@ CREATE TYPE achievement_category AS ENUM (
 
 -- Achievements
 CREATE TABLE achievements (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
     achievement_key VARCHAR(64) NOT NULL UNIQUE,
     name VARCHAR(128) NOT NULL,
     description TEXT,
@@ -810,7 +835,7 @@ CREATE TABLE achievements (
 
 -- Achievement criteria
 CREATE TABLE achievement_criteria (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
     achievement_id UUID NOT NULL REFERENCES achievements(id) ON DELETE CASCADE,
     
     -- Condition
@@ -1041,5 +1066,6 @@ REINDEX INDEX idx_matches_player;
 
 ---
 
-*Document Version: 1.0*
+*Document Version: 2.1*
 *Last Updated: February 2026*
+*Changes: PostgreSQL 18.2, updated golang-migrate to 4.19.x, Redis 8.x*

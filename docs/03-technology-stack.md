@@ -20,24 +20,24 @@ This document outlines the recommended technology stack for building a browser-b
 
 | Layer | Technology | Version | Purpose |
 |-------|------------|---------|---------|
-| **Language** | TypeScript | 5.x | Type safety, better DX |
-| **Framework** | React | 18.x | UI components, state management |
-| **3D Engine** | Three.js | r171+ | 3D rendering, WebGPU support |
-| **React Integration** | React Three Fiber | 8.x | Declarative 3D in React |
-| **Physics** | Rapier.js | 0.12+ | WebAssembly physics engine |
-| **Audio** | Howler.js | 2.x | Cross-browser audio |
-| **Build Tool** | Vite | 5.x | Fast HMR, ES modules |
-| **State Management** | Zustand | 4.x | Lightweight state store |
+| **Language** | TypeScript | 5.9.x | Type safety, better DX |
+| **Framework** | React | 19.x | UI components, state management |
+| **3D Engine** | Three.js | 0.182.x | 3D rendering, WebGPU support |
+| **React Integration** | React Three Fiber | 9.x | Declarative 3D in React |
+| **Physics** | Rapier.js | 0.19.x | WebAssembly physics engine |
+| **Audio** | Howler.js | 2.2.x | Cross-browser audio |
+| **Build Tool** | Vite | 7.x | Fast HMR, ES modules |
+| **State Management** | Zustand | 5.x | Lightweight state store |
 
 ### 2.2 Why Three.js over Babylon.js?
 
 | Factor | Three.js | Babylon.js |
 |--------|----------|------------|
-| Bundle Size | ~168 KB gzipped | ~1.4 MB gzipped |
-| Weekly Downloads | 4.2M | 13K |
+| Bundle Size | ~170 KB gzipped | ~1.4 MB gzipped |
+| Weekly Downloads | 5M+ | 15K+ |
 | Community Size | Largest | Medium |
 | React Integration | React Three Fiber | Limited |
-| WebGPU Support | ✅ (r171+) | ✅ |
+| WebGPU Support | ✅ (0.182+) | ✅ |
 | Learning Curve | Medium | Higher |
 
 **Decision**: Three.js chosen for smaller bundle size, React Three Fiber integration, and larger community support.
@@ -93,12 +93,12 @@ const renderer = await WebGPURenderer.isAvailable()
 
 | Layer | Technology | Version | Purpose |
 |-------|------------|---------|---------|
-| **Language** | TypeScript | 5.x | Shared types with frontend |
-| **Runtime** | Bun | 1.x | Ultra-fast server runtime |
-| **Functional Framework** | Effect | 3.x | Functional programming, error handling |
+| **Language** | TypeScript | 5.9.x | Shared types with frontend |
+| **Runtime** | Bun | 1.3.x | Ultra-fast server runtime |
+| **Functional Framework** | Effect | 3.19.x | Functional programming, error handling |
 | **WebSocket** | Bun WebSocket | Built-in | Native high-performance WebSocket |
 | **Validation** | Effect Schema | 3.x | Type-safe validation |
-| **Database Client** | Prisma | 5.x | Type-safe database queries |
+| **Database Client** | Kysely | 0.28.x | Type-safe SQL query builder |
 
 ### 3.2 Why Bun?
 
@@ -335,16 +335,104 @@ const program = Effect.gen(function* (_) {
 
 | Layer | Technology | Version | Purpose |
 |-------|------------|---------|---------|
-| **Primary DB** | PostgreSQL | 16.x | Persistent data |
-| **Cache/Session** | Redis | 7.x | Real-time state, caching |
-| **ORM** | Prisma | 5.x | Type-safe queries |
-| **Migrations** | Prisma Migrate | 5.x | Schema migrations |
+| **Primary DB** | PostgreSQL | 18.2 | Persistent data with UUID v7 |
+| **Time-Series** | TimescaleDB | 2.25.x | Match telemetry, analytics |
+| **Cache/Session** | Redis | 8.x | Real-time state, caching |
+| **Query Builder** | Kysely | 0.28.x | Type-safe SQL queries |
+| **Migrations** | golang-migrate | 4.19.x | CLI-based schema migrations |
+| **Type Generation** | kysely-codegen | 0.19.x | Generate types from schema |
 
-### 4.2 PostgreSQL vs Alternatives
+### 4.2 PostgreSQL 18 Features
+
+PostgreSQL 18 introduces several features beneficial for gaming:
+
+| Feature | Description | Gaming Use Case |
+|---------|-------------|-----------------|
+| **UUID v7** | Time-ordered UUIDs | Primary keys that sort chronologically |
+| **Async I/O** | io_uring support | 2-3x faster sequential scans |
+| **Improved btree** | Better index performance | Faster player/match lookups |
+| **Generated columns** | Virtual computed columns | Derived stats without triggers |
+
+**UUID v7 Example:**
+```sql
+-- Time-ordered UUID (sorts chronologically, unlike UUID v4)
+CREATE TABLE players (
+  id UUID PRIMARY KEY DEFAULT uuidv7(),
+  username VARCHAR(50) NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- UUID v7 is sortable by time
+SELECT * FROM players ORDER BY id;  -- Returns in insertion order
+```
+
+### 4.3 Why Kysely over Prisma?
+
+| Factor | Kysely | Prisma |
+|--------|--------|--------|
+| **Query Control** | Full SQL control | Abstracted |
+| **Performance** | Raw SQL speed | ORM overhead |
+| **Bundle Size** | ~50KB | ~2MB |
+| **Complex Queries** | Native SQL | Limited |
+| **Type Safety** | Generated from DB | Schema-first |
+| **Migrations** | External tool (golang-migrate) | Built-in |
+
+**Decision**: Kysely chosen for:
+- Full SQL control for complex game queries
+- Better performance for high-throughput gaming workloads
+- Smaller bundle size
+- Native PostgreSQL 18 feature support
+
+### 4.4 Kysely Setup Example
+
+```typescript
+// packages/database/src/client.ts
+import { Kysely, PostgresDialect } from 'kysely'
+import { Pool } from 'pg'
+import type { Database } from './types'
+
+export const db = new Kysely<Database>({
+  dialect: new PostgresDialect({
+    pool: new Pool({
+      host: process.env.DB_HOST,
+      database: process.env.DB_NAME,
+      max: 10, // Connection pool size
+    })
+  })
+})
+
+// Type-safe query example
+const player = await db
+  .selectFrom('players')
+  .select(['id', 'username', 'stats'])
+  .where('id', '=', playerId)
+  .executeTakeFirst()
+```
+
+### 4.5 golang-migrate Workflow
+
+```bash
+# Install (macOS)
+brew install golang-migrate
+
+# Create migration
+migrate create -ext sql -dir migrations -seq create_players_table
+
+# Apply migrations
+migrate -database $DATABASE_URL -path migrations up
+
+# Rollback
+migrate -database $DATABASE_URL -path migrations down 1
+
+# Generate Kysely types from database
+kysely-codegen --out-file src/types.ts
+```
+
+### 4.6 PostgreSQL vs Alternatives
 
 | Database | Pros | Cons | Verdict |
 |----------|------|------|---------|
-| **PostgreSQL** | ACID, JSONB, mature | Vertical scaling primary | ✅ Recommended |
+| **PostgreSQL 18** | ACID, JSONB, UUID v7, mature | Vertical scaling primary | ✅ Recommended |
 | MongoDB | Flexible schema | No joins, consistency issues | ❌ Not for games |
 | MySQL | Popular | Limited JSON support | ⚠️ Alternative |
 
@@ -546,16 +634,110 @@ For smaller scale or MVP:
 
 ## 7. Development Tools
 
-### 7.1 Code Quality
+### 7.1 Monorepo Management
 
-| Tool | Purpose |
-|------|---------|
-| ESLint | Linting |
-| Prettier | Code formatting |
-| Husky | Git hooks |
-| lint-staged | Pre-commit checks |
+| Tool | Purpose | Notes |
+|------|---------|-------|
+| Moonrepo | Monorepo task runner | Full Bun support, task inheritance, affected builds |
 
-### 7.2 Testing
+#### Why Moonrepo over Turborepo?
+
+| Factor | Moonrepo | Turborepo |
+|--------|----------|-----------|
+| **Bun Support** | Tier 1 (native) | Tier 3 (limited) |
+| **Task Inheritance** | Full support | Limited |
+| **Toolchain Management** | Built-in | External |
+| **Project Globs** | Flexible | Fixed patterns |
+| **Remote Caching** | Built-in | Requires Vercel |
+| **Language Server** | Built-in | None |
+| **Affected Builds** | Built-in query | Via CLI |
+| **Config Format** | YAML (per-project) | JSON (single file) |
+
+**Moonrepo Configuration:**
+```yaml
+# .moon/workspace.yml
+projects:
+  - "apps/*"
+  - "packages/*"
+
+# .moon/toolchains.yml
+bun:
+  version: "1.3.9"
+  syncProjectWorkspaceDependencies: true
+
+typescript:
+  version: "5.9.3"
+  syncProjectReferences: true
+```
+
+**Moonrepo Commands:**
+```bash
+# Run task for all projects
+moon run :build
+moon run :lint
+moon run :test
+
+# Run task for specific project
+moon run server:dev
+moon run database:migrate-up
+
+# CI mode (affected tasks only)
+moon ci
+
+# Query affected projects
+moon query affected
+```
+
+### 7.2 Code Quality
+
+| Tool | Purpose | Notes |
+|------|---------|-------|
+| oxlint | Linting | Rust-based, 10-100x faster than ESLint |
+| oxfmt | Code formatting | Rust-based, Prettier-compatible |
+| Husky | Git hooks | Pre-commit hooks |
+| lint-staged | Pre-commit checks | Run oxlint on staged files |
+
+### 7.3 Why oxlint/oxfmt over ESLint/Prettier?
+
+| Factor | oxlint/oxfmt | ESLint/Prettier |
+|--------|--------------|-----------------|
+| **Speed** | 10-100x faster | Baseline |
+| **Language** | Rust | JavaScript |
+| **ESLint Rules** | 600+ compatible | All |
+| **Config Format** | JSON/TypeScript | JavaScript/JSON |
+| **IDE Support** | VS Code extension | Full ecosystem |
+
+**Oxlint Configuration:**
+```typescript
+// oxlint.config.ts
+import { defineConfig } from "oxlint"
+
+export default defineConfig({
+  categories: {
+    correctness: "error",
+    suspicious: "warn",
+  },
+  plugins: ["typescript", "react", "import", "unicorn"],
+  rules: {
+    "no-unused-vars": "error",
+    "typescript/no-explicit-any": "warn",
+  }
+})
+```
+
+**package.json Scripts:**
+```json
+{
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check"
+  }
+}
+```
+
+### 7.4 Testing
 
 | Tool | Purpose |
 |------|---------|
@@ -563,7 +745,7 @@ For smaller scale or MVP:
 | Playwright | E2E testing |
 | Bun Test | Native test runner |
 
-### 7.3 CI/CD
+### 7.5 CI/CD
 
 | Tool | Purpose |
 |------|---------|
@@ -579,24 +761,24 @@ For smaller scale or MVP:
 
 ```json
 {
-  "name": "crossfire-web-client",
+  "name": "@crossfire/web-client",
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "three": "^0.171.0",
-    "@react-three/fiber": "^8.15.0",
-    "@react-three/drei": "^9.88.0",
-    "rapier3d-compat": "^0.12.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "three": "^0.182.0",
+    "@react-three/fiber": "^9.5.0",
+    "@react-three/drei": "^10.7.0",
+    "@dimforge/rapier3d-compat": "^0.19.0",
     "howler": "^2.2.4",
-    "zustand": "^4.4.0",
-    "effect": "^3.x",
-    "@effect/platform": "^0.x"
+    "zustand": "^5.0.11",
+    "effect": "^3.19.16",
+    "@effect/platform": "^0.94.4"
   },
   "devDependencies": {
-    "typescript": "^5.3.0",
-    "vite": "^5.0.0",
-    "@types/react": "^18.2.0",
-    "@types/three": "^0.171.0"
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "@types/react": "^19.2.14",
+    "@types/three": "^0.182.0"
   }
 }
 ```
@@ -605,22 +787,25 @@ For smaller scale or MVP:
 
 ```json
 {
-  "name": "crossfire-web-server",
+  "name": "@crossfire/web-server",
   "dependencies": {
-    "effect": "^3.x",
-    "@effect/platform": "^0.x",
-    "@effect/platform-bun": "^0.x",
-    "@effect/experimental": "^0.x",
-    "@effect/sql": "^0.x",
-    "@effect/sql-prisma": "^0.x",
-    "@prisma/client": "^5.8.0",
-    "ioredis": "^5.3.0",
-    "msgpackr": "^1.x"
+    "effect": "^3.19.16",
+    "@effect/platform": "^0.94.4",
+    "@effect/platform-bun": "^0.87.1",
+    "@effect/experimental": "^0.58.0",
+    "kysely": "^0.28.11",
+    "pg": "^8.18.0",
+    "ioredis": "^5.9.3",
+    "msgpackr": "^1.11.8",
+    "better-auth": "^1.4.18"
   },
   "devDependencies": {
-    "typescript": "^5.3.0",
-    "prisma": "^5.8.0",
-    "@types/bun": "latest"
+    "typescript": "^5.9.3",
+    "kysely-codegen": "^0.19.0",
+    "oxlint": "^1.47.0",
+    "oxfmt": "^0.32.0",
+    "@types/bun": "^1.3.9",
+    "@types/pg": "^8.16.0"
   }
 }
 ```
@@ -634,13 +819,18 @@ For smaller scale or MVP:
 | 3D Rendering | Three.js | Babylon.js | Three.js (smaller bundle, R3F) |
 | UI Framework | React | Vue/Svelte | React (ecosystem, R3F) |
 | Backend | Effect Bun | Express | Effect Bun (functional, typed errors) |
-| Database | PostgreSQL | MongoDB | PostgreSQL (ACID, relations) |
+| Database | PostgreSQL 18.2 | MongoDB | PostgreSQL 18.2 (ACID, UUID v7) |
+| Query Builder | Kysely | Prisma | Kysely (control, performance) |
+| Migrations | golang-migrate | Prisma Migrate | golang-migrate (CLI, SQL-first) |
+| Monorepo | Moonrepo | Turborepo | Moonrepo (Bun support, task inheritance) |
 | WebSocket | Bun WebSocket | uWS | Bun WebSocket (native, high perf) |
-| ORM | Prisma | TypeORM | Prisma (DX, migrations) |
-| Cache | Redis | Memcached | Redis (data structures) |
+| Linting | oxlint | ESLint | oxlint (10-100x faster) |
+| Formatting | oxfmt | Prettier | oxfmt (Rust-based, fast) |
+| Cache | Redis 8.x | Memcached | Redis (data structures) |
 | Deployment | K8s + Agones | Docker Compose | K8s for scale, Docker for MVP |
 
 ---
 
-*Document Version: 1.0*
-*Last Updated: February 2026*
+*Document Version: 2.2*  
+*Last Updated: February 2026*  
+*Changes: Updated all dependency versions to latest (React 19.x, Three.js 0.182, Vite 7.x, PostgreSQL 18.2, Redis 8.x, etc.)*
