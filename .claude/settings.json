@@ -1,63 +1,21 @@
 {
-  "claude": {
-    "model": "claude-3-5-sonnet-20241022",
-    "thinking": {
-      "enabled": true,
-      "max_tokens": 8000,
-      "budget_tokens": 5000
-    },
-    "environment": {
-      "MAX_THINKING_TOKENS": 8000,
-      "BUDGET_TOKENS": 5000,
-      "NODE_ENV": "development",
-      "BAKE_PARALLEL": "4"
-    },
-    "packageManager": "bun",
-    "projectRoot": "/Users/harrytran998/Desktop/Me/crossfire"
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)",
+      "Bash(chmod 777 *)",
+      "Bash(dd *)",
+      "Bash(git push --force *)",
+      "Bash(git reset --force *)"
+    ],
+    "ask": [
+      "Bash(rm -rf *)",
+      "Bash(curl *)",
+      "Bash(sudo *)",
+    ],
+    "defaultMode": "bypassPermissions"
   },
-  "mcp": {
-    "servers": [
-      {
-        "name": "filesystem",
-        "enabled": true,
-        "config": {
-          "allowedDirectories": [
-            "/Users/harrytran998/Desktop/Me/crossfire"
-          ]
-        }
-      },
-      {
-        "name": "git",
-        "enabled": true,
-        "config": {}
-      },
-      {
-        "name": "bash",
-        "enabled": true,
-        "config": {}
-      }
-    ]
-  },
-  "linting": {
-    "linter": "oxlint",
-    "format": "biome",
-    "typescript": {
-      "version": "5.9",
-      "strict": true,
-      "noImplicitAny": true,
-      "noUnusedLocals": true,
-      "noUnusedParameters": true
-    }
-  },
-  "testing": {
-    "framework": "vitest",
-    "coverage": {
-      "enabled": true,
-      "minimum": 80
-    }
-  },
-  "git": {
-    "convention": "conventional-commits",
-    "branchNaming": "feature/*, bugfix/*, hotfix/*, release/*"
-  }
+  "model": "opus"
 }

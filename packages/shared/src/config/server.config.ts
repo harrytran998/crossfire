@@ -1,4 +1,4 @@
-import { Config, Effect, Layer } from 'effect'
+import { Config, Effect } from 'effect'
 
 export class ServerConfig extends Effect.Service<ServerConfig>()('ServerConfig', {
   succeed: Effect.gen(function* () {

@@ -1,4 +1,4 @@
-import { Effect, Layer, Runtime } from 'effect'
+import { Effect, Layer } from 'effect'
 import { serve } from 'bun'
 import {
   ServerConfig,

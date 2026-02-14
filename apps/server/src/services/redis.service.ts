@@ -1,4 +1,4 @@
-import { Effect, Context } from 'effect'
+import { Effect, Context, Layer } from 'effect'
 import IORedis from 'ioredis'
 import { RedisConfig } from '@crossfire/shared'
 import { RedisError } from '../errors'
