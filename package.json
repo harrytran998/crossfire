@@ -1,0 +1,41 @@
+{
+  "name": "crossfire",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Browser-Based Multiplayer FPS - Inspired by Crossfire",
+  "author": "Harry Tran",
+  "license": "MIT",
+  "type": "module",
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "packages/*"
+    ]
+  },
+  "scripts": {
+    "dev": "moon run server:dev",
+    "build": "moon run :build",
+    "test": "moon run :test",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "typecheck": "moon run :typecheck",
+    "clean": "moon run :clean",
+    "db:migrate": "moon run database:migrate-up",
+    "db:rollback": "moon run database:migrate-down",
+    "db:seed": "moon run database:seed",
+    "db:generate": "moon run database:generate-types",
+    "db:create": "moon run database:create-migration",
+    "ci": "moon ci"
+  },
+  "devDependencies": {
+    "oxlint": "^1.47.0",
+    "oxfmt": "^0.32.0",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "bun": ">=1.3.0"
+  },
+  "packageManager": "bun@1.3.9"
+}
