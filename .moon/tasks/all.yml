@@ -24,7 +24,7 @@ tasks:
       NODE_ENV: "development"
 
   build:
-    command: "tsdown"
+    command: "bunx tsdown"
     description: "Build the project with tsdown"
     env:
       NODE_ENV: "production"

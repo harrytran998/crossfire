@@ -5,7 +5,7 @@ language: "typescript"
 
 tasks:
   build:
-    command: "tsdown"
+    command: "bunx tsdown"
     description: "Build shared package with tsdown"
     inputs:
       - "src/**/*"
@@ -15,7 +15,7 @@ tasks:
       - "dist/"
 
   dev:
-    command: "tsdown --watch"
+    command: "bunx tsdown --watch"
     description: "Build in watch mode"
     local: true
 

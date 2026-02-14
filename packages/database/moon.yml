@@ -46,7 +46,7 @@ tasks:
       DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/crossfire"
 
   build:
-    command: "tsdown"
+    command: "bunx tsdown"
     description: "Build database package with tsdown"
     inputs:
       - "src/**/*"

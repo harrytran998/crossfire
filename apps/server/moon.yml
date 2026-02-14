@@ -19,7 +19,7 @@ tasks:
       NODE_ENV: "development"
 
   build:
-    command: "tsdown"
+    command: "bunx tsdown"
     description: "Build server for production with tsdown"
     deps:
       - "shared:build"
