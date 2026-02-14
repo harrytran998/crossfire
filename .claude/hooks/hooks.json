@@ -1,0 +1,103 @@
+{
+  "version": "1.0.0",
+  "enabled": true,
+  "hooks": {
+    "PreToolUse": {
+      "enabled": true,
+      "handlers": [
+        {
+          "name": "secret-detector",
+          "file": "pre-tool-use.js",
+          "description": "Detect and block commits containing secrets",
+          "severity": "error"
+        },
+        {
+          "name": "dangerous-commands",
+          "file": "pre-tool-use.js",
+          "description": "Warn on potentially dangerous bash commands",
+          "severity": "warning"
+        }
+      ]
+    },
+    "PostToolUse": {
+      "enabled": true,
+      "handlers": [
+        {
+          "name": "lint-suggester",
+          "file": "post-tool-use.js",
+          "description": "Suggest linting after file modifications",
+          "severity": "info"
+        },
+        {
+          "name": "operation-logger",
+          "file": "post-tool-use.js",
+          "description": "Log completed operations for audit trail",
+          "severity": "info"
+        }
+      ]
+    },
+    "SessionStart": {
+      "enabled": true,
+      "handlers": [
+        {
+          "name": "welcome-message",
+          "file": "session-start.js",
+          "description": "Display welcome message and version info",
+          "severity": "info"
+        },
+        {
+          "name": "version-check",
+          "file": "session-start.js",
+          "description": "Check for tool/dependency updates",
+          "severity": "warning"
+        }
+      ]
+    },
+    "SessionEnd": {
+      "enabled": true,
+      "handlers": [
+        {
+          "name": "session-summary",
+          "file": "session-end.js",
+          "description": "Display session summary and statistics",
+          "severity": "info"
+        },
+        {
+          "name": "cleanup-reminders",
+          "file": "session-end.js",
+          "description": "Provide reminders for cleanup tasks",
+          "severity": "info"
+        }
+      ]
+    }
+  },
+  "config": {
+    "secretPatterns": [
+      "(?i)(password|passwd|pwd)\\s*[:=]",
+      "(?i)(api[_-]?key|apikey)\\s*[:=]",
+      "(?i)(secret|token)\\s*[:=]",
+      "(?i)(aws|gcp|azure)\\s*[_-]?(key|secret)",
+      "private[_-]?key",
+      "BEGIN PRIVATE KEY",
+      "BEGIN RSA PRIVATE KEY"
+    ],
+    "dangerousCommands": [
+      "rm\\s+-rf\\s+/",
+      "dd\\s+if=",
+      ":(){ *:|:|&",
+      "fork\\(\\)",
+      "mkfs",
+      ">\\s*/dev/sda",
+      "chmod\\s+000",
+      "git\\s+push\\s+.*--force"
+    ],
+    "lintTriggers": [
+      "\\.ts$",
+      "\\.tsx$",
+      "\\.js$",
+      "\\.jsx$",
+      "\\.json$",
+      "\\.css$"
+    ]
+  }
+}

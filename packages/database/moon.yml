@@ -1,0 +1,54 @@
+$schema: "https://moonrepo.dev/schemas/project.json"
+
+type: "library"
+language: "typescript"
+
+env:
+  DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/crossfire"
+
+tasks:
+  generate-types:
+    command: "kysely-codegen --out-file src/types.ts"
+    description: "Generate TypeScript types from database schema"
+    inputs:
+      - "migrations/**/*"
+    outputs:
+      - "src/types.ts"
+
+  migrate-up:
+    command: "migrate -database $DATABASE_URL -path migrations up"
+    description: "Apply all pending migrations"
+    env:
+      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/crossfire"
+
+  migrate-down:
+    command: "migrate -database $DATABASE_URL -path migrations down 1"
+    description: "Rollback last migration"
+    env:
+      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/crossfire"
+
+  create-migration:
+    command: "migrate create -ext sql -dir migrations -seq"
+    description: "Create a new migration file (usage: moon run database:create-migration -- <name>)"
+    local: true
+
+  seed:
+    command: "bun run scripts/seed.ts"
+    description: "Seed database with initial data"
+    deps:
+      - "~:migrate-up"
+
+  reset:
+    command: "migrate -database $DATABASE_URL -path migrations drop"
+    description: "Drop all tables and reset database"
+    local: true
+    env:
+      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/crossfire"
+
+  build:
+    command: "bun build src/index.ts --outdir dist"
+    description: "Build database package"
+    inputs:
+      - "src/**/*"
+    outputs:
+      - "dist/"

@@ -1,0 +1,78 @@
+{
+  "name": "docker",
+  "version": "1.0.0",
+  "enabled": true,
+  "description": "Docker MCP server for container and compose management",
+  "config": {
+    "command": "node",
+    "args": ["${MCP_DIR}/docker/server.js"],
+    "env": {
+      "DOCKER_HOST": "${env.DOCKER_HOST}",
+      "DOCKER_SOCKET": "/var/run/docker.sock",
+      "DOCKER_TIMEOUT": "30000",
+      "LOG_LEVEL": "info"
+    }
+  },
+  "tools": [
+    {
+      "name": "list_containers",
+      "description": "List all Docker containers (running and stopped)"
+    },
+    {
+      "name": "get_container_details",
+      "description": "Get detailed information about a specific container"
+    },
+    {
+      "name": "start_container",
+      "description": "Start a stopped container"
+    },
+    {
+      "name": "stop_container",
+      "description": "Stop a running container"
+    },
+    {
+      "name": "restart_container",
+      "description": "Restart a container"
+    },
+    {
+      "name": "remove_container",
+      "description": "Remove a container"
+    },
+    {
+      "name": "get_container_logs",
+      "description": "Get logs from a container"
+    },
+    {
+      "name": "execute_command",
+      "description": "Execute a command inside a running container"
+    },
+    {
+      "name": "list_images",
+      "description": "List all Docker images"
+    },
+    {
+      "name": "pull_image",
+      "description": "Pull a Docker image from a registry"
+    },
+    {
+      "name": "list_compose_services",
+      "description": "List services from a docker-compose file"
+    },
+    {
+      "name": "compose_up",
+      "description": "Start containers defined in docker-compose file"
+    },
+    {
+      "name": "compose_down",
+      "description": "Stop and remove containers from docker-compose file"
+    },
+    {
+      "name": "get_container_stats",
+      "description": "Get resource usage statistics for a container"
+    },
+    {
+      "name": "inspect_network",
+      "description": "Inspect Docker network and connected containers"
+    }
+  ]
+}

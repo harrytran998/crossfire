@@ -1,0 +1,26 @@
+$schema: "https://moonrepo.dev/schemas/project.json"
+
+type: "library"
+language: "typescript"
+
+tasks:
+  build:
+    command: "bun build src/index.ts --outdir dist"
+    description: "Build shared package"
+    inputs:
+      - "src/**/*"
+      - "package.json"
+    outputs:
+      - "dist/"
+
+  dev:
+    command: "bun build src/index.ts --outdir dist --watch"
+    description: "Build in watch mode"
+    local: true
+
+  test:
+    command: "bun test tests/"
+    description: "Run shared package tests"
+    inputs:
+      - "src/**/*"
+      - "tests/**/*"

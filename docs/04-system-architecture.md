@@ -38,7 +38,7 @@
 │  │                                                                           │    │
 │  │  ┌────────────────┐     ┌────────────────┐     ┌────────────────┐       │    │
 │  │  │  API Server    │     │  API Server    │     │  API Server    │       │    │
-│  │  │  (NestJS)      │     │  (NestJS)      │     │  (NestJS)      │       │    │
+│  │  │ (Effect Bun)   │     │ (Effect Bun)   │     │ (Effect Bun)   │       │    │
 │  │  │                │     │                │     │                │       │    │
 │  │  │ - Auth Service │     │ - Auth Service │     │ - Auth Service │       │    │
 │  │  │ - User Service │     │ - User Service │     │ - User Service │       │    │
@@ -121,7 +121,7 @@
 │  │  │  Zustand    │  │   Game      │  │     Network         │  │ │
 │  │  │  Store      │  │   State     │  │     Manager         │  │ │
 │  │  │             │  │             │  │                     │  │ │
-│  │  │ - UI State  │  │ - Players   │  │ - Socket.IO         │  │ │
+│  │  │ - UI State  │  │ - Players   │  │ - Bun WebSocket     │  │ │
 │  │  │ - Settings  │  │ - Room      │  │ - Input Buffer      │  │ │
 │  │  │ - Auth      │  │ - Match     │  │ - State Sync        │  │ │
 │  │  └─────────────┘  └─────────────┘  └─────────────────────┘  │ │
@@ -204,7 +204,7 @@
 │  ┌─────────────────────────────────────────────────────────────┐ │
 │  │                    DATA ACCESS LAYER                         │ │
 │  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │ │
-│  │  │ Prisma ORM  │  │  Redis      │  │  Repository        │  │ │
+│  │  │   Kysely    │  │  Redis      │  │  Repository        │  │ │
 │  │  │ (PostgreSQL)│  │  Service    │  │  Services          │  │ │
 │  │  └─────────────┘  └─────────────┘  └─────────────────────┘  │ │
 │  └─────────────────────────────────────────────────────────────┘ │
@@ -544,7 +544,7 @@
 │  ┌─────────────────────────────────────────────────────────────┐ │
 │  │  - JWT Authentication                                        │ │
 │  │  - Input Validation (class-validator)                       │ │
-│  │  - SQL Injection Prevention (Prisma parameterized)          │ │
+│  │  - SQL Injection Prevention (Kysely parameterized)          │ │
 │  │  - XSS Prevention                                            │ │
 │  └─────────────────────────────────────────────────────────────┘ │
 │                                                                   │
