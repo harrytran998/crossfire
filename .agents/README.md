@@ -7,15 +7,15 @@ This folder is the canonical, tool-agnostic AI workspace for this repository.
 Initial source was mirrored from `.claude/` to keep existing knowledge unchanged.
 
 | Source (`.claude`) | Canonical (`.agents`) |
-| --- | --- |
-| `agents/` | `agents/` |
-| `commands/` | `commands/` |
-| `rules/` | `rules/` |
-| `skills/` | `skills/` |
-| `hooks/` | `hooks/` |
-| `mcp/` | `mcp/` |
-| `settings.json` | `settings.json` |
-| `CLAUDE.md` | `CLAUDE.md` |
+| ------------------ | --------------------- |
+| `agents/`          | `agents/`             |
+| `commands/`        | `commands/`           |
+| `rules/`           | `rules/`              |
+| `skills/`          | `skills/`             |
+| `hooks/`           | `hooks/`              |
+| `mcp/`             | `mcp/`                |
+| `settings.json`    | `settings.json`       |
+| `CLAUDE.md`        | `CLAUDE.md`           |
 
 Compatibility aliases are included:
 
