@@ -1,0 +1,54 @@
+{
+  "name": "postgres",
+  "version": "1.0.0",
+  "enabled": true,
+  "description": "PostgreSQL MCP server for executing queries and inspecting schema",
+  "config": {
+    "command": "node",
+    "args": ["${MCP_DIR}/postgres/server.js"],
+    "env": {
+      "DATABASE_URL": "${env.DATABASE_URL}",
+      "DATABASE_HOST": "${env.DATABASE_HOST}",
+      "DATABASE_PORT": "${env.DATABASE_PORT}",
+      "DATABASE_NAME": "${env.DATABASE_NAME}",
+      "DATABASE_USER": "${env.DATABASE_USER}",
+      "DATABASE_PASSWORD": "${env.DATABASE_PASSWORD}",
+      "QUERY_TIMEOUT": "30000",
+      "LOG_LEVEL": "info"
+    }
+  },
+  "tools": [
+    {
+      "name": "execute_query",
+      "description": "Execute a SQL query against the PostgreSQL database"
+    },
+    {
+      "name": "list_tables",
+      "description": "List all tables in the current database"
+    },
+    {
+      "name": "get_table_schema",
+      "description": "Get the schema/columns for a specific table"
+    },
+    {
+      "name": "describe_database",
+      "description": "Get overall database structure and statistics"
+    },
+    {
+      "name": "execute_prepared_statement",
+      "description": "Execute a prepared statement with parameters"
+    },
+    {
+      "name": "get_table_indexes",
+      "description": "List indexes for a specific table"
+    },
+    {
+      "name": "get_foreign_keys",
+      "description": "List foreign key relationships for a table"
+    },
+    {
+      "name": "export_query_results",
+      "description": "Export query results to CSV or JSON format"
+    }
+  ]
+}

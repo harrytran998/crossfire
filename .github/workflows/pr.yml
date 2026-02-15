@@ -34,5 +34,11 @@ jobs:
       - name: Run typecheck
         run: bun run typecheck
 
-      - name: Build packages
-        run: bun run build
+      - name: Build shared package
+        run: bun run --cwd packages/shared build
+
+      - name: Build database package
+        run: bun run --cwd packages/database build
+
+      - name: Build server
+        run: bun build apps/server/src/index.ts --outdir apps/server/dist --target bun
