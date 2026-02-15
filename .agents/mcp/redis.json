@@ -1,0 +1,69 @@
+{
+  "name": "redis",
+  "version": "1.0.0",
+  "enabled": true,
+  "description": "Redis MCP server for cache and session management",
+  "config": {
+    "command": "node",
+    "args": ["${MCP_DIR}/redis/server.js"],
+    "env": {
+      "REDIS_URL": "${env.REDIS_URL}",
+      "REDIS_HOST": "${env.REDIS_HOST}",
+      "REDIS_PORT": "${env.REDIS_PORT}",
+      "REDIS_PASSWORD": "${env.REDIS_PASSWORD}",
+      "REDIS_DB": "${env.REDIS_DB}",
+      "REDIS_TIMEOUT": "5000",
+      "LOG_LEVEL": "info"
+    }
+  },
+  "tools": [
+    {
+      "name": "get_key",
+      "description": "Get the value of a Redis key"
+    },
+    {
+      "name": "set_key",
+      "description": "Set a Redis key with optional TTL"
+    },
+    {
+      "name": "delete_key",
+      "description": "Delete one or more Redis keys"
+    },
+    {
+      "name": "list_keys",
+      "description": "List keys matching a pattern"
+    },
+    {
+      "name": "get_key_ttl",
+      "description": "Get the remaining TTL of a key"
+    },
+    {
+      "name": "expire_key",
+      "description": "Set expiration time for a key"
+    },
+    {
+      "name": "get_hash",
+      "description": "Get all fields and values from a Redis hash"
+    },
+    {
+      "name": "set_hash_field",
+      "description": "Set a field in a Redis hash"
+    },
+    {
+      "name": "list_sessions",
+      "description": "List all session keys in Redis"
+    },
+    {
+      "name": "get_session",
+      "description": "Get session data from Redis"
+    },
+    {
+      "name": "clear_cache",
+      "description": "Clear all cache entries or entries matching a pattern"
+    },
+    {
+      "name": "get_redis_info",
+      "description": "Get Redis server info and statistics"
+    }
+  ]
+}

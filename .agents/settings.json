@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)",
+      "Bash(chmod 777 *)",
+      "Bash(dd *)",
+      "Bash(git push --force *)",
+      "Bash(git reset --force *)"
+    ],
+    "ask": ["Bash(rm -rf *)", "Bash(curl *)", "Bash(sudo *)"],
+    "defaultMode": "bypassPermissions"
+  },
+  "model": "opus"
+}
