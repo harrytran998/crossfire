@@ -60,8 +60,8 @@ describe('AuthService', () => {
           email: testEmail,
           password: 'WrongPassword!',
         })
-      })
-    ).catch((e) => e)
+      }).pipe(Effect.flip)
+    )
 
     expect(result).toBeInstanceOf(InvalidCredentialsError)
   })
