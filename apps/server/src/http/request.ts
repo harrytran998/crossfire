@@ -11,7 +11,10 @@ export const parseJsonObject = async (
 ): Promise<{ ok: true; body: Record<string, unknown> } | { ok: false; response: Response }> => {
   try {
     const parsed = await request.json()
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    const isObject = parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)
+    const prototype = isObject ? Object.getPrototypeOf(parsed) : null
+
+    if (!isObject || (prototype !== Object.prototype && prototype !== null)) {
       return {
         ok: false,
         response: Response.json({ error: 'Invalid JSON body' }, { status: 400 }),
@@ -25,4 +28,21 @@ export const parseJsonObject = async (
       response: Response.json({ error: 'Malformed JSON body' }, { status: 400 }),
     }
   }
+}
+
+export const getClientIp = (req: Request): string => {
+  const forwardedFor = req.headers.get('x-forwarded-for')
+  if (forwardedFor) {
+    const first = forwardedFor.split(',')[0]?.trim()
+    if (first) {
+      return first
+    }
+  }
+
+  const connectingIp = req.headers.get('cf-connecting-ip')?.trim()
+  if (connectingIp) {
+    return connectingIp
+  }
+
+  return 'unknown'
 }
