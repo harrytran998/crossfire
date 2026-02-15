@@ -1,7 +1,7 @@
 import { Config, Effect } from 'effect'
 
 export class ServerConfig extends Effect.Service<ServerConfig>()('ServerConfig', {
-  succeed: Effect.gen(function* () {
+  effect: Effect.gen(function* () {
     const host = yield* Config.string('HOST').pipe(Config.withDefault('localhost'))
     const port = yield* Config.integer('PORT').pipe(Config.withDefault(3000))
     const nodeEnv = yield* Config.string('NODE_ENV').pipe(Config.withDefault('development'))

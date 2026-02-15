@@ -8,9 +8,9 @@ import {
 } from '@crossfire/shared'
 
 export const ConfigLayer = Layer.mergeAll(
-  ServerConfig.Live,
-  DatabaseConfig.Live,
-  RedisConfig.Live,
-  AuthConfig.Live,
-  LoggingConfig.Live
+  ServerConfig.Default,
+  DatabaseConfig.Default,
+  RedisConfig.Default,
+  AuthConfig.Default,
+  LoggingConfig.Default
 )

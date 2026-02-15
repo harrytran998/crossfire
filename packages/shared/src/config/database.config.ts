@@ -1,7 +1,7 @@
 import { Config, Effect, Redacted } from 'effect'
 
 export class DatabaseConfig extends Effect.Service<DatabaseConfig>()('DatabaseConfig', {
-  succeed: Effect.gen(function* () {
+  effect: Effect.gen(function* () {
     const url = yield* Config.redacted('DATABASE_URL')
     const host = yield* Config.string('DB_HOST').pipe(Config.withDefault('localhost'))
     const port = yield* Config.integer('DB_PORT').pipe(Config.withDefault(5432))

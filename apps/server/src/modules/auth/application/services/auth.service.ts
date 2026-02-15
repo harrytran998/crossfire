@@ -12,7 +12,7 @@ import {
   UserNotFoundError,
   UnauthorizedError,
 } from '../../domain/errors/auth.errors'
-import { CryptoService } from '../../infrastructure/adapters/crypto.service'
+import { CryptoService, CryptoServiceLive } from '../../infrastructure/adapters/crypto.service'
 import {
   AuthRepository as AuthRepositoryTag,
   AuthRepositoryLive,
@@ -154,4 +154,4 @@ export const AuthServiceLive = Layer.effect(
       getUserById,
     })
   })
-).pipe(Layer.provide(AuthRepositoryLive))
+).pipe(Layer.provide(AuthRepositoryLive), Layer.provide(CryptoServiceLive))
