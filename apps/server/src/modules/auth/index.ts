@@ -28,4 +28,4 @@ export {
   AuthRepositoryLive,
 } from './infrastructure/repositories'
 export { CryptoService, CryptoServiceLive } from './infrastructure/adapters'
-export { AuthRoutes, AuthMiddleware, CurrentAuth } from './presentation'
+export { handleAuthRequest } from './presentation'
