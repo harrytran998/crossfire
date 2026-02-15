@@ -7,9 +7,11 @@ import { AuthServiceLive } from './modules/auth/application/services/auth.servic
 import { PlayerServiceLive } from './modules/player/application/services/player.service'
 import { StaticDataServiceLive } from './modules/static-data/application/services/static-data.service'
 import { handleTaggedError } from './http/response'
-import { handleAuthRequest } from './modules/auth'
-import { handlePlayerRequest } from './modules/player'
-import { handleStaticDataRequest } from './modules/static-data'
+import { applySecurityHeaders, handlePreflightRequest } from './http/security'
+import { RadixRouter, type RouteDefinition } from './http/radix-router'
+import { authRoutes } from './modules/auth'
+import { playerRoutes } from './modules/player'
+import { staticDataRoutes } from './modules/static-data'
 
 const BaseLayer = Layer.mergeAll(ConfigLayer, DatabaseServiceLive)
 
@@ -22,16 +24,51 @@ const AppLayer = Layer.mergeAll(
 const runApp = <A, E, R>(effect: Effect.Effect<A, E, R>) =>
   Effect.runPromise(Effect.provide(effect, AppLayer) as Effect.Effect<A, E, never>)
 
-const tryRouteHandlers = async (req: Request, path: string): Promise<Response | null> => {
-  const handlers = [handleAuthRequest, handlePlayerRequest, handleStaticDataRequest] as const
-  for (const handler of handlers) {
-    const response = await handler(req, path, runApp)
-    if (response) {
-      return response
-    }
+const router = new RadixRouter()
+
+const baseRoutes: readonly RouteDefinition[] = [
+  {
+    method: 'GET',
+    path: '/health',
+    handler: async () => new Response('OK', { status: 200 }),
+  },
+  {
+    method: 'GET',
+    path: '/api',
+    handler: async () =>
+      Response.json({
+        name: 'Crossfire API',
+        version: '0.1.0',
+        status: 'running',
+      }),
+  },
+]
+
+router.addMany(baseRoutes)
+router.addMany(authRoutes)
+router.addMany(playerRoutes)
+router.addMany(staticDataRoutes)
+
+const dispatchRoute = async (req: Request, path: string): Promise<Response> => {
+  const match = router.match(req.method, path)
+
+  if (match.kind === 'not_found') {
+    return new Response('Not Found', { status: 404 })
   }
 
-  return null
+  if (match.kind === 'method_not_allowed') {
+    return new Response('Method Not Allowed', {
+      status: 405,
+      headers: {
+        Allow: match.allow.join(', '),
+      },
+    })
+  }
+
+  return match.handler(req, {
+    params: match.params,
+    runApp,
+  })
 }
 
 const Program = Effect.gen(function* () {
@@ -47,23 +84,16 @@ const Program = Effect.gen(function* () {
     async fetch(req) {
       const path = new URL(req.url).pathname
 
-      if (path === '/health') {
-        return new Response('OK', { status: 200 })
-      }
-
-      if (path === '/api') {
-        return Response.json({
-          name: 'Crossfire API',
-          version: '0.1.0',
-          status: 'running',
-        })
+      const preflight = handlePreflightRequest(req)
+      if (preflight) {
+        return applySecurityHeaders(preflight, req)
       }
 
       try {
-        const response = await tryRouteHandlers(req, path)
-        return response ?? new Response('Not Found', { status: 404 })
+        const response = await dispatchRoute(req, path)
+        return applySecurityHeaders(response, req)
       } catch (error) {
-        return handleTaggedError(error)
+        return applySecurityHeaders(handleTaggedError(error), req)
       }
     },
   })
