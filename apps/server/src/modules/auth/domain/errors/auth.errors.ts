@@ -3,10 +3,7 @@ import { HttpServerRespondable, HttpServerResponse } from '@effect/platform'
 
 export class InvalidCredentialsError extends Data.TaggedError('InvalidCredentialsError')<{}> {
   [HttpServerRespondable.symbol]() {
-    return HttpServerResponse.json(
-      { error: 'Invalid email or password' },
-      { status: 401 }
-    )
+    return HttpServerResponse.json({ error: 'Invalid email or password' }, { status: 401 })
   }
 }
 
@@ -14,37 +11,25 @@ export class UserAlreadyExistsError extends Data.TaggedError('UserAlreadyExistsE
   readonly field: 'email' | 'username'
 }> {
   [HttpServerRespondable.symbol]() {
-    return HttpServerResponse.json(
-      { error: `${this.field} already registered` },
-      { status: 409 }
-    )
+    return HttpServerResponse.json({ error: `${this.field} already registered` }, { status: 409 })
   }
 }
 
 export class UserNotFoundError extends Data.TaggedError('UserNotFoundError')<{}> {
   [HttpServerRespondable.symbol]() {
-    return HttpServerResponse.json(
-      { error: 'User not found' },
-      { status: 404 }
-    )
+    return HttpServerResponse.json({ error: 'User not found' }, { status: 404 })
   }
 }
 
 export class SessionExpiredError extends Data.TaggedError('SessionExpiredError')<{}> {
   [HttpServerRespondable.symbol]() {
-    return HttpServerResponse.json(
-      { error: 'Session expired' },
-      { status: 401 }
-    )
+    return HttpServerResponse.json({ error: 'Session expired' }, { status: 401 })
   }
 }
 
 export class UnauthorizedError extends Data.TaggedError('UnauthorizedError')<{}> {
   [HttpServerRespondable.symbol]() {
-    return HttpServerResponse.json(
-      { error: 'Unauthorized' },
-      { status: 401 }
-    )
+    return HttpServerResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 }
 
@@ -54,10 +39,10 @@ export class UserBannedError extends Data.TaggedError('UserBannedError')<{
 }> {
   [HttpServerRespondable.symbol]() {
     return HttpServerResponse.json(
-      { 
+      {
         error: 'Account banned',
         reason: this.reason,
-        until: this.until?.toISOString() 
+        until: this.until?.toISOString(),
       },
       { status: 403 }
     )
@@ -66,10 +51,7 @@ export class UserBannedError extends Data.TaggedError('UserBannedError')<{
 
 export class EmailNotVerifiedError extends Data.TaggedError('EmailNotVerifiedError')<{}> {
   [HttpServerRespondable.symbol]() {
-    return HttpServerResponse.json(
-      { error: 'Email not verified' },
-      { status: 403 }
-    )
+    return HttpServerResponse.json({ error: 'Email not verified' }, { status: 403 })
   }
 }
 

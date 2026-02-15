@@ -1,5 +1,11 @@
 import { Effect, Context, Layer } from 'effect'
-import type { User, Session, CreateUserInput, LoginInput, AuthResult } from '../../domain/entities/user.entity'
+import type {
+  User,
+  Session,
+  CreateUserInput,
+  LoginInput,
+  AuthResult,
+} from '../../domain/entities/user.entity'
 import {
   InvalidCredentialsError,
   UserBannedError,
@@ -7,15 +13,22 @@ import {
   UnauthorizedError,
 } from '../../domain/errors/auth.errors'
 import { CryptoService } from '../../infrastructure/adapters/crypto.service'
-import { AuthRepository as AuthRepositoryTag, AuthRepositoryLive } from '../../infrastructure/repositories/auth.repository.impl'
+import {
+  AuthRepository as AuthRepositoryTag,
+  AuthRepositoryLive,
+} from '../../infrastructure/repositories/auth.repository.impl'
 
 const TOKEN_EXPIRATION_MS = 60 * 60 * 24 * 7 * 1000
 
 export interface AuthService {
   readonly register: (input: CreateUserInput) => Effect.Effect<AuthResult, InvalidCredentialsError>
-  readonly login: (input: LoginInput) => Effect.Effect<AuthResult, InvalidCredentialsError | UserBannedError>
+  readonly login: (
+    input: LoginInput
+  ) => Effect.Effect<AuthResult, InvalidCredentialsError | UserBannedError>
   readonly logout: (refreshToken: string) => Effect.Effect<void>
-  readonly validateSession: (refreshToken: string) => Effect.Effect<{ user: User; session: Session }, UnauthorizedError>
+  readonly validateSession: (
+    refreshToken: string
+  ) => Effect.Effect<{ user: User; session: Session }, UnauthorizedError>
   readonly refreshSession: (refreshToken: string) => Effect.Effect<AuthResult, UnauthorizedError>
   readonly getUserById: (userId: string) => Effect.Effect<User, UserNotFoundError>
 }
@@ -32,9 +45,9 @@ export const AuthServiceLive = Layer.effect(
 
     const register = (input: CreateUserInput): Effect.Effect<AuthResult, InvalidCredentialsError> =>
       Effect.gen(function* () {
-        const user = yield* repo.create(input).pipe(
-          Effect.mapError(() => new InvalidCredentialsError())
-        )
+        const user = yield* repo
+          .create(input)
+          .pipe(Effect.mapError(() => new InvalidCredentialsError()))
         const token = yield* crypto.generateToken()
         const expiresAt = createSessionExpiry()
 
@@ -43,7 +56,9 @@ export const AuthServiceLive = Layer.effect(
         return { user, session, token }
       })
 
-    const login = (input: LoginInput): Effect.Effect<AuthResult, InvalidCredentialsError | UserBannedError> =>
+    const login = (
+      input: LoginInput
+    ): Effect.Effect<AuthResult, InvalidCredentialsError | UserBannedError> =>
       Effect.gen(function* () {
         const user = yield* repo.findByEmail(input.email)
 
@@ -108,9 +123,7 @@ export const AuthServiceLive = Layer.effect(
         return { user, session }
       })
 
-    const refreshSession = (
-      refreshToken: string
-    ): Effect.Effect<AuthResult, UnauthorizedError> =>
+    const refreshSession = (refreshToken: string): Effect.Effect<AuthResult, UnauthorizedError> =>
       Effect.gen(function* () {
         const { user, session } = yield* validateSession(refreshToken)
 

@@ -46,28 +46,34 @@ export interface AuthResult {
   readonly token: string
 }
 
-export const mapUserRowToEntity = (row: UserRow): User => ({
-  id: row.id as unknown as string,
-  username: row.username,
-  email: row.email,
-  passwordHash: row.password_hash,
-  emailVerified: (row.email_verified ?? false) as unknown as boolean,
-  isActive: (row.is_active ?? true) as unknown as boolean,
-  isBanned: (row.is_banned ?? false) as unknown as boolean,
-  bannedUntil: row.banned_until as unknown as Date | null,
-  banReason: row.ban_reason,
-  createdAt: row.created_at as unknown as Date,
-  updatedAt: row.updated_at as unknown as Date,
-  lastLoginAt: row.last_login_at as unknown as Date | null,
-})
+export const mapUserRowToEntity = (row: UserRow): User => {
+  const safeRow = row as unknown as Record<string, unknown>
+  return {
+    id: String(safeRow.id),
+    username: String(safeRow.username),
+    email: String(safeRow.email),
+    passwordHash: String(safeRow.password_hash),
+    emailVerified: Boolean(safeRow.email_verified ?? false),
+    isActive: Boolean(safeRow.is_active ?? true),
+    isBanned: Boolean(safeRow.is_banned ?? false),
+    bannedUntil: safeRow.banned_until as Date | null,
+    banReason: safeRow.ban_reason as string | null,
+    createdAt: safeRow.created_at as Date,
+    updatedAt: safeRow.updated_at as Date,
+    lastLoginAt: safeRow.last_login_at as Date | null,
+  }
+}
 
-export const mapSessionRowToEntity = (row: SessionRow): Session => ({
-  id: row.id as unknown as string,
-  userId: row.user_id,
-  refreshToken: row.refresh_token,
-  ipAddress: row.ip_address,
-  userAgent: row.user_agent,
-  createdAt: row.created_at as unknown as Date,
-  expiresAt: row.expires_at as unknown as Date,
-  revokedAt: row.revoked_at as unknown as Date | null,
-})
+export const mapSessionRowToEntity = (row: SessionRow): Session => {
+  const safeRow = row as unknown as Record<string, unknown>
+  return {
+    id: String(safeRow.id),
+    userId: String(safeRow.user_id),
+    refreshToken: String(safeRow.refresh_token),
+    ipAddress: safeRow.ip_address as string | null,
+    userAgent: safeRow.user_agent as string | null,
+    createdAt: safeRow.created_at as Date,
+    expiresAt: safeRow.expires_at as Date,
+    revokedAt: safeRow.revoked_at as Date | null,
+  }
+}

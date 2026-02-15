@@ -1,16 +1,7 @@
-import { Effect, Layer, Context } from 'effect'
-import {
-  HttpRouter,
-  HttpServerResponse,
-  HttpServerRequest,
-} from '@effect/platform'
-import type { AuthService } from '../../application/services/auth.service'
+import { Effect, Context } from 'effect'
+import { HttpRouter, HttpServerResponse, HttpServerRequest } from '@effect/platform'
 import { AuthService as AuthServiceTag } from '../../application/services/auth.service'
-import {
-  RegistrationSchema,
-  LoginSchema,
-  UnauthorizedError,
-} from '../../domain/errors/auth.errors'
+import { RegistrationSchema, LoginSchema, UnauthorizedError } from '../../domain/errors/auth.errors'
 import type { User, Session } from '../../domain/entities/user.entity'
 
 export interface CurrentAuth {
@@ -30,7 +21,7 @@ const extractBearerToken = (request: HttpServerRequest.HttpServerRequest): strin
 export const AuthMiddleware = Effect.gen(function* () {
   const authService = yield* AuthServiceTag
 
-  return (effect: Effect.Effect<unknown, unknown, CurrentAuth>) =>
+  return <A, E>(effect: Effect.Effect<A, E, CurrentAuth>) =>
     Effect.gen(function* () {
       const request = yield* HttpServerRequest.HttpServerRequest
       const token = extractBearerToken(request)
@@ -47,36 +38,37 @@ export const AuthMiddleware = Effect.gen(function* () {
 
 const registerHandler = Effect.gen(function* () {
   const authService = yield* AuthServiceTag
-  const request = yield* HttpServerRequest.HttpServerRequest
-
-  const body = yield* HttpServerRequest.schemaBodyJson(RegistrationSchema)(request)
+  const body = yield* HttpServerRequest.schemaBodyJson(RegistrationSchema)
   const result = yield* authService.register({
     username: body.username,
     email: body.email,
     password: body.password,
   })
 
-  return HttpServerResponse.json({
-    user: {
-      id: result.user.id,
-      username: result.user.username,
-      email: result.user.email,
+  yield* Effect.logInfo(`User registered: ${result.user.id}`)
+
+  return yield* HttpServerResponse.json(
+    {
+      user: {
+        id: result.user.id,
+        username: result.user.username,
+        email: result.user.email,
+      },
+      token: result.token,
     },
-    token: result.token,
-  }, { status: 201 })
+    { status: 201 }
+  )
 })
 
 const loginHandler = Effect.gen(function* () {
   const authService = yield* AuthServiceTag
-  const request = yield* HttpServerRequest.HttpServerRequest
-
-  const body = yield* HttpServerRequest.schemaBodyJson(LoginSchema)(request)
+  const body = yield* HttpServerRequest.schemaBodyJson(LoginSchema)
   const result = yield* authService.login({
     email: body.email,
     password: body.password,
   })
 
-  return HttpServerResponse.json({
+  return yield* HttpServerResponse.json({
     user: {
       id: result.user.id,
       username: result.user.username,
@@ -95,13 +87,13 @@ const logoutHandler = Effect.gen(function* () {
     yield* authService.logout(token)
   }
 
-  return HttpServerResponse.json({ message: 'Logged out successfully' })
+  return yield* HttpServerResponse.json({ message: 'Logged out successfully' })
 })
 
 const sessionHandler = Effect.gen(function* () {
   const { user } = yield* CurrentAuth
 
-  return HttpServerResponse.json({
+  return yield* HttpServerResponse.json({
     user: {
       id: user.id,
       username: user.username,
@@ -122,7 +114,7 @@ const refreshHandler = Effect.gen(function* () {
 
   const result = yield* authService.refreshSession(token)
 
-  return HttpServerResponse.json({
+  return yield* HttpServerResponse.json({
     token: result.token,
     user: {
       id: result.user.id,
@@ -139,5 +131,3 @@ export const AuthRoutes = HttpRouter.empty.pipe(
   HttpRouter.get('/api/auth/session', sessionHandler),
   HttpRouter.post('/api/auth/refresh', refreshHandler)
 )
-
-export const AuthRoutesLive = Layer.succeed(AuthRoutes, AuthRoutes)

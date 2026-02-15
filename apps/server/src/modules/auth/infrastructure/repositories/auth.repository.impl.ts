@@ -1,7 +1,13 @@
 import { Effect, Context, Layer } from 'effect'
 import { DatabaseService } from '../../../../services/database.service'
 import type { AuthRepository as AuthRepositoryType } from '../../domain/repositories/auth.repository'
-import type { User, Session, CreateUserInput, UserRow, SessionRow } from '../../domain/entities/user.entity'
+import type {
+  User,
+  Session,
+  CreateUserInput,
+  UserRow,
+  SessionRow,
+} from '../../domain/entities/user.entity'
 import { mapUserRowToEntity, mapSessionRowToEntity } from '../../domain/entities/user.entity'
 import { UserAlreadyExistsError, UserNotFoundError } from '../../domain/errors/auth.errors'
 import { CryptoService, CryptoServiceLive } from '../adapters/crypto.service'
@@ -36,17 +42,11 @@ export const AuthRepositoryLive = Layer.effect(
 
     const findById = (id: string): Effect.Effect<User | null> =>
       Effect.promise(async () => {
-        const row = await db
-          .selectFrom('users')
-          .where('id', '=', id)
-          .selectAll()
-          .executeTakeFirst()
+        const row = await db.selectFrom('users').where('id', '=', id).selectAll().executeTakeFirst()
         return row ? mapUserRowToEntity(row as unknown as UserRow) : null
       }).pipe(Effect.orDie)
 
-    const create = (
-      input: CreateUserInput
-    ): Effect.Effect<User, UserAlreadyExistsError> =>
+    const create = (input: CreateUserInput): Effect.Effect<User, UserAlreadyExistsError> =>
       Effect.gen(function* () {
         const existingEmail = yield* findByEmail(input.email)
         if (existingEmail) {
@@ -73,9 +73,7 @@ export const AuthRepositoryLive = Layer.effect(
             })
             .returningAll()
             .executeTakeFirstOrThrow()
-        }).pipe(
-          Effect.mapError(() => new UserAlreadyExistsError({ field: 'email' }))
-        )
+        }).pipe(Effect.mapError(() => new UserAlreadyExistsError({ field: 'email' })))
 
         return mapUserRowToEntity(row as unknown as UserRow)
       })

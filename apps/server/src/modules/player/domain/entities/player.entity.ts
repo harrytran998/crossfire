@@ -1,4 +1,8 @@
-import type { Players, PlayerStats as PlayerStatsRow, PlayerProgression as PlayerProgressionRow } from '@crossfire/database'
+import type {
+  Players,
+  PlayerStats as PlayerStatsRow,
+  PlayerProgression as PlayerProgressionRow,
+} from '@crossfire/database'
 
 export type PlayerRow = Players
 export type PlayerStatsDbType = PlayerStatsRow
@@ -85,7 +89,9 @@ export const mapPlayerStatsRowToEntity = (row: PlayerStatsDbType): PlayerStats =
   lastUpdated: row.last_updated as unknown as Date,
 })
 
-export const mapPlayerProgressionRowToEntity = (row: PlayerProgressionDbType): PlayerProgression => ({
+export const mapPlayerProgressionRowToEntity = (
+  row: PlayerProgressionDbType
+): PlayerProgression => ({
   playerId: row.player_id,
   currentLevel: row.current_level as unknown as number,
   currentXp: row.current_xp as unknown as bigint,
