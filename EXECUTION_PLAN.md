@@ -1,730 +1,343 @@
-# Crossfire Web Game - Detailed Execution Plan
+# Crossfire Web Game - Execution Plan v2.3
 
-> **API + Database First** implementation strategy with Bun + Effect + Better Auth + PostgreSQL 18 + Kysely
-
----
-
-## 📊 Progress Tracker
-
-**Total: 10/42 tasks completed**
-
-### Phase 0: Foundation & Infrastructure (10/10) ✅
-
-- [x] `P0-W1-T01` Create Monorepo Structure ✅
-- [x] `P0-W1-T02` Docker Compose Infrastructure ✅
-- [x] `P0-W1-T03` TypeScript Configuration ✅
-- [x] `P0-W1-T04` Code Quality Tooling (oxlint + oxfmt) ✅
-- [x] `P0-W1-T05` Environment Configuration System ✅
-- [x] `P0-W1-T06` CI/CD Pipeline ✅
-- [x] `P0-W2-T07` Kysely Schema Implementation ✅
-- [x] `P0-W2-T08` Database Migration System (golang-migrate) ✅
-- [x] `P0-W2-T09` Shared Package - Types & Utilities ✅
-- [x] `P0-W2-T10` Effect Platform Setup ✅
-
-### Phase 1: Authentication & Core Backend (0/8)
-
-- [ ] `P1-W3-T11` Better Auth Setup
-- [ ] `P1-W3-T12` Auth REST API Endpoints
-- [ ] `P1-W3-T13` Player Service Layer
-- [ ] `P1-W3-T14` Player Stats & Progression Service
-- [ ] `P1-W3-T15` Player REST API Endpoints
-- [ ] `P1-W4-T16` Weapons & Attachments Service
-- [ ] `P1-W4-T17` Maps Service
-- [ ] `P1-W4-T18` Static Data REST API
-
-### Phase 2: Core API Development (0/9)
-
-- [ ] `P2-W5-T19` Inventory Service
-- [ ] `P2-W5-T20` Loadout Service
-- [ ] `P2-W5-T21` Inventory & Loadout REST API
-- [ ] `P2-W6-T22` Match Service
-- [ ] `P2-W6-T23` Match History REST API
-- [ ] `P2-W7-T24` Leaderboard Service
-- [ ] `P2-W7-T25` Leaderboard REST API
-- [ ] `P2-W8-T26` Friends Service
-- [ ] `P2-W8-T27` Friends REST API
-
-### Phase 3: Real-time & WebSocket (0/6)
-
-- [ ] `P3-W9-T28` Bun WebSocket Server Setup
-- [ ] `P3-W9-T29` Message Protocol Implementation
-- [ ] `P3-W10-T30` Room Service
-- [ ] `P3-W10-T31` Room WebSocket Handlers
-- [ ] `P3-W11-T32` Matchmaking Service
-- [ ] `P3-W11-T33` Matchmaking REST API
-
-### Phase 4: Game Logic API (0/4)
-
-- [ ] `P4-W12-T34` Achievement Service
-- [ ] `P4-W12-T35` Achievement REST API
-- [ ] `P4-W13-T36` Telemetry Service (TimescaleDB)
-- [ ] `P4-W13-T37` Admin REST API
-
-### Phase 5: Frontend Foundation (0/6)
-
-- [ ] `P5-W14-T38` Vite + React Setup
-- [ ] `P5-W14-T39` UI Component Library
-- [ ] `P5-W14-T40` Authentication UI
-- [ ] `P5-W15-T41` Three.js Integration
-- [ ] `P5-W15-T42` WebSocket Client
+> API + Database first, with early real-time risk reduction for server-authoritative FPS gameplay.
 
 ---
 
-## Executive Summary
+## 1. Executive Summary
 
-This execution plan provides a step-by-step roadmap for building the Crossfire Web Game, starting with **Database + API** as requested. The plan is organized into phases and waves to maximize parallel execution where possible.
+- **Project**: Crossfire browser-based multiplayer FPS
+- **Approach**: Backend/API-first, but **real-time core starts in parallel from Week 4**
+- **Team Size**: 2-3 developers
+- **Calendar Estimate**: **12-14 weeks remaining** (Phases 1-5)
+- **Critical Path Estimate**: **10-11 weeks**
 
-**Total Estimated Time**: 12-14 weeks (Phase 1 only)  
-**Team Size**: 2-3 developers  
-**Primary Focus**: Backend API infrastructure before Frontend
+### Current Progress (as of February 15, 2026)
 
----
-
-## 🏗️ Architecture Design: Clean + Modular + Event-Driven
-
-### Core Principles
-
-| Principle              | Description                                                                      |
-| ---------------------- | -------------------------------------------------------------------------------- |
-| **Clean Architecture** | Separation of concerns with Domain → Application → Infrastructure → Presentation |
-| **Modular Design**     | Self-contained modules with clear boundaries, each owns its data and logic       |
-| **Event-Driven**       | Async communication via events for loose coupling and unlimited scalability      |
-| **Effect Platform**    | Functional, type-safe services with built-in error handling and concurrency      |
-
-### Technology Stack
-
-| Layer             | Technology       | Purpose                                           |
-| ----------------- | ---------------- | ------------------------------------------------- |
-| **Runtime**       | Bun              | Ultra-fast JS runtime with native WebSocket       |
-| **Framework**     | Effect           | Functional programming, typed errors, concurrency |
-| **Query Builder** | Kysely           | Type-safe SQL query builder for PostgreSQL        |
-| **Migrations**    | golang-migrate   | Database migration management (CLI)               |
-| **Database**      | PostgreSQL 18.2  | Persistent data with UUID v7, advanced search     |
-| **Time-series**   | TimescaleDB 2.25 | Analytics and telemetry data                      |
-| **Cache**         | Redis 8.x        | Real-time state, sessions                         |
-| **Monorepo**      | Moonrepo         | Task runner and monorepo management               |
-| **Linting**       | oxlint 1.47.x    | Fast Rust-based linter (ESLint compatible)        |
-| **Formatting**    | oxfmt 0.32.x     | Fast Rust-based formatter (Prettier compatible)   |
-| **Auth**          | Better Auth      | Authentication with PostgreSQL adapter            |
-
-### Module Structure
-
-Each module follows Clean Architecture with 4 layers:
-
-```
-apps/server/src/modules/{module}/
-├── domain/                    # Core business logic (no dependencies)
-│   ├── entities/              # Domain entities and value objects
-│   ├── repositories/          # Repository interfaces (contracts)
-│   ├── services/              # Domain services
-│   ├── events/                # Domain events
-│   └── errors/                # Domain-specific errors
-│
-├── application/               # Use cases and orchestration
-│   ├── usecases/              # Application use cases
-│   ├── commands/              # Command handlers (CQRS)
-│   ├── queries/               # Query handlers (CQRS)
-│   ├── dto/                   # Data transfer objects
-│   └── mappers/               # Entity-DTO mappers
-│
-├── infrastructure/            # External implementations
-│   ├── repositories/          # Kysely repository implementations
-│   ├── adapters/              # External service adapters
-│   ├── persistence/           # Database models and mappings
-│   └── event-publishers/      # Event publishing logic
-│
-└── presentation/              # External interfaces
-    ├── http/                  # REST controllers and routes
-    ├── websocket/             # WebSocket handlers
-    └── grpc/                  # gRPC service definitions (future)
-```
-
-### Complete Module List
-
-| Module           | Purpose                        | Events Published                                           | Events Consumed                       |
-| ---------------- | ------------------------------ | ---------------------------------------------------------- | ------------------------------------- |
-| **auth**         | Authentication & authorization | `UserRegistered`, `UserLoggedIn`, `SessionExpired`         | -                                     |
-| **player**       | Player profiles & stats        | `PlayerCreated`, `ProfileUpdated`, `LevelUp`               | `UserRegistered`, `MatchEnded`        |
-| **inventory**    | Weapon ownership               | `WeaponAcquired`, `WeaponExpired`, `LoadoutChanged`        | `PlayerCreated`, `LevelUp`            |
-| **match**        | Match history & results        | `MatchStarted`, `MatchEnded`, `PlayerKill`, `PlayerDeath`  | `RoomGameStarted`                     |
-| **room**         | Game rooms & participants      | `RoomCreated`, `PlayerJoined`, `PlayerLeft`, `GameStarted` | `PlayerReady`                         |
-| **matchmaking**  | Queue & matching               | `QueueJoined`, `QueueLeft`, `MatchFound`                   | -                                     |
-| **leaderboard**  | Rankings & leaderboards        | `RankUpdated`, `LeaderboardRefreshed`                      | `MatchEnded`, `PlayerKill`            |
-| **friend**       | Friends & social               | `FriendRequestSent`, `FriendAdded`, `FriendRemoved`        | -                                     |
-| **achievement**  | Achievements & unlocks         | `AchievementUnlocked`, `ProgressUpdated`                   | `PlayerKill`, `MatchEnded`, `LevelUp` |
-| **telemetry**    | Analytics & metrics            | `MatchEvent`, `PlayerTelemetry`, `ServerMetrics`           | All game events                       |
-| **notification** | User notifications             | `NotificationSent`                                         | All domain events                     |
-
-### Project Directory Structure
-
-```
-crossfire/
-├── apps/
-│   ├── server/                          # Bun + Effect Backend
-│   │   ├── src/
-│   │   │   ├── modules/                  # Feature modules
-│   │   │   │   ├── auth/
-│   │   │   │   ├── player/
-│   │   │   │   ├── match/
-│   │   │   │   ├── room/
-│   │   │   │   ├── inventory/
-│   │   │   │   ├── matchmaking/
-│   │   │   │   ├── leaderboard/
-│   │   │   │   ├── friend/
-│   │   │   │   ├── achievement/
-│   │   │   │   ├── telemetry/
-│   │   │   │   └── notification/
-│   │   │   │
-│   │   │   ├── core/                     # Shared infrastructure
-│   │   │   │   ├── events/
-│   │   │   │   ├── database/
-│   │   │   │   ├── cache/
-│   │   │   │   └── config/
-│   │   │   │
-│   │   │   ├── http/
-│   │   │   ├── websocket/
-│   │   │   └── index.ts
-│   │   │
-│   │   └── tests/
-│   │
-│   └── web/                               # React Frontend (Phase 5)
-│
-├── packages/
-│   ├── shared/                            # Shared types & utilities
-│   │   ├── src/
-│   │   │   ├── types/
-│   │   │   ├── utils/
-│   │   │   └── constants/
-│   │   └── package.json
-│   │
-│   ├── database/                          # Kysely + Migrations
-│   │   ├── src/
-│   │   │   ├── client.ts                  # Kysely client factory
-│   │   │   ├── types.ts                   # Generated DB types
-│   │   │   └── seeds/
-│   │   ├── migrations/                    # golang-migrate SQL files
-│   │   │   ├── 000001_create_users.up.sql
-│   │   │   ├── 000001_create_users.down.sql
-│   │   │   └── ...
-│   │   ├── scripts/
-│   │   │   ├── migrate.sh
-│   │   │   ├── generate-types.ts
-│   │   │   └── seed.ts
-│   │   └── package.json
-│   │
-│   └── tsconfig/                          # Shared TypeScript configs
-│
-├── docker/
-│   ├── postgres/
-│   │   └── init/
-│   │       ├── 01-extensions.sql
-│   │       └── 02-timescaledb.sql
-│   └── redis/
-│       └── redis.conf
-│
-├── docs/
-├── .moon/
-│   ├── workspace.yml
-│   ├── toolchains.yml
-│   └── tasks/
-│       └── all.yml
-├── EXECUTION_PLAN.md
-├── TODO.md
-├── docker-compose.yml
-├── oxlint.config.ts
-├── .oxfmtrc.json
-└── package.json
-```
+- **Delivery Progress**: `18/42` tasks implemented (Phase 0 + Phase 1 delivered)
+- **Gate-Verified Progress**: `16/42` tasks fully verified against architecture quality gates
+- **Phase 0 Status**: Implemented, with **3 corrective actions still pending** (`C01-C03`)
 
 ---
 
-## Phase Overview
+## 2. Big-Picture Solution Architecture
 
-| Phase       | Focus                       | Duration  | Parallel Tasks   |
-| ----------- | --------------------------- | --------- | ---------------- |
-| **Phase 0** | Foundation & Infrastructure | 1-2 weeks | 6 parallel tasks |
-| **Phase 1** | Database & Authentication   | 2-3 weeks | 5 parallel tasks |
-| **Phase 2** | Core API Development        | 3-4 weeks | 6 parallel tasks |
-| **Phase 3** | Real-time & WebSocket       | 2-3 weeks | 4 parallel tasks |
-| **Phase 4** | Game Logic API              | 2 weeks   | 3 parallel tasks |
-| **Phase 5** | Frontend Foundation (Later) | 3-4 weeks | 4 parallel tasks |
+### 2.1 System Context
+
+```text
+Browser Client (React + Three.js + Zustand)
+  ├─ REST (auth/profile/static/inventory)
+  └─ WebSocket + MessagePack (room/match/gameplay)
+
+Bun + Effect Backend
+  ├─ API Modules (auth, player, inventory, loadout, social, leaderboard)
+  ├─ Real-time Modules (room, matchmaking, match, game-state)
+  ├─ Domain Event Bus (typed events)
+  └─ Outbox/Event Dispatcher (idempotent delivery)
+
+Data Layer
+  ├─ PostgreSQL 18.x (system of record)
+  ├─ Redis 8.x (ephemeral real-time state + queues)
+  └─ TimescaleDB extension (telemetry hypertables)
+```
+
+### 2.2 Architecture Principles
+
+- **Clean Architecture**: Domain -> Application -> Infrastructure -> Presentation
+- **Server Authoritative**: server validates movement/combat/match outcomes
+- **Event-Driven Integration**: domain events via outbox and idempotent consumers
+- **Type Safety First**: strict TypeScript, typed Effect errors, no `any`
+- **Observability by Default**: logs, metrics, health probes, traceable request/game IDs
+
+### 2.3 Real-Time Engineering Constraints
+
+- **Simulation tick**: 30 Hz authoritative game loop
+- **State broadcast**: 20 Hz delta updates
+- **Input buffer window**: 100-150 ms
+- **Latency target**: p95 < 120 ms end-to-end input-to-ack
+- **Server budget**: match update frame < 16 ms p95
 
 ---
 
-# PHASE 0: Foundation & Infrastructure
+## 3. Architecture Gaps Found and Corrective Actions
 
-**Duration**: 1-2 weeks  
-**Goal**: Setup development environment, project structure, and tooling  
-**Parallel Opportunities**: 6 tasks can run simultaneously in Wave 1
+These actions are mandatory before Phase 1 is marked complete.
+
+### C01 - UUIDv7 Consistency
+
+- **Problem**: Plan requires UUIDv7, migrations still default to `gen_random_uuid()`.
+- **Action**:
+  1. Add migration to introduce UUIDv7 defaults for target tables.
+  2. Confirm `uuidv7()` support in runtime DB image.
+  3. Update codegen/types and seed scripts.
+- **Owner**: Backend + Database
+- **ETA**: 0.5 day
+
+### C02 - Timescale Bootstrap Consistency
+
+- **Problem**: Plan references `docker/postgres/init/02-timescaledb.sql`, file is absent.
+- **Action**:
+  1. Either create `02-timescaledb.sql` or remove reference and keep single source in `01-extensions.sql`.
+  2. Convert telemetry tables to hypertables with explicit migration.
+- **Owner**: Backend + DevOps
+- **ETA**: 0.5 day
+
+### C03 - Event Delivery Contract
+
+- **Problem**: Event-driven architecture is stated but no operational contract.
+- **Action**:
+  1. Add outbox table + dispatcher.
+  2. Add consumer idempotency key strategy.
+  3. Define retry/backoff and dead-letter policy.
+- **Owner**: Backend
+- **ETA**: 1 day
 
 ---
 
-## Wave 1: Project Setup (Week 1)
+## 4. Updated Delivery Model
 
-**All tasks in this wave can run in PARALLEL**
+### 4.1 Phase Map (Calendar)
 
-### T01: Create Monorepo Structure
+| Phase | Focus                             | Duration                           | Calendar Window                  | Exit Gate                                    |
+| ----- | --------------------------------- | ---------------------------------- | -------------------------------- | -------------------------------------------- |
+| 0     | Foundation & infra hardening      | 1 week (already delivered + fixes) | Week 1-2 (done), fixes in Week 3 | C01-C03 complete                             |
+| 1     | Auth + Player + Static Data APIs  | 2-3 weeks                          | Week 3-5                         | secure auth + profile APIs + tests           |
+| 2     | Core economy APIs                 | 2-3 weeks                          | Week 5-7                         | inventory/loadout/match-history stable       |
+| 3     | Real-time platform                | 3 weeks                            | Week 4-8 (overlap)               | WS protocol + room + matchmaking load-tested |
+| 4     | Game logic services               | 2 weeks                            | Week 8-9                         | achievements + telemetry + admin controls    |
+| 5     | Frontend foundation + integration | 3 weeks                            | Week 10-12                       | playable vertical slice                      |
 
-```yaml
-Task ID: P0-W1-T01
-Category: devops
-Skills: git-master, bun
-Dependencies: None
-Duration: 2-3 hours
-Priority: P0
+### 4.2 Why This Model
 
-Description: |
-  Initialize Moonrepo monorepo with Bun workspaces structure.
+- Keeps API-first direction.
+- Starts real-time work earlier to reduce late-stage architecture risk.
+- Aligns better with FPS dependency reality (simulation/networking cannot be a late add-on).
 
-Files to Create:
-  - package.json (root)
-  - .moon/workspace.yml
-  - .moon/toolchains.yml
-  - .moon/tasks/all.yml
-  - .gitignore
-  - README.md
-  - apps/server/package.json
-  - apps/server/moon.yml
-  - apps/web/package.json (placeholder)
-  - packages/shared/package.json
-  - packages/shared/moon.yml
-  - packages/database/package.json
-  - packages/database/moon.yml
+---
 
-Moonrepo Configuration:
-  # .moon/workspace.yml
-  projects:
-    - "apps/*"
-    - "packages/*"
+## 5. Detailed Task Plan (42 Base Tasks + 3 Phase-Gate Fixes)
 
-  # .moon/toolchains.yml
-  bun:
-    version: "1.3.9"
-    syncProjectWorkspaceDependencies: true
+## Phase 0 - Foundation & Infrastructure (10/10 delivered, with corrective gate)
 
-Acceptance Criteria:
-  - [ ] bun install works
-  - [ ] moon setup runs successfully
-  - [ ] moon run :build works
-  - [ ] Git repository initialized
+### Wave 1 (Delivered)
+
+- [x] `P0-W1-T01` Monorepo structure (Moonrepo + Bun workspaces)
+- [x] `P0-W1-T02` Docker infrastructure (PostgreSQL 18 + Redis 8 + Timescale extension)
+- [x] `P0-W1-T03` TypeScript strict configuration
+- [x] `P0-W1-T04` Code quality tooling (oxlint + oxfmt)
+- [x] `P0-W1-T05` Effect configuration system
+- [x] `P0-W1-T06` CI/CD baseline
+
+### Wave 2 (Delivered)
+
+- [x] `P0-W2-T07` Kysely schema + migrations
+- [x] `P0-W2-T08` golang-migrate workflow
+- [x] `P0-W2-T09` Shared package (types/utilities/constants)
+- [x] `P0-W2-T10` Effect platform bootstrap
+
+### Phase 0 Gate Fixes (must be done before Phase 1 sign-off)
+
+- [ ] `P0-GATE-C01` UUIDv7 migration consistency (see C01)
+- [ ] `P0-GATE-C02` Timescale bootstrap + hypertable consistency (see C02)
+- [ ] `P0-GATE-C03` Outbox/event delivery contract (see C03)
+
+---
+
+## Phase 1 - Authentication & Core Backend (8 tasks)
+
+### Phase 1 Completion Checklist
+
+- [x] `P1-W3-T11` Better Auth integration with Effect + Kysely
+- [x] `P1-W3-T12` Auth REST endpoints
+- [x] `P1-W3-T13` Player application service
+- [x] `P1-W3-T14` Player stats + progression service
+- [x] `P1-W3-T15` Player REST endpoints
+- [x] `P1-W4-T16` Weapons + attachments service
+- [x] `P1-W4-T17` Maps service
+- [x] `P1-W4-T18` Static data REST endpoints
+
+| Task ID     | Scope                                        | Depends On    | Est. | Acceptance Criteria                                          |
+| ----------- | -------------------------------------------- | ------------- | ---- | ------------------------------------------------------------ |
+| `P1-W3-T11` | Better Auth integration with Effect + Kysely | T07, T10, C01 | 1.5d | register/login/refresh/logout flows pass integration tests   |
+| `P1-W3-T12` | Auth REST endpoints                          | T11           | 1.5d | `/api/auth/*` endpoints validated with schema + typed errors |
+| `P1-W3-T13` | Player application service                   | T07, T11      | 1.5d | profile create/read/update with domain validation            |
+| `P1-W3-T14` | Player stats + progression service           | T13           | 1d   | stats/progression reads+writes and level-up logic tested     |
+| `P1-W3-T15` | Player REST endpoints                        | T13, T14      | 1d   | `/api/players/me`, `/api/players/me/stats` stable            |
+| `P1-W4-T16` | Weapons + attachments service                | T07           | 1d   | static weapon catalog and attachment queries                 |
+| `P1-W4-T17` | Maps service                                 | T07           | 0.5d | active map catalog API-ready                                 |
+| `P1-W4-T18` | Static data REST endpoints                   | T16, T17      | 1d   | `/api/weapons`, `/api/maps` documented + tested              |
+
+**Phase 1 Exit Gate**
+
+- [x] Auth security/flow tests pass (invalid token, revoked token, session refresh/logout paths).
+- [x] Player read endpoints validated via local e2e + curl smoke tests.
+- [x] Unit + e2e + curl suites added for auth/player/static data workflows.
+
+**Phase 1 Status**: ✅ Complete (auth + player + static data services and APIs implemented with unit/e2e/curl coverage)
+
+---
+
+## Phase 2 - Core API Development (9 tasks)
+
+| Task ID     | Scope                               | Depends On | Est. | Acceptance Criteria                                   |
+| ----------- | ----------------------------------- | ---------- | ---- | ----------------------------------------------------- |
+| `P2-W5-T19` | Inventory service                   | T13, T16   | 1.5d | ownership, acquisition, and validation rules enforced |
+| `P2-W5-T20` | Loadout service                     | T19        | 1.5d | slot rules and weapon compatibility validation        |
+| `P2-W5-T21` | Inventory + loadout REST API        | T19, T20   | 1d   | CRUD + validation error contracts complete            |
+| `P2-W6-T22` | Match service (history and summary) | T13        | 1.5d | match result persistence + query pagination           |
+| `P2-W6-T23` | Match history REST API              | T22        | 1d   | `/api/matches`, `/api/matches/:id` stable             |
+| `P2-W7-T24` | Leaderboard service                 | T22        | 1.5d | ranking computation and seasonal partitioning         |
+| `P2-W7-T25` | Leaderboard REST API                | T24        | 0.5d | global + mode-specific endpoints                      |
+| `P2-W8-T26` | Friends service                     | T13        | 1.5d | friend request/accept/remove with blocking checks     |
+| `P2-W8-T27` | Friends REST API                    | T26        | 1d   | social endpoints and permission checks complete       |
+
+**Phase 2 Exit Gate**
+
+- Transactional integrity for inventory/loadout updates.
+- Match/leaderboard queries indexed and benchmarked.
+- API backward compatibility documented.
+
+---
+
+## Phase 3 - Real-time & WebSocket (6 tasks, starts in Week 4)
+
+| Task ID      | Scope                                       | Depends On | Est. | Acceptance Criteria                                       |
+| ------------ | ------------------------------------------- | ---------- | ---- | --------------------------------------------------------- |
+| `P3-W9-T28`  | Bun WebSocket gateway with Effect           | T10, C03   | 2d   | authenticated WS sessions, heartbeat, backpressure policy |
+| `P3-W9-T29`  | Message protocol (MessagePack + versioning) | T28        | 1.5d | protocol schema v1 + compatibility tests                  |
+| `P3-W10-T30` | Room service (Redis-backed state)           | T28, T29   | 2d   | create/join/leave/ready/start with ownership rules        |
+| `P3-W10-T31` | Room WS handlers                            | T30        | 1.5d | stable room event routing and broadcast fan-out           |
+| `P3-W11-T32` | Matchmaking service                         | T30        | 2d   | queue + match assignment with timeout/cancel support      |
+| `P3-W11-T33` | Matchmaking REST API                        | T32        | 0.5d | enqueue/dequeue/status endpoints                          |
+
+**Phase 3 Exit Gate**
+
+- Soak test: >=1,000 concurrent WS sessions in dev perf env.
+- Room lifecycle recovery on disconnect/reconnect verified.
+- Protocol contract tests pass for malformed/outdated messages.
+
+---
+
+## Phase 4 - Game Logic API (4 tasks)
+
+| Task ID      | Scope                                     | Depends On    | Est. | Acceptance Criteria                             |
+| ------------ | ----------------------------------------- | ------------- | ---- | ----------------------------------------------- |
+| `P4-W12-T34` | Achievement service                       | T22, T24      | 1.5d | rule engine for unlock progression              |
+| `P4-W12-T35` | Achievement REST API                      | T34           | 0.5d | unlock/progress read endpoints                  |
+| `P4-W13-T36` | Telemetry service (Timescale hypertables) | C02, T28, T22 | 2d   | ingest pipeline with retention and aggregations |
+| `P4-W13-T37` | Admin REST API                            | T36, T24      | 1d   | metrics, moderation, and audit-safe actions     |
+
+**Phase 4 Exit Gate**
+
+- Telemetry ingestion p95 < 100 ms.
+- Data retention jobs tested.
+- Admin endpoints protected with RBAC and audit logs.
+
+---
+
+## Phase 5 - Frontend Foundation (5 tasks)
+
+| Task ID      | Scope                                         | Depends On         | Est. | Acceptance Criteria                          |
+| ------------ | --------------------------------------------- | ------------------ | ---- | -------------------------------------------- |
+| `P5-W14-T38` | Vite + React app hardening                    | T01                | 1d   | app shell, routing, env wiring complete      |
+| `P5-W14-T39` | UI component system                           | T38                | 2d   | reusable HUD/menu/form primitives            |
+| `P5-W14-T40` | Authentication UI                             | T12, T38           | 1.5d | register/login/session refresh UX functional |
+| `P5-W15-T41` | Three.js integration                          | T38                | 2.5d | render loop + scene bootstrap + controls     |
+| `P5-W15-T42` | WebSocket client + vertical slice integration | T29, T31, T40, T41 | 2.5d | auth -> lobby -> room playable end-to-end    |
+
+**Phase 5 Exit Gate**
+
+- User can authenticate, enter lobby, join room, and receive live room updates.
+- Frontend smoke tests green on Chrome + Firefox.
+- No P0/P1 defects in vertical slice.
+
+---
+
+## 6. Critical Path (Updated)
+
+```text
+T01 -> T07 -> C01 -> T11 -> T12 -> T28 -> T29 -> T30 -> T31 -> T42
 ```
 
-### T02: Docker Compose Infrastructure
+- **Critical Path Duration**: ~10-11 weeks
+- **Full Scope Duration**: ~12-14 weeks
 
-```yaml
-Task ID: P0-W1-T02
-Category: devops
-Skills: docker
-Dependencies: None
-Duration: 3-4 hours
-Priority: P0
+---
 
-Description: |
-  Setup Docker Compose with PostgreSQL 18, TimescaleDB, Redis.
+## 7. Dependency Graph (Condensed)
 
-Services:
-  - PostgreSQL 18 (with UUID v7 support)
-  - TimescaleDB extension
-  - Redis 7
+```text
+Foundation: T01..T10
+Gate fixes: C01, C02, C03
 
-Files to Create:
-  - docker-compose.yml
-  - docker-compose.dev.yml
-  - .env.example
-  - docker/postgres/init/01-extensions.sql
-  - docker/postgres/init/02-timescaledb.sql
+Auth track:
+C01 -> T11 -> T12 -> T13 -> T14 -> T15
 
-PostgreSQL 18 Features:
-  - uuidv7() function for time-ordered UUIDs
-  - Async I/O for better performance
-  - Improved btree index performance
+Economy/API track:
+T13 -> T19 -> T20 -> T21
+T13 -> T22 -> T23 -> T24 -> T25
+T13 -> T26 -> T27
 
-Acceptance Criteria:
-  - [ ] docker-compose up starts all services
-  - [ ] PostgreSQL 18 accessible on port 5432
-  - [ ] Redis accessible on port 6379
-  - [ ] SELECT uuidv7() works
-```
+Realtime track:
+C03 -> T28 -> T29 -> T30 -> T31 -> T32 -> T33
 
-### T03: TypeScript Configuration
+Telemetry/Admin:
+C02 -> T36 -> T37
 
-```yaml
-Task ID: P0-W1-T03
-Category: devops
-Skills: bun
-Dependencies: None
-Duration: 2 hours
-Priority: P0
-
-Description: |
-  Configure TypeScript with strict mode across all packages.
-
-Files to Create:
-  - tsconfig.json (root)
-  - packages/tsconfig/base.json
-  - packages/tsconfig/node.json
-  - packages/tsconfig/browser.json
-  - apps/server/tsconfig.json
-  - packages/shared/tsconfig.json
-  - packages/database/tsconfig.json
-
-Acceptance Criteria:
-  - [ ] Strict mode enabled
-  - [ ] Path aliases configured (@crossfire/*)
-  - [ ] Type checking passes
-```
-
-### T04: Code Quality Tooling (oxlint + oxfmt)
-
-```yaml
-Task ID: P0-W1-T04
-Category: quick
-Skills: bun
-Dependencies: None
-Duration: 2 hours
-Priority: P0
-
-Description: |
-  Setup oxlint and oxfmt for fast linting and formatting.
-  These Rust-based tools are 10-100x faster than ESLint/Prettier.
-
-Files to Create:
-  - oxlint.config.ts              # Oxlint TypeScript config
-  - .oxfmtrc.json                 # Oxfmt configuration
-  - .oxlintignore
-  - .lintstagedrc
-  - .husky/pre-commit
-
-Package.json Scripts:
-  {
-    "lint": "oxlint",
-    "lint:fix": "oxlint --fix",
-    "format": "oxfmt",
-    "format:check": "oxfmt --check"
-  }
-
-Acceptance Criteria:
-  - [ ] oxlint runs without errors
-  - [ ] oxfmt formats code
-  - [ ] Pre-commit hooks work
-  - [ ] VS Code extension compatible
-```
-
-### T05: Environment Configuration System
-
-```yaml
-Task ID: P0-W1-T05
-Category: ultrabrain
-Skills: effect
-Dependencies: None
-Duration: 4-5 hours
-Priority: P0
-
-Description: |
-  Create type-safe environment configuration using Effect Config.
-
-Files to Create:
-  - packages/shared/src/config/index.ts
-  - packages/shared/src/config/server.config.ts
-  - packages/shared/src/config/database.config.ts
-  - packages/shared/src/config/redis.config.ts
-  - .env.example
-
-Acceptance Criteria:
-  - [ ] All config values typed
-  - [ ] Validation with Effect Schema
-  - [ ] Secrets properly redacted
-```
-
-### T06: CI/CD Pipeline
-
-```yaml
-Task ID: P0-W1-T06
-Category: devops
-Skills: git-master
-Dependencies: None
-Duration: 3 hours
-Priority: P1
-
-Description: |
-  Setup GitHub Actions for CI/CD with Moonrepo.
-
-Files to Create:
-  - .github/workflows/ci.yml
-  - .github/workflows/pr.yml
-  - .github/PULL_REQUEST_TEMPLATE.md
-
-CI Jobs:
-  - moon setup
-  - moon run :lint (oxlint)
-  - moon run :format (oxfmt --check)
-  - moon run :typecheck
-  - moon run :test (placeholder)
-  - moon ci (affected tasks only)
-
-Moonrepo CI Commands:
-  - moon ci              # Run all affected tasks
-  - moon query affected  # List affected projects
-
-Acceptance Criteria:
-  - [ ] CI runs on every PR
-  - [ ] All jobs pass
+Frontend track:
+T38 -> T39 -> T40
+T41 + (T29,T31,T40) -> T42
 ```
 
 ---
 
-## Wave 2: Database & Shared Package (Week 1-2)
+## 8. Quality Gates and Definition of Done
 
-### T07: Kysely Schema Implementation
+A task is done only when all are true:
 
-```yaml
-Task ID: P0-W2-T07
-Category: ultrabrain
-Skills: database
-Dependencies: P0-W1-T01, P0-W1-T02
-Duration: 8-10 hours
-Priority: P0
+- Implementation merged with conventional commits.
+- Typecheck, lint, format, tests all pass in CI.
+- Error handling uses typed Effect errors.
+- API contracts validated (schema tests).
+- Observability added (structured logs + key metrics).
+- Documentation updated for public contracts.
 
-Description: |
-  Create SQL migration files and setup Kysely type generation.
+Phase-level mandatory gates:
 
-Files to Create:
-  - packages/database/migrations/*.up.sql
-  - packages/database/migrations/*.down.sql
-  - packages/database/src/client.ts
-  - packages/database/src/types.ts (generated)
-  - packages/database/scripts/generate-types.ts
-
-Database Tables:
-  - users, sessions (Better Auth compatible)
-  - players, player_stats, player_progression
-  - weapons, weapon_attachments, maps
-  - player_inventory, player_loadouts
-  - game_rooms, room_participants
-  - matches, match_participants
-  - friendships, leaderboards, achievements
-  - match_events, player_telemetry (TimescaleDB)
-
-PostgreSQL 18 Features:
-  - uuidv7() for primary keys (time-ordered UUIDs)
-  - Improved btree index performance
-
-Acceptance Criteria:
-  - [ ] All migration files created
-  - [ ] Migrations apply successfully
-  - [ ] Kysely types generated
-  - [ ] UUID v7 used for primary keys
-```
-
-### T08: Database Migration System (golang-migrate)
-
-```yaml
-Task ID: P0-W2-T08
-Category: devops
-Skills: database
-Dependencies: P0-W2-T07
-Duration: 2-3 hours
-Priority: P0
-
-Description: |
-  Setup golang-migrate CLI for managing database migrations.
-
-Installation:
-  brew install golang-migrate
-
-Files to Create:
-  - packages/database/scripts/migrate.sh
-  - packages/database/scripts/create-migration.sh
-  - packages/database/scripts/seed.ts
-
-package.json Scripts:
-  {
-    "db:migrate": "migrate -database $DATABASE_URL -path packages/database/migrations up",
-    "db:rollback": "migrate -database $DATABASE_URL -path packages/database/migrations down 1",
-    "db:create": "./scripts/create-migration.sh",
-    "db:seed": "bun packages/database/scripts/seed.ts",
-    "db:generate": "kysely-codegen --out-file packages/database/src/types.ts"
-  }
-
-Acceptance Criteria:
-  - [ ] golang-migrate CLI installed
-  - [ ] Migrations apply successfully
-  - [ ] Rollback works
-  - [ ] Seed script works
-```
-
-### T09: Shared Package - Types & Utilities
-
-```yaml
-Task ID: P0-W2-T09
-Category: quick
-Skills: bun
-Dependencies: P0-W1-T03
-Duration: 4-6 hours
-Priority: P0
-
-Description: |
-  Create shared package with common types and utilities.
-
-Files to Create:
-  - packages/shared/src/types/index.ts
-  - packages/shared/src/types/auth.types.ts
-  - packages/shared/src/types/player.types.ts
-  - packages/shared/src/utils/index.ts
-  - packages/shared/src/constants/index.ts
-
-Acceptance Criteria:
-  - [ ] All shared types exported
-  - [ ] No circular dependencies
-```
-
-### T10: Effect Platform Setup
-
-```yaml
-Task ID: P0-W2-T10
-Category: ultrabrain
-Skills: effect
-Dependencies: P0-W1-T01
-Duration: 4-5 hours
-Priority: P0
-
-Description: |
-  Initialize Effect platform in server package with Bun runtime.
-
-Files to Create:
-  - apps/server/src/index.ts
-  - apps/server/src/services/index.ts
-  - apps/server/src/layers/index.ts
-  - apps/server/src/errors/index.ts
-
-Reference Pattern (HazelChat):
-  - BunHttpServer.layerConfig()
-  - BunRuntime.runMain
-  - DevTools.layer() from @effect/experimental
-
-Acceptance Criteria:
-  - [ ] Effect program runs
-  - [ ] Bun serve integration works
-  - [ ] Layer composition works
-```
+- **Coverage**: >=80% for business logic in touched modules.
+- **Performance**:
+  - REST read endpoints p95 < 250 ms.
+  - WS broadcast loop stable under defined load.
+- **Security**:
+  - auth/session flows validated with negative tests.
+  - admin/moderation actions are RBAC-protected and auditable.
 
 ---
 
-# PHASE 1-5: Detailed Tasks
+## 9. Primary Risks and Mitigations
 
-_See full task details in original plan. Key changes:_
-
-**Technology Updates:**
-
-- PostgreSQL 16 → PostgreSQL 18 (UUID v7, improved performance)
-- Prisma → Kysely + golang-migrate (type-safe query builder + CLI migrations)
-- ESLint/Prettier → oxlint/oxfmt (10-100x faster Rust-based tools)
-
-**Key Integration Points:**
-
-1. **Kysely Repository Pattern:**
-
-```typescript
-// packages/database/src/client.ts
-import { Kysely, PostgresDialect } from 'kysely'
-import { Pool } from 'pg'
-
-export const db = new Kysely<Database>({
-  dialect: new PostgresDialect({
-    pool: new Pool({ connectionString: process.env.DATABASE_URL }),
-  }),
-})
-```
-
-2. **golang-migrate Workflow:**
-
-```bash
-# Create migration
-migrate create -ext sql -dir migrations -seq create_players
-
-# Apply
-migrate -database $DATABASE_URL -path migrations up
-
-# Generate Kysely types
-kysely-codegen --out-file src/types.ts
-```
-
-3. **oxlint Configuration:**
-
-```typescript
-// oxlint.config.ts
-import { defineConfig } from 'oxlint'
-
-export default defineConfig({
-  categories: { correctness: 'error', suspicious: 'warn' },
-  plugins: ['typescript', 'import', 'unicorn'],
-})
-```
+| Risk                                    | Impact | Mitigation                                            |
+| --------------------------------------- | ------ | ----------------------------------------------------- |
+| Late discovery of real-time bottlenecks | High   | Start Phase 3 in Week 4, run soak tests early         |
+| Event delivery duplication/loss         | High   | Outbox + idempotency + DLQ policy (C03)               |
+| UUID strategy drift across services     | Medium | Complete C01 before Phase 1 sign-off                  |
+| Telemetry schema growth cost            | Medium | Timescale hypertables + retention + rollups           |
+| API/frontend contract drift             | Medium | typed shared contracts + contract tests per milestone |
 
 ---
 
-# Dependency Graph
+## 10. Milestone Checklist
 
-```
-Phase 0 (Foundation)
-├── Wave 1 (All PARALLEL)
-│   ├── T01 (Moonrepo) ──┐
-│   ├── T02 (Docker) ────┤
-│   ├── T03 (TypeScript)─┤
-│   ├── T04 (oxlint) ────┤
-│   ├── T05 (Config) ────┤
-│   └── T06 (CI/CD) ─────┘
-│
-└── Wave 2
-    ├── T07 (Kysely Schema) ─┬── T08 (golang-migrate)
-    ├── T09 (Shared) ────────┤
-    └── T10 (Effect Setup) ──┘
-```
+- [ ] `M1` Foundation Gate Closed (C01-C03 done)
+- [ ] `M2` Auth + Player APIs Production-Ready
+- [ ] `M3` Core Economy APIs Stable
+- [ ] `M4` Realtime Room + Matchmaking Stable
+- [ ] `M5` Telemetry + Admin Operational
+- [ ] `M6` Frontend Vertical Slice Playable
 
 ---
 
-# Critical Path
-
-```
-T01 → T07 → T11 → T13 → T19 → T28 → T30 → T42
-      ↓     ↓     ↓     ↓     ↓     ↓
-     (DB) (Auth)(Player)(Inv) (WS) (Room)(Client)
-```
-
-**Critical Path Duration**: ~8-9 weeks  
-**With Full Parallelism**: ~12-14 weeks (complete)
-
----
-
-# Acceptance Criteria Summary
-
-## Phase 0 Complete When:
-
-- [x] All infrastructure running (Docker Compose)
-- [x] PostgreSQL 18.2 with UUID v7 working
-- [x] Kysely types generated from schema
-- [x] Migrations apply successfully
-- [x] CI/CD pipeline passing
-- [x] oxlint/oxfmt configured
-
-**Phase 0 Status: ✅ COMPLETE (as of Feb 2026)**
-
-### Implementation Notes:
-
-- **T01 Monorepo**: Moonrepo + Bun workspaces with 5 packages (server, web, shared, database, tsconfig)
-- **T02 Docker**: PostgreSQL 18 + Redis 8 with TimescaleDB extension
-- **T03 TypeScript**: Strict mode enabled, project references configured
-- **T04 Linting**: oxlint with type-aware rules via tsgolint, oxfmt for formatting
-- **T05 Config**: Effect Config system with Redacted secrets
-- **T06 CI/CD**: GitHub Actions with lint, format, typecheck, test, build jobs
-- **T07 Schema**: 12 migration pairs (24 files) covering all game tables
-- **T08 Migrations**: golang-migrate with moon task integration
-- **T09 Shared**: Types, utils, constants, and Effect config services
-- **T10 Effect**: Bun server with Layer composition and typed errors
-
----
-
-_Plan Version: 2.2_  
-_Created: February 2026_  
-_Changes: Updated all dependencies to latest versions (React 19, Three.js 0.182, Vite 7, PostgreSQL 18.2, Redis 8, etc.)_  
-_Estimated Duration: 12-14 weeks for Phase 1-4 (API + Database)_
+_Plan Version: 2.3_  
+_Updated: February 15, 2026_  
+_Previous Version: 2.2_  
+_Remaining Duration Estimate: 12-14 weeks_
