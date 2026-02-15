@@ -13,6 +13,37 @@ import {
 export const StaticDataRepository =
   Context.GenericTag<StaticDataRepositoryType>('StaticDataRepository')
 
+const weaponColumns = [
+  'id',
+  'weapon_key',
+  'name',
+  'weapon_type',
+  'rarity',
+  'base_damage',
+  'unlock_level',
+  'unlock_cost',
+  'is_active',
+] as const
+
+const weaponAttachmentColumns = [
+  'id',
+  'weapon_id',
+  'attachment_type',
+  'name',
+  'unlock_level',
+  'is_active',
+] as const
+
+const mapColumns = [
+  'id',
+  'map_key',
+  'name',
+  'max_players',
+  'supported_modes',
+  'size_category',
+  'is_active',
+] as const
+
 export const StaticDataRepositoryLive = Layer.effect(
   StaticDataRepository,
   Effect.gen(function* () {
@@ -25,7 +56,7 @@ export const StaticDataRepositoryLive = Layer.effect(
           .where('is_active', '=', true)
           .orderBy('unlock_level', 'asc')
           .orderBy('name', 'asc')
-          .selectAll()
+          .select(weaponColumns)
           .execute()
         return rows.map((row) => mapWeaponRowToEntity(row as unknown as WeaponRow))
       }).pipe(Effect.orDie)
@@ -36,7 +67,7 @@ export const StaticDataRepositoryLive = Layer.effect(
           .selectFrom('weapons')
           .where('weapon_key', '=', weaponKey)
           .where('is_active', '=', true)
-          .selectAll()
+          .select(weaponColumns)
           .executeTakeFirst()
         return row ? mapWeaponRowToEntity(row as unknown as WeaponRow) : null
       }).pipe(Effect.orDie)
@@ -49,7 +80,7 @@ export const StaticDataRepositoryLive = Layer.effect(
           .where('is_active', '=', true)
           .orderBy('unlock_level', 'asc')
           .orderBy('name', 'asc')
-          .selectAll()
+          .select(weaponAttachmentColumns)
           .execute()
         return rows.map((row) =>
           mapWeaponAttachmentRowToEntity(row as unknown as WeaponAttachmentRow)
@@ -62,7 +93,7 @@ export const StaticDataRepositoryLive = Layer.effect(
           .selectFrom('maps')
           .where('is_active', '=', true)
           .orderBy('name', 'asc')
-          .selectAll()
+          .select(mapColumns)
           .execute()
         return rows.map((row) => mapMapRowToEntity(row as unknown as MapRow))
       }).pipe(Effect.orDie)

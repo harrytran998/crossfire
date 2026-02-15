@@ -17,6 +17,44 @@ import { PlayerAlreadyExistsError, PlayerNotFoundError } from '../../domain/erro
 
 export const PlayerRepository = Context.GenericTag<PlayerRepositoryType>('PlayerRepository')
 
+const playerColumns = [
+  'id',
+  'user_id',
+  'display_name',
+  'avatar_url',
+  'bio',
+  'region',
+  'language',
+  'created_at',
+  'updated_at',
+] as const
+
+const playerStatsColumns = [
+  'player_id',
+  'total_matches',
+  'matches_won',
+  'matches_lost',
+  'total_kills',
+  'total_deaths',
+  'total_assists',
+  'total_headshots',
+  'total_damage_dealt',
+  'total_damage_received',
+  'total_score',
+  'playtime_seconds',
+  'last_updated',
+] as const
+
+const playerProgressionColumns = [
+  'player_id',
+  'current_level',
+  'current_xp',
+  'total_xp',
+  'xp_multiplier',
+  'xp_booster_expires',
+  'last_updated',
+] as const
+
 export const PlayerRepositoryLive = Layer.effect(
   PlayerRepository,
   Effect.gen(function* () {
@@ -27,7 +65,7 @@ export const PlayerRepositoryLive = Layer.effect(
         const row = await db
           .selectFrom('players')
           .where('user_id', '=', userId)
-          .selectAll()
+          .select(playerColumns)
           .executeTakeFirst()
         return row ? mapPlayerRowToEntity(row as unknown as PlayerRow) : null
       }).pipe(Effect.orDie)
@@ -37,7 +75,7 @@ export const PlayerRepositoryLive = Layer.effect(
         const row = await db
           .selectFrom('players')
           .where('id', '=', playerId)
-          .selectAll()
+          .select(playerColumns)
           .executeTakeFirst()
         return row ? mapPlayerRowToEntity(row as unknown as PlayerRow) : null
       }).pipe(Effect.orDie)
@@ -58,7 +96,7 @@ export const PlayerRepositoryLive = Layer.effect(
               region: input.region ?? 'ASIA',
               language: input.language ?? 'en',
             })
-            .returningAll()
+            .returning(playerColumns)
             .executeTakeFirstOrThrow()
         }).pipe(Effect.mapError(() => new PlayerAlreadyExistsError()))
 
@@ -89,7 +127,7 @@ export const PlayerRepositoryLive = Layer.effect(
             .updateTable('players')
             .set({ ...updates, updated_at: new Date() })
             .where('id', '=', playerId)
-            .returningAll()
+            .returning(playerColumns)
             .executeTakeFirst()
         }).pipe(Effect.orDie)
 
@@ -105,7 +143,7 @@ export const PlayerRepositoryLive = Layer.effect(
         const row = await db
           .selectFrom('player_stats')
           .where('player_id', '=', playerId)
-          .selectAll()
+          .select(playerStatsColumns)
           .executeTakeFirst()
         return row ? mapPlayerStatsRowToEntity(row as unknown as PlayerStatsDbType) : null
       }).pipe(Effect.orDie)
@@ -115,7 +153,7 @@ export const PlayerRepositoryLive = Layer.effect(
         const row = await db
           .selectFrom('player_progression')
           .where('player_id', '=', playerId)
-          .selectAll()
+          .select(playerProgressionColumns)
           .executeTakeFirst()
         return row
           ? mapPlayerProgressionRowToEntity(row as unknown as PlayerProgressionDbType)
@@ -128,7 +166,7 @@ export const PlayerRepositoryLive = Layer.effect(
           .insertInto('player_stats')
           .values({ player_id: playerId })
           .onConflict((oc) => oc.column('player_id').doNothing())
-          .returningAll()
+          .returning(playerStatsColumns)
           .executeTakeFirst()
 
         if (row) {
@@ -138,7 +176,7 @@ export const PlayerRepositoryLive = Layer.effect(
         const existing = await db
           .selectFrom('player_stats')
           .where('player_id', '=', playerId)
-          .selectAll()
+          .select(playerStatsColumns)
           .executeTakeFirstOrThrow()
         return mapPlayerStatsRowToEntity(existing as unknown as PlayerStatsDbType)
       }).pipe(Effect.orDie)
@@ -149,7 +187,7 @@ export const PlayerRepositoryLive = Layer.effect(
           .insertInto('player_progression')
           .values({ player_id: playerId })
           .onConflict((oc) => oc.column('player_id').doNothing())
-          .returningAll()
+          .returning(playerProgressionColumns)
           .executeTakeFirst()
 
         if (row) {
@@ -159,7 +197,7 @@ export const PlayerRepositoryLive = Layer.effect(
         const existing = await db
           .selectFrom('player_progression')
           .where('player_id', '=', playerId)
-          .selectAll()
+          .select(playerProgressionColumns)
           .executeTakeFirstOrThrow()
         return mapPlayerProgressionRowToEntity(existing as unknown as PlayerProgressionDbType)
       }).pipe(Effect.orDie)
