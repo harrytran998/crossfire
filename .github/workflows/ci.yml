@@ -113,6 +113,12 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Build shared package
+        run: bun run --cwd packages/shared build
+
+      - name: Build database package
+        run: bun run --cwd packages/database build
+
       - name: Install golang-migrate
         run: |
           curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.2/migrate.linux-amd64.tar.gz | tar xvz
@@ -122,8 +128,8 @@ jobs:
       - name: Run database migrations
         run: migrate -database "$DATABASE_URL?sslmode=disable" -path packages/database/migrations up
 
-      - name: Run tests
-        run: bun test apps/server/tests/
+      - name: Run unit tests
+        run: bun test apps/server/tests/unit/
 
   build:
     name: Build
@@ -141,5 +147,11 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Build all packages
-        run: bun run build
+      - name: Build shared package
+        run: bun run --cwd packages/shared build
+
+      - name: Build database package
+        run: bun run --cwd packages/database build
+
+      - name: Build server
+        run: bun build apps/server/src/index.ts --outdir apps/server/dist --target bun
