@@ -94,6 +94,12 @@ jobs:
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/crossfire_test
       REDIS_URL: redis://localhost:6379
+      AUTH_SECRET: test-auth-secret-for-ci-min-32-characters-long
+      JWT_SECRET: test-jwt-secret-for-ci-min-32-characters-long
+      JWT_EXPIRES_IN: 7d
+      SERVER_HOST: localhost
+      SERVER_PORT: 3000
+      NODE_ENV: test
 
     steps:
       - name: Checkout
@@ -107,8 +113,17 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Install golang-migrate
+        run: |
+          curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.2/migrate.linux-amd64.tar.gz | tar xvz
+          sudo mv migrate /usr/local/bin/migrate
+          sudo chmod +x /usr/local/bin/migrate
+
+      - name: Run database migrations
+        run: migrate -database "$DATABASE_URL?sslmode=disable" -path packages/database/migrations up
+
       - name: Run tests
-        run: bun run test
+        run: bun test apps/server/tests/
 
   build:
     name: Build
