@@ -1,5 +1,8 @@
 import { describe, test, expect } from 'bun:test'
 
+const runE2E = process.env.RUN_E2E === 'true'
+const e2eTest = runE2E ? test : test.skip
+
 describe('E2E: Auth API', () => {
   const API_URL = process.env.API_URL || 'http://localhost:3000'
 
@@ -10,7 +13,7 @@ describe('E2E: Auth API', () => {
     password: 'TestPassword123!',
   }
 
-  test('POST /api/auth/register - should register new user', async () => {
+  e2eTest('POST /api/auth/register - should register new user', async () => {
     const response = await fetch(`${API_URL}/api/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -27,7 +30,7 @@ describe('E2E: Auth API', () => {
     authToken = data.token
   })
 
-  test('POST /api/auth/login - should login existing user', async () => {
+  e2eTest('POST /api/auth/login - should login existing user', async () => {
     const response = await fetch(`${API_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -46,7 +49,7 @@ describe('E2E: Auth API', () => {
     authToken = data.token
   })
 
-  test('GET /api/auth/session - should return current session', async () => {
+  e2eTest('GET /api/auth/session - should return current session', async () => {
     const response = await fetch(`${API_URL}/api/auth/session`, {
       headers: {
         Authorization: `Bearer ${authToken}`,
@@ -60,7 +63,7 @@ describe('E2E: Auth API', () => {
     expect(data.user.email).toBe(testUser.email)
   })
 
-  test('POST /api/auth/refresh - should refresh token', async () => {
+  e2eTest('POST /api/auth/refresh - should refresh token', async () => {
     const response = await fetch(`${API_URL}/api/auth/refresh`, {
       method: 'POST',
       headers: {
@@ -75,7 +78,7 @@ describe('E2E: Auth API', () => {
     expect(data.token).not.toBe(authToken)
   })
 
-  test('POST /api/auth/logout - should logout user', async () => {
+  e2eTest('POST /api/auth/logout - should logout user', async () => {
     const response = await fetch(`${API_URL}/api/auth/logout`, {
       method: 'POST',
       headers: {
