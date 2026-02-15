@@ -1,6 +1,9 @@
 import { describe, test, expect } from 'bun:test'
 import { Effect, Layer } from 'effect'
-import { AuthService, AuthServiceLive } from '../../src/modules/auth/application/services/auth.service'
+import {
+  AuthService,
+  AuthServiceLive,
+} from '../../src/modules/auth/application/services/auth.service'
 import { InvalidCredentialsError } from '../../src/modules/auth/domain/errors/auth.errors'
 import { DatabaseServiceLive } from '../../src/services/database.service'
 import { ConfigLayer } from '../../src/layers/index'

@@ -1,27 +1,27 @@
-$schema: "https://moonrepo.dev/schemas/project.json"
+$schema: 'https://moonrepo.dev/schemas/project.json'
 
-type: "library"
-language: "typescript"
+type: 'library'
+language: 'typescript'
 
 tasks:
   build:
-    command: "tsdown"
-    description: "Build shared package with tsdown"
+    command: 'tsdown'
+    description: 'Build shared package with tsdown'
     inputs:
-      - "src/**/*"
-      - "tsdown.config.ts"
-      - "package.json"
+      - 'src/**/*'
+      - 'tsdown.config.ts'
+      - 'package.json'
     outputs:
-      - "dist/"
+      - 'dist/'
 
   dev:
-    command: "tsdown --watch"
-    description: "Build in watch mode"
+    command: 'tsdown --watch'
+    description: 'Build in watch mode'
     local: true
 
   test:
-    command: "bun test tests/"
-    description: "Run shared package tests"
+    command: 'bun test tests/'
+    description: 'Run shared package tests'
     inputs:
-      - "src/**/*"
-      - "tests/**/*"
+      - 'src/**/*'
+      - 'tests/**/*'

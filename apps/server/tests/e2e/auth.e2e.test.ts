@@ -2,7 +2,7 @@ import { describe, test, expect } from 'bun:test'
 
 describe('E2E: Auth API', () => {
   const API_URL = process.env.API_URL || 'http://localhost:3000'
-  
+
   let authToken: string = ''
   const testUser = {
     email: `e2e-${Date.now()}@test.com`,
@@ -18,12 +18,12 @@ describe('E2E: Auth API', () => {
     })
 
     expect(response.status).toBe(201)
-    
+
     const data = await response.json()
     expect(data.user).toBeDefined()
     expect(data.user.email).toBe(testUser.email)
     expect(data.token).toBeDefined()
-    
+
     authToken = data.token
   })
 
@@ -38,11 +38,11 @@ describe('E2E: Auth API', () => {
     })
 
     expect(response.status).toBe(200)
-    
+
     const data = await response.json()
     expect(data.user).toBeDefined()
     expect(data.token).toBeDefined()
-    
+
     authToken = data.token
   })
 
@@ -54,7 +54,7 @@ describe('E2E: Auth API', () => {
     })
 
     expect(response.status).toBe(200)
-    
+
     const data = await response.json()
     expect(data.user).toBeDefined()
     expect(data.user.email).toBe(testUser.email)
@@ -69,7 +69,7 @@ describe('E2E: Auth API', () => {
     })
 
     expect(response.status).toBe(200)
-    
+
     const data = await response.json()
     expect(data.token).toBeDefined()
     expect(data.token).not.toBe(authToken)
@@ -84,7 +84,7 @@ describe('E2E: Auth API', () => {
     })
 
     expect(response.status).toBe(200)
-    
+
     const data = await response.json()
     expect(data.message).toBe('Logged out successfully')
   })
