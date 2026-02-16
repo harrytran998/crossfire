@@ -198,6 +198,7 @@ bun run watch
 - ✅ **Use `unknown`** - If type is truly unknown
 - ✅ **Effect errors** - Must be properly handled with `.pipe(Effect.catchAll(...))`
 - ✅ **UUID v7** - All entities use UUID v7 for sortable IDs
+- ✅ **Use `jose` for JOSE** - Use the `jose` library for JSON Object Signing and Encryption modules
 
 ### Linting & Formatting
 
