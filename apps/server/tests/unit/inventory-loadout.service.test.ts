@@ -47,8 +47,8 @@ describe('Inventory + Loadout services', () => {
 
         const id = `${Date.now()}${Math.floor(Math.random() * 100000)}`
         const registered = yield* auth.register({
-          email: `inventory-loadout-${id}@example.com`,
-          username: `inventory_loadout_${id}`,
+          email: `il-${id}@example.com`,
+          username: `il_${id}`,
           password: 'TestPassword123!',
         })
 

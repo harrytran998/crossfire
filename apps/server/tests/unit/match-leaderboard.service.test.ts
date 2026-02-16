@@ -41,8 +41,8 @@ describe('Match + Leaderboard services', () => {
 
         const id = `${Date.now()}${Math.floor(Math.random() * 100000)}`
         const user = yield* auth.register({
-          email: `match-leaderboard-${id}@example.com`,
-          username: `match_leaderboard_${id}`,
+          email: `ml-${id}@example.com`,
+          username: `ml_${id}`,
           password: 'TestPassword123!',
         })
 

@@ -57,7 +57,7 @@ describe('E2E: Phase 2 Core APIs', () => {
     const weaponId = weaponsPayload.weapons[0]?.id as string | undefined
     expect(weaponId).toBeDefined()
 
-    const acquireRes = await fetch(`${API_URL}/api/inventory/me/acquire`, {
+    const acquireRes = await fetch(`${API_URL}/api/inventory/acquire`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -67,17 +67,17 @@ describe('E2E: Phase 2 Core APIs', () => {
     })
     expect([200, 201]).toContain(acquireRes.status)
 
-    const inventoryRes = await fetch(`${API_URL}/api/inventory/me`, {
+    const inventoryRes = await fetch(`${API_URL}/api/inventory`, {
       headers: { Authorization: `Bearer ${token}` },
     })
     expect(inventoryRes.status).toBe(200)
     const inventoryPayload = await inventoryRes.json()
-    expect(Array.isArray(inventoryPayload.inventory)).toBe(true)
+    expect(Array.isArray(inventoryPayload.items)).toBe(true)
 
-    const inventoryItemId = inventoryPayload.inventory[0]?.id as string | undefined
+    const inventoryItemId = inventoryPayload.items[0]?.id as string | undefined
     expect(inventoryItemId).toBeDefined()
 
-    const createLoadoutRes = await fetch(`${API_URL}/api/loadouts/me`, {
+    const createLoadoutRes = await fetch(`${API_URL}/api/loadouts`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -91,16 +91,19 @@ describe('E2E: Phase 2 Core APIs', () => {
     })
     expect([201, 409]).toContain(createLoadoutRes.status)
 
-    const loadoutsRes = await fetch(`${API_URL}/api/loadouts/me`, {
+    const loadoutsRes = await fetch(`${API_URL}/api/loadouts`, {
       headers: { Authorization: `Bearer ${token}` },
     })
     expect(loadoutsRes.status).toBe(200)
+
+    const unauthorizedRes = await fetch(`${API_URL}/api/inventory`)
+    expect(unauthorizedRes.status).toBe(401)
   })
 
   test('match + leaderboard list endpoints', async () => {
     const { token } = await registerAndCreatePlayer('p2ml')
 
-    const matchesRes = await fetch(`${API_URL}/api/matches/me?page=1&pageSize=10`, {
+    const matchesRes = await fetch(`${API_URL}/api/matches?page=1&pageSize=10`, {
       headers: { Authorization: `Bearer ${token}` },
     })
     expect(matchesRes.status).toBe(200)
@@ -112,6 +115,14 @@ describe('E2E: Phase 2 Core APIs', () => {
       }
     )
     expect(leaderboardsRes.status).toBe(200)
+
+    const invalidLeaderboardQuery = await fetch(
+      `${API_URL}/api/leaderboards?page=1&pageSize=1000`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    )
+    expect(invalidLeaderboardQuery.status).toBe(400)
   })
 
   test('friends request lifecycle endpoints', async () => {
@@ -127,6 +138,16 @@ describe('E2E: Phase 2 Core APIs', () => {
       body: JSON.stringify({ playerId: second.playerId }),
     })
     expect([201, 409]).toContain(requestRes.status)
+
+    const selfRequestRes = await fetch(`${API_URL}/api/friends/requests`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${first.token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ playerId: first.playerId }),
+    })
+    expect(selfRequestRes.status).toBe(400)
 
     const incomingRes = await fetch(`${API_URL}/api/friends/requests`, {
       headers: { Authorization: `Bearer ${second.token}` },

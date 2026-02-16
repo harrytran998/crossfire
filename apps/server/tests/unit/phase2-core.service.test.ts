@@ -16,7 +16,10 @@ import {
   LoadoutService,
   LoadoutServiceLive,
 } from '../../src/modules/loadout/application/services/loadout.service'
-import { MatchService, MatchServiceLive } from '../../src/modules/match/application/services/match.service'
+import {
+  MatchService,
+  MatchServiceLive,
+} from '../../src/modules/match/application/services/match.service'
 import {
   LeaderboardService,
   LeaderboardServiceLive,
@@ -112,9 +115,13 @@ describe('Phase 2 Core Services', () => {
           primaryWeaponId: firstItem.id,
         })
 
-        const updatedLoadout = yield* loadouts.updateForUser(registered.user.id, createdLoadout.id, {
-          name: 'Assault Updated',
-        })
+        const updatedLoadout = yield* loadouts.updateForUser(
+          registered.user.id,
+          createdLoadout.id,
+          {
+            name: 'Assault Updated',
+          }
+        )
 
         const listedLoadouts = yield* loadouts.listByUserId(registered.user.id)
         yield* loadouts.removeForUser(registered.user.id, createdLoadout.id)
@@ -153,7 +160,11 @@ describe('Phase 2 Core Services', () => {
         })
 
         const map = yield* Effect.promise(async () => {
-          return db.selectFrom('maps').select(['id']).orderBy('name', 'asc').executeTakeFirstOrThrow()
+          return db
+            .selectFrom('maps')
+            .select(['id'])
+            .orderBy('name', 'asc')
+            .executeTakeFirstOrThrow()
         })
 
         const match = yield* Effect.promise(async () => {
