@@ -6,6 +6,11 @@ import { DatabaseServiceLive } from './services/database.service'
 import { AuthServiceLive } from './modules/auth/application/services/auth.service'
 import { PlayerServiceLive } from './modules/player/application/services/player.service'
 import { StaticDataServiceLive } from './modules/static-data/application/services/static-data.service'
+import {
+  OutboxDispatcherService,
+  OutboxDispatcherServiceLive,
+} from './services/outbox-dispatcher.service'
+import { OutboxServiceLive } from './services/outbox.service'
 import { handleTaggedError } from './http/response'
 import { applySecurityHeaders, handlePreflightRequest } from './http/security'
 import { RadixRouter, type RouteDefinition } from './http/radix-router'
@@ -19,7 +24,9 @@ const BaseLayer = Layer.mergeAll(ConfigLayer, DatabaseServiceLive)
 const AppLayer = Layer.mergeAll(
   Layer.provide(AuthServiceLive, BaseLayer),
   Layer.provide(PlayerServiceLive, BaseLayer),
-  Layer.provide(StaticDataServiceLive, BaseLayer)
+  Layer.provide(StaticDataServiceLive, BaseLayer),
+  Layer.provide(OutboxServiceLive, BaseLayer),
+  Layer.provide(OutboxDispatcherServiceLive, Layer.provide(OutboxServiceLive, BaseLayer))
 )
 
 const runApp = <A, E, R>(effect: Effect.Effect<A, E, R>) =>
@@ -79,6 +86,31 @@ const Program = Effect.gen(function* () {
   yield* Effect.logInfo(`Environment: ${config.nodeEnv}`)
   yield* Effect.logInfo(`Game tick rate: ${config.gameTickRate}Hz`)
 
+  setInterval(() => {
+    void runApp(
+      Effect.gen(function* () {
+        const dispatcher = yield* OutboxDispatcherService
+        return yield* dispatcher.processPending(25)
+      })
+    )
+      .then((result) => {
+        if (result.failed > 0 || result.deadLettered > 0) {
+          void runApp(
+            Effect.logWarning(
+              `Outbox dispatcher processed=${result.processed} failed=${result.failed} dead_lettered=${result.deadLettered}`
+            )
+          )
+        }
+      })
+      .catch((error: unknown) => {
+        if (error instanceof Error) {
+          void runApp(Effect.logError(`Outbox dispatcher failure: ${error.message}`))
+          return
+        }
+        void runApp(Effect.logError('Outbox dispatcher failure'))
+      })
+  }, 3000)
+
   const server = serve({
     hostname: config.host,
     port: config.port,
@@ -104,7 +136,7 @@ const Program = Effect.gen(function* () {
 })
 
 const Main = Program.pipe(
-  Effect.provide(ConfigLayer),
+  Effect.provide(AppLayer),
   Effect.catchAllCause((error) => Effect.logFatal('Server crashed', error))
 )
 

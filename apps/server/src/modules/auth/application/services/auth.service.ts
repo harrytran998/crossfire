@@ -17,6 +17,13 @@ import {
   AuthRepository as AuthRepositoryTag,
   AuthRepositoryLive,
 } from '../../infrastructure/repositories/auth.repository.impl'
+import {
+  SessionExpired,
+  UserLoggedIn,
+  UserLoggedOut,
+  UserRegistered,
+} from '../../domain/events/auth.events'
+import { OutboxService, OutboxServiceLive } from '../../../../services/outbox.service'
 
 const TOKEN_EXPIRATION_MS = 60 * 60 * 24 * 7 * 1000
 
@@ -40,6 +47,7 @@ export const AuthServiceLive = Layer.effect(
   Effect.gen(function* () {
     const repo = yield* AuthRepositoryTag
     const crypto = yield* CryptoService
+    const outbox = yield* OutboxService
 
     const createSessionExpiry = () => new Date(Date.now() + TOKEN_EXPIRATION_MS)
 
@@ -52,6 +60,28 @@ export const AuthServiceLive = Layer.effect(
         const expiresAt = createSessionExpiry()
 
         const session = yield* repo.createSession(user.id, token, null, null, expiresAt)
+
+        const event = new UserRegistered({
+          userId: user.id,
+          email: user.email,
+          username: user.username,
+          timestamp: new Date(),
+        })
+
+        yield* outbox
+          .enqueue({
+            aggregateType: 'user',
+            aggregateId: user.id,
+            eventType: event._tag,
+            payload: {
+              userId: event.userId,
+              email: event.email,
+              username: event.username,
+              timestamp: event.timestamp.toISOString(),
+            },
+            idempotencyKey: `auth:user-registered:${user.id}`,
+          })
+          .pipe(Effect.orDie)
 
         return { user, session, token }
       })
@@ -86,6 +116,28 @@ export const AuthServiceLive = Layer.effect(
         const session = yield* repo.createSession(user.id, token, null, null, expiresAt)
         yield* repo.updateLastLogin(user.id).pipe(Effect.orDie)
 
+        const event = new UserLoggedIn({
+          userId: user.id,
+          sessionId: session.id,
+          ipAddress: session.ipAddress,
+          timestamp: new Date(),
+        })
+
+        yield* outbox
+          .enqueue({
+            aggregateType: 'session',
+            aggregateId: session.id,
+            eventType: event._tag,
+            payload: {
+              userId: event.userId,
+              sessionId: event.sessionId,
+              ipAddress: event.ipAddress,
+              timestamp: event.timestamp.toISOString(),
+            },
+            idempotencyKey: `auth:user-logged-in:${session.id}`,
+          })
+          .pipe(Effect.orDie)
+
         return { user, session, token }
       })
 
@@ -94,6 +146,26 @@ export const AuthServiceLive = Layer.effect(
         const session = yield* repo.findSessionByToken(refreshToken)
         if (session) {
           yield* repo.revokeSession(session.id)
+
+          const event = new UserLoggedOut({
+            userId: session.userId,
+            sessionId: session.id,
+            timestamp: new Date(),
+          })
+
+          yield* outbox
+            .enqueue({
+              aggregateType: 'session',
+              aggregateId: session.id,
+              eventType: event._tag,
+              payload: {
+                userId: event.userId,
+                sessionId: event.sessionId,
+                timestamp: event.timestamp.toISOString(),
+              },
+              idempotencyKey: `auth:user-logged-out:${session.id}`,
+            })
+            .pipe(Effect.orDie)
         }
       })
 
@@ -108,6 +180,30 @@ export const AuthServiceLive = Layer.effect(
         }
 
         if (session.revokedAt || new Date() > session.expiresAt) {
+          if (session.revokedAt == null) {
+            yield* repo.revokeSession(session.id).pipe(Effect.orDie)
+
+            const event = new SessionExpired({
+              userId: session.userId,
+              sessionId: session.id,
+              timestamp: new Date(),
+            })
+
+            yield* outbox
+              .enqueue({
+                aggregateType: 'session',
+                aggregateId: session.id,
+                eventType: event._tag,
+                payload: {
+                  userId: event.userId,
+                  sessionId: event.sessionId,
+                  timestamp: event.timestamp.toISOString(),
+                },
+                idempotencyKey: `auth:session-expired:${session.id}`,
+              })
+              .pipe(Effect.orDie)
+          }
+
           return yield* Effect.fail(new UnauthorizedError())
         }
 
@@ -154,4 +250,8 @@ export const AuthServiceLive = Layer.effect(
       getUserById,
     })
   })
-).pipe(Layer.provide(AuthRepositoryLive), Layer.provide(CryptoServiceLive))
+).pipe(
+  Layer.provide(AuthRepositoryLive),
+  Layer.provide(CryptoServiceLive),
+  Layer.provide(OutboxServiceLive)
+)
