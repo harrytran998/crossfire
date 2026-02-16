@@ -68,7 +68,9 @@ const parseUserLoggedInPayload = (payload: unknown): UserLoggedInPayload => {
     typeof payload.userId !== 'string' ||
     typeof payload.sessionId !== 'string' ||
     typeof payload.timestamp !== 'string' ||
-    (payload.ipAddress !== null && typeof payload.ipAddress !== 'string' && payload.ipAddress !== undefined)
+    (payload.ipAddress !== null &&
+      typeof payload.ipAddress !== 'string' &&
+      payload.ipAddress !== undefined)
   ) {
     throw new Error('Invalid UserLoggedIn payload fields')
   }
@@ -151,7 +153,8 @@ const getHandler = (
             throw new Error(`User not found for UserRegistered event userId=${payload.userId}`)
           }
         },
-        catch: (error) => (error instanceof Error ? error : new Error('UserRegistered handler failed')),
+        catch: (error) =>
+          error instanceof Error ? error : new Error('UserRegistered handler failed'),
       })
   }
 
@@ -171,7 +174,8 @@ const getHandler = (
             .where('id', '=', payload.userId)
             .execute()
         },
-        catch: (error) => (error instanceof Error ? error : new Error('UserLoggedIn handler failed')),
+        catch: (error) =>
+          error instanceof Error ? error : new Error('UserLoggedIn handler failed'),
       })
   }
 

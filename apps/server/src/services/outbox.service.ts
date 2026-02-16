@@ -55,7 +55,9 @@ export class OutboxService extends Context.Tag('OutboxService')<
   OutboxService,
   {
     readonly enqueue: (input: EnqueueOutboxMessageInput) => Effect.Effect<string, DatabaseError>
-    readonly claimPending: (limit: number) => Effect.Effect<ReadonlyArray<ClaimedOutboxMessage>, DatabaseError>
+    readonly claimPending: (
+      limit: number
+    ) => Effect.Effect<ReadonlyArray<ClaimedOutboxMessage>, DatabaseError>
     readonly isConsumerProcessed: (
       consumerName: string,
       idempotencyKey: string
@@ -100,7 +102,9 @@ export const OutboxServiceLive = Layer.effect(
         return String(inserted.id)
       })
 
-    const claimPending = (limit: number): Effect.Effect<ReadonlyArray<ClaimedOutboxMessage>, DatabaseError> =>
+    const claimPending = (
+      limit: number
+    ): Effect.Effect<ReadonlyArray<ClaimedOutboxMessage>, DatabaseError> =>
       query(async (dbClient) => {
         const now = new Date()
 
@@ -156,29 +160,27 @@ export const OutboxServiceLive = Layer.effect(
       query(async () => {
         const now = new Date()
 
-        await db
-          .transaction()
-          .execute(async (trx) => {
-            await trx
-              .insertInto('outbox_consumers')
-              .values({
-                consumer_name: consumerName,
-                idempotency_key: idempotencyKey,
-              })
-              .onConflict((oc) => oc.columns(['consumer_name', 'idempotency_key']).doNothing())
-              .execute()
+        await db.transaction().execute(async (trx) => {
+          await trx
+            .insertInto('outbox_consumers')
+            .values({
+              consumer_name: consumerName,
+              idempotency_key: idempotencyKey,
+            })
+            .onConflict((oc) => oc.columns(['consumer_name', 'idempotency_key']).doNothing())
+            .execute()
 
-            await trx
-              .updateTable('outbox_messages')
-              .set({
-                status: 'processed',
-                processed_at: now,
-                last_error: null,
-                updated_at: now,
-              })
-              .where('id', '=', messageId)
-              .execute()
-          })
+          await trx
+            .updateTable('outbox_messages')
+            .set({
+              status: 'processed',
+              processed_at: now,
+              last_error: null,
+              updated_at: now,
+            })
+            .where('id', '=', messageId)
+            .execute()
+        })
       })
 
     const scheduleRetry = (
@@ -206,33 +208,31 @@ export const OutboxServiceLive = Layer.effect(
       query(async () => {
         const now = new Date()
 
-        await db
-          .transaction()
-          .execute(async (trx) => {
-            await trx
-              .insertInto('outbox_dead_letters')
-              .values({
-                outbox_message_id: message.id,
-                event_type: message.eventType,
-                payload: message.payload,
-                idempotency_key: message.idempotencyKey,
-                failure_reason: failureReason,
-                failed_at: now,
-              })
-              .onConflict((oc) => oc.column('outbox_message_id').doNothing())
-              .execute()
+        await db.transaction().execute(async (trx) => {
+          await trx
+            .insertInto('outbox_dead_letters')
+            .values({
+              outbox_message_id: message.id,
+              event_type: message.eventType,
+              payload: message.payload,
+              idempotency_key: message.idempotencyKey,
+              failure_reason: failureReason,
+              failed_at: now,
+            })
+            .onConflict((oc) => oc.column('outbox_message_id').doNothing())
+            .execute()
 
-            await trx
-              .updateTable('outbox_messages')
-              .set({
-                status: 'dead_letter',
-                last_error: failureReason,
-                processed_at: now,
-                updated_at: now,
-              })
-              .where('id', '=', message.id)
-              .execute()
-          })
+          await trx
+            .updateTable('outbox_messages')
+            .set({
+              status: 'dead_letter',
+              last_error: failureReason,
+              processed_at: now,
+              updated_at: now,
+            })
+            .where('id', '=', message.id)
+            .execute()
+        })
       })
 
     return OutboxService.of({
