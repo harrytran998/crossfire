@@ -559,7 +559,7 @@
 │                                                                   │
 │  Layer 4: Data Security                                          │
 │  ┌─────────────────────────────────────────────────────────────┐ │
-│  │  - Password Hashing (bcrypt)                                │ │
+│  │  - Password Hashing (argon2)                                │ │
 │  │  - Data Encryption at Rest                                  │ │
 │  │  - Audit Logging                                            │ │
 │  │  - GDPR Compliance                                          │ │
