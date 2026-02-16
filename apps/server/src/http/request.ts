@@ -1,3 +1,5 @@
+import { HTTP_STATUS } from './status'
+
 export const extractBearerToken = (req: Request): string | null => {
   const header = req.headers.get('authorization')
   if (!header || !header.startsWith('Bearer ')) {
@@ -17,7 +19,10 @@ export const parseJsonObject = async (
     if (!isObject || (prototype !== Object.prototype && prototype !== null)) {
       return {
         ok: false,
-        response: Response.json({ error: 'Invalid JSON body' }, { status: 400 }),
+        response: Response.json(
+          { error: 'Invalid JSON body' },
+          { status: HTTP_STATUS.BAD_REQUEST }
+        ),
       }
     }
 
@@ -25,7 +30,10 @@ export const parseJsonObject = async (
   } catch {
     return {
       ok: false,
-      response: Response.json({ error: 'Malformed JSON body' }, { status: 400 }),
+      response: Response.json(
+        { error: 'Malformed JSON body' },
+        { status: HTTP_STATUS.BAD_REQUEST }
+      ),
     }
   }
 }

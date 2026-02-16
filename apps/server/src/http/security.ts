@@ -1,3 +1,5 @@
+import { HTTP_STATUS } from './status'
+
 const DEFAULT_ALLOWED_ORIGINS = ['http://localhost:3000', 'http://localhost:5173']
 
 const parseAllowedOrigins = (): Set<string> => {
@@ -41,13 +43,13 @@ export const handlePreflightRequest = (req: Request): Response | null => {
 
   const origin = req.headers.get('origin')
   if (!isAllowedOrigin(origin)) {
-    return Response.json({ error: 'Origin not allowed' }, { status: 403 })
+    return Response.json({ error: 'Origin not allowed' }, { status: HTTP_STATUS.FORBIDDEN })
   }
 
   const headers = new Headers()
   applyCorsHeaders(headers, origin)
 
-  return new Response(null, { status: 204, headers })
+  return new Response(null, { status: HTTP_STATUS.NO_CONTENT, headers })
 }
 
 export const applySecurityHeaders = (res: Response, req: Request): Response => {
