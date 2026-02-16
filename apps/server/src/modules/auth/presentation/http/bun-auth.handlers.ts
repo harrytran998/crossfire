@@ -1,5 +1,6 @@
 import { Effect, ParseResult, Schema } from 'effect'
 import { AuthService } from '../../application/services/auth.service'
+import { AuthThrottleService } from '../../application/services/auth-throttle.service'
 import { BetterAuthConfig } from '../../infrastructure/adapters/better-auth.config'
 import type { AuthResult } from '../../domain/entities/user.entity'
 import { LoginSchema, RegistrationSchema } from '../../domain/errors/auth.errors'
@@ -7,12 +8,11 @@ import { errorResponse } from '../../../../http/response'
 import { extractBearerToken, getClientIp, parseJsonObject } from '../../../../http/request'
 import type { RouteDefinition } from '../../../../http/radix-router'
 import { HTTP_STATUS } from '../../../../http/status'
-import {
-  clearLoginFailures,
-  consumeAuthRateLimit,
-  getLoginLockout,
-  recordLoginFailure,
-} from './auth-security'
+
+const getSessionContext = (req: Request) => ({
+  ipAddress: getClientIp(req),
+  userAgent: req.headers.get('user-agent'),
+})
 
 const validationErrorResponse = (error: ParseResult.ParseError): Response =>
   Response.json(
@@ -24,8 +24,15 @@ const validationErrorResponse = (error: ParseResult.ParseError): Response =>
   )
 
 const registerHandler: RouteDefinition['handler'] = async (req, { runApp }) => {
-  const ip = getClientIp(req)
-  const rateLimit = consumeAuthRateLimit('register', ip)
+  const sessionContext = getSessionContext(req)
+
+  const rateLimit = await runApp(
+    Effect.gen(function* () {
+      const authThrottle = yield* AuthThrottleService
+      return yield* authThrottle.consumeAuthRateLimit('register', sessionContext.ipAddress)
+    })
+  )
+
   if (!rateLimit.allowed) {
     return Response.json(
       { error: 'Too many requests, please try again later' },
@@ -50,11 +57,14 @@ const registerHandler: RouteDefinition['handler'] = async (req, { runApp }) => {
   const result = await runApp(
     Effect.gen(function* () {
       const auth = yield* AuthService
-      return yield* auth.register({
-        email: body.email,
-        username: body.username,
-        password: body.password,
-      })
+      return yield* auth.register(
+        {
+          email: body.email,
+          username: body.username,
+          password: body.password,
+        },
+        sessionContext
+      )
     })
   )
 
@@ -72,8 +82,15 @@ const registerHandler: RouteDefinition['handler'] = async (req, { runApp }) => {
 }
 
 const loginHandler: RouteDefinition['handler'] = async (req, { runApp }) => {
-  const ip = getClientIp(req)
-  const rateLimit = consumeAuthRateLimit('login', ip)
+  const sessionContext = getSessionContext(req)
+
+  const rateLimit = await runApp(
+    Effect.gen(function* () {
+      const authThrottle = yield* AuthThrottleService
+      return yield* authThrottle.consumeAuthRateLimit('login', sessionContext.ipAddress)
+    })
+  )
+
   if (!rateLimit.allowed) {
     return Response.json(
       { error: 'Too many requests, please try again later' },
@@ -95,7 +112,13 @@ const loginHandler: RouteDefinition['handler'] = async (req, { runApp }) => {
   }
 
   const body = decoded.right
-  const lockout = getLoginLockout(ip, body.email)
+  const lockout = await runApp(
+    Effect.gen(function* () {
+      const authThrottle = yield* AuthThrottleService
+      return yield* authThrottle.getLoginLockout(sessionContext.ipAddress, body.email)
+    })
+  )
+
   if (lockout.locked) {
     return Response.json(
       { error: 'Too many failed login attempts, please try again later' },
@@ -113,18 +136,31 @@ const loginHandler: RouteDefinition['handler'] = async (req, { runApp }) => {
     result = await runApp(
       Effect.gen(function* () {
         const auth = yield* AuthService
-        return yield* auth.login({
-          email: body.email,
-          password: body.password,
-        })
+        return yield* auth.login(
+          {
+            email: body.email,
+            password: body.password,
+          },
+          sessionContext
+        )
       })
     )
-    clearLoginFailures(ip, body.email)
+    await runApp(
+      Effect.gen(function* () {
+        const authThrottle = yield* AuthThrottleService
+        yield* authThrottle.clearLoginFailures(sessionContext.ipAddress, body.email)
+      })
+    )
   } catch (error) {
     if (error && typeof error === 'object' && '_tag' in error) {
       const tag = (error as { _tag: string })._tag
       if (tag === 'InvalidCredentialsError') {
-        recordLoginFailure(ip, body.email)
+        await runApp(
+          Effect.gen(function* () {
+            const authThrottle = yield* AuthThrottleService
+            yield* authThrottle.recordLoginFailure(sessionContext.ipAddress, body.email)
+          })
+        )
       }
     }
 
@@ -145,10 +181,12 @@ const sessionHandler: RouteDefinition['handler'] = async (req, { runApp }) => {
   const token = extractBearerToken(req)
   if (!token) return errorResponse(HTTP_STATUS.UNAUTHORIZED, 'Unauthorized')
 
+  const sessionContext = getSessionContext(req)
+
   const result = await runApp(
     Effect.gen(function* () {
       const auth = yield* AuthService
-      return yield* auth.validateSession(token)
+      return yield* auth.validateSession(token, sessionContext)
     })
   )
 
@@ -169,10 +207,12 @@ const refreshHandler: RouteDefinition['handler'] = async (req, { runApp }) => {
   const token = extractBearerToken(req)
   if (!token) return errorResponse(HTTP_STATUS.UNAUTHORIZED, 'Unauthorized')
 
+  const sessionContext = getSessionContext(req)
+
   const result = await runApp(
     Effect.gen(function* () {
       const auth = yield* AuthService
-      return yield* auth.refreshSession(token)
+      return yield* auth.refreshSession(token, sessionContext)
     })
   )
 
@@ -183,10 +223,12 @@ const logoutHandler: RouteDefinition['handler'] = async (req, { runApp }) => {
   const token = extractBearerToken(req)
   if (!token) return errorResponse(HTTP_STATUS.UNAUTHORIZED, 'Unauthorized')
 
+  const sessionContext = getSessionContext(req)
+
   await runApp(
     Effect.gen(function* () {
       const auth = yield* AuthService
-      yield* auth.logout(token)
+      yield* auth.logout(token, sessionContext)
     })
   )
 

@@ -21,7 +21,6 @@ export interface User {
 export interface Session {
   readonly id: string
   readonly userId: string
-  readonly refreshToken: string
   readonly ipAddress: string | null
   readonly userAgent: string | null
   readonly createdAt: Date
@@ -69,7 +68,6 @@ export const mapSessionRowToEntity = (row: SessionRow): Session => {
   return {
     id: String(safeRow.id),
     userId: String(safeRow.user_id),
-    refreshToken: String(safeRow.refresh_token),
     ipAddress: safeRow.ip_address as string | null,
     userAgent: safeRow.user_agent as string | null,
     createdAt: safeRow.created_at as Date,

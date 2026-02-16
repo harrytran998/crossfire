@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 env:
   BUN_VERSION: '1.3.9'
 
@@ -69,7 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:18-alpine
+        image: timescale/timescaledb:2.25.0-pg18
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres

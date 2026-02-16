@@ -23,6 +23,7 @@ export {
 export { UserRegistered, UserLoggedIn, UserLoggedOut, SessionExpired } from './domain/events'
 export type { AuthRepository } from './domain/repositories'
 export { AuthService, AuthServiceLive } from './application/services'
+export { AuthThrottleService, AuthThrottleServiceLive } from './application/services'
 export {
   AuthRepository as AuthRepositoryTag,
   AuthRepositoryLive,

@@ -1,6 +1,6 @@
 # Crossfire Web Game - Implementation TODO
 
-> Auto-generated from EXECUTION_PLAN.md v2.1
+> Auto-generated from EXECUTION_PLAN.md v2.3
 > Track progress by updating status: pending → in_progress → completed
 
 ---
@@ -24,51 +24,62 @@
 
 ### Wave 1: Project Setup (Parallel - Week 1)
 
-- [ ] **P0-W1-T01** | Create monorepo structure (Moonrepo + Bun)
+- [x] **P0-W1-T01** | Create monorepo structure (Moonrepo + Bun)
   - Category: devops | Skills: git-master, bun | Est: 2-3h
   - Files: package.json, .moon/workspace.yml, .moon/toolchains.yml, .moon/tasks/all.yml
 
-- [ ] **P0-W1-T02** | Setup Docker Compose infrastructure
+- [x] **P0-W1-T02** | Setup Docker Compose infrastructure
   - Category: devops | Skills: docker | Est: 3-4h
   - Services: PostgreSQL 18, TimescaleDB, Redis
   - **Key**: Use PostgreSQL 18 for UUID v7 support
 
-- [ ] **P0-W1-T03** | Configure TypeScript with strict mode
+- [x] **P0-W1-T03** | Configure TypeScript with strict mode
   - Category: devops | Skills: bun | Est: 2h
   - Files: tsconfig.json (root + packages)
 
-- [ ] **P0-W1-T04** | Setup oxlint and oxfmt (replaces ESLint/Prettier)
+- [x] **P0-W1-T04** | Setup oxlint and oxfmt (replaces ESLint/Prettier)
   - Category: quick | Skills: bun | Est: 2h
   - Files: oxlint.config.ts, .oxfmtrc.json, .husky/pre-commit
   - **Note**: 10-100x faster than ESLint/Prettier
 
-- [ ] **P0-W1-T05** | Create environment config system (Effect Config)
+- [x] **P0-W1-T05** | Create environment config system (Effect Config)
   - Category: ultrabrain | Skills: effect | Est: 4-5h
   - Files: packages/shared/src/config/\*.ts
 
-- [ ] **P0-W1-T06** | Setup GitHub Actions CI/CD
+- [x] **P0-W1-T06** | Setup GitHub Actions CI/CD
   - Category: devops | Skills: git-master | Est: 3h
   - Files: .github/workflows/ci.yml, pr.yml
 
 ### Wave 2: Database & Shared Package (Week 1-2)
 
-- [ ] **P0-W2-T07** | Implement Kysely schema + SQL migrations
+- [x] **P0-W2-T07** | Implement Kysely schema + SQL migrations
   - Category: ultrabrain | Skills: database | Est: 8-10h
   - Files: packages/database/migrations/\*.sql, packages/database/src/types.ts
   - **Key**: Use uuidv7() for primary keys, kysely-codegen for types
   - **BLOCKS**: Most Phase 1+ tasks
 
-- [ ] **P0-W2-T08** | Setup golang-migrate for migrations
+- [x] **P0-W2-T08** | Setup golang-migrate for migrations
   - Category: devops | Skills: database | Est: 2-3h
   - Files: packages/database/scripts/migrate.sh, seed.ts
   - **Install**: `brew install golang-migrate`
   - **DEPENDS ON**: P0-W2-T07
 
-- [ ] **P0-W2-T09** | Create shared package (types & utilities)
+- [x] **P0-W2-T09** | Create shared package (types & utilities)
   - Category: quick | Skills: bun | Est: 4-6h
   - Files: packages/shared/src/types/\*.ts
 
-- [ ] **P0-W2-T10** | Setup Effect platform in server
+- [x] **P0-W2-T10** | Setup Effect platform in server
+
+### Phase 0 Gate Fixes (must be completed before Phase 1 sign-off)
+
+- [x] **P0-GATE-C01** | UUIDv7 migration consistency
+  - Scope: migrate PK defaults from gen_random_uuid() to uuidv7() with rollback migration
+
+- [x] **P0-GATE-C02** | Timescale bootstrap + hypertable consistency
+  - Scope: explicit Timescale init script and telemetry hypertable conversion migration
+
+- [x] **P0-GATE-C03** | Outbox/event delivery contract
+  - Scope: outbox + idempotency + retry/backoff + dead-letter schema and dispatcher wiring
   - Category: ultrabrain | Skills: effect | Est: 4-5h
   - Files: apps/server/src/index.ts, services/, layers/
 
@@ -78,33 +89,33 @@
 
 ### Wave 3: Better Auth Integration (Week 2)
 
-- [ ] **P1-W3-T11** | Integrate Better Auth with Effect + Kysely
+- [x] **P1-W3-T11** | Integrate Better Auth with Effect + Kysely
   - Category: ultrabrain | Skills: effect, bun | Est: 6-8h
   - **DEPENDS ON**: P0-W2-T07, P0-W2-T10
 
-- [ ] **P1-W3-T12** | Implement Auth REST API endpoints
+- [x] **P1-W3-T12** | Implement Auth REST API endpoints
   - Category: integration | Skills: effect | Est: 6-8h
   - Endpoints: POST /auth/register, login, logout, refresh
 
-- [ ] **P1-W3-T13** | Create Player service layer (Kysely)
+- [x] **P1-W3-T13** | Create Player service layer (Kysely)
   - Category: ultrabrain | Skills: effect, database | Est: 6-8h
 
-- [ ] **P1-W3-T14** | Create Player Stats & Progression services
+- [x] **P1-W3-T14** | Create Player Stats & Progression services
   - Category: integration | Skills: effect, database | Est: 5-6h
 
-- [ ] **P1-W3-T15** | Implement Player REST API
+- [x] **P1-W3-T15** | Implement Player REST API
   - Category: integration | Skills: effect | Est: 4-5h
 
 ### Wave 4: Static Data API (Week 2-3)
 
-- [ ] **P1-W4-T16** | Create Weapons & Attachments service
+- [x] **P1-W4-T16** | Create Weapons & Attachments service
   - Category: integration | Skills: effect, database | Est: 5-6h
   - **PARALLEL with Wave 3 after T07**
 
-- [ ] **P1-W4-T17** | Create Maps service
+- [x] **P1-W4-T17** | Create Maps service
   - Category: quick | Skills: effect, database | Est: 3-4h
 
-- [ ] **P1-W4-T18** | Implement Static Data REST API
+- [x] **P1-W4-T18** | Implement Static Data REST API
   - Category: integration | Skills: effect | Est: 4-5h
 
 ---
@@ -223,8 +234,8 @@
 
 | Metric        | Count |
 | ------------- | ----- |
-| Total Tasks   | 42    |
-| Phase 0 Tasks | 10    |
+| Total Tasks   | 45    |
+| Phase 0 Tasks | 13    |
 | Phase 1 Tasks | 8     |
 | Phase 2 Tasks | 9     |
 | Phase 3 Tasks | 6     |
@@ -326,6 +337,6 @@ CREATE TABLE users (
 
 ---
 
-_TODO List Version: 2.2_  
-_Generated from: EXECUTION_PLAN.md v2.2_  
+_TODO List Version: 2.3_  
+_Generated from: EXECUTION_PLAN.md v2.3_  
 _Last Updated: February 2026_

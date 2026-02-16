@@ -1,5 +1,15 @@
 import { Config, Effect, Redacted } from 'effect'
 
+const hasWeakDatabaseCredential = (value: string): boolean => {
+  const normalized = value.trim().toLowerCase()
+  return (
+    normalized === 'postgres' ||
+    normalized === 'password' ||
+    normalized === 'changeme' ||
+    normalized.includes('replace_with')
+  )
+}
+
 export class DatabaseConfig extends Effect.Service<DatabaseConfig>()('DatabaseConfig', {
   effect: Effect.gen(function* () {
     const url = yield* Config.redacted('DATABASE_URL')
@@ -11,14 +21,28 @@ export class DatabaseConfig extends Effect.Service<DatabaseConfig>()('DatabaseCo
       Config.withDefault(Redacted.make('postgres'))
     )
     const poolMax = yield* Config.integer('DB_POOL_MAX').pipe(Config.withDefault(10))
+    const nodeEnv = yield* Config.string('NODE_ENV').pipe(Config.withDefault('development'))
+
+    const decodedUrl = Redacted.value(url)
+    const decodedPassword = Redacted.value(password)
+
+    if (nodeEnv === 'production') {
+      if (hasWeakDatabaseCredential(decodedPassword)) {
+        return yield* Effect.fail(new Error('DB_PASSWORD is weak or placeholder in production'))
+      }
+
+      if (decodedUrl.includes('postgres:postgres@')) {
+        return yield* Effect.fail(new Error('DATABASE_URL uses default postgres credentials'))
+      }
+    }
 
     return {
-      url: Redacted.value(url),
+      url: decodedUrl,
       host,
       port,
       name,
       user,
-      password: Redacted.value(password),
+      password: decodedPassword,
       poolMax,
     }
   }),

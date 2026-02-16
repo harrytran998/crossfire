@@ -1,12 +1,13 @@
 services:
   postgres:
-    image: postgres:18-alpine
+    image: timescale/timescaledb:2.25.0-pg18
     container_name: crossfire-postgres
     restart: unless-stopped
+    command: postgres -c shared_preload_libraries=timescaledb
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: crossfire
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-crossfire}
     ports:
       - '5432:5432'
     volumes:
