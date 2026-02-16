@@ -1,5 +1,6 @@
 import { Effect, ParseResult, Schema } from 'effect'
 import { AuthService } from '../../../auth/application/services/auth.service'
+import { AuthThrottleService } from '../../../auth/application/services/auth-throttle.service'
 import { FriendsService } from '../../application/services/friends.service'
 import {
   FriendPlayerIdParamSchema,
@@ -43,6 +44,25 @@ const sendRequestHandler: RouteDefinition['handler'] = async (req, { runApp }) =
   const auth = await requireAuthUser(req, runApp)
   if (auth instanceof Response) {
     return auth
+  }
+
+  const rateLimit = await runApp(
+    Effect.gen(function* () {
+      const throttle = yield* AuthThrottleService
+      return yield* throttle.consumeApiRateLimit('friends-request', auth.userId)
+    })
+  )
+
+  if (!rateLimit.allowed) {
+    return Response.json(
+      { error: 'Too many requests, please try again later' },
+      {
+        status: HTTP_STATUS.TOO_MANY_REQUESTS,
+        headers: {
+          'Retry-After': String(rateLimit.retryAfterSeconds),
+        },
+      }
+    )
   }
 
   const parsed = await parseJsonObject(req)

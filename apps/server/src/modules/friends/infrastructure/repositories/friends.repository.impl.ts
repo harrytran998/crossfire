@@ -36,23 +36,6 @@ export const FriendsRepositoryLive = Layer.effect(
       addresseeId
     ) =>
       Effect.promise(async () => {
-        const existing = await db
-          .selectFrom('friendships')
-          .where('requester_id', '=', requesterId)
-          .where('addressee_id', '=', addresseeId)
-          .select(friendshipColumns)
-          .executeTakeFirst()
-
-        if (existing) {
-          const updated = await db
-            .updateTable('friendships')
-            .set({ status: 'pending', updated_at: new Date() })
-            .where('id', '=', existing.id as unknown as string)
-            .returning(friendshipColumns)
-            .executeTakeFirstOrThrow()
-          return mapFriendshipRowToEntity(updated as unknown as FriendshipRow)
-        }
-
         const created = await db
           .insertInto('friendships')
           .values({
@@ -60,6 +43,12 @@ export const FriendsRepositoryLive = Layer.effect(
             addressee_id: addresseeId,
             status: 'pending',
           })
+          .onConflict((oc) =>
+            oc.columns(['requester_id', 'addressee_id']).doUpdateSet({
+              status: 'pending',
+              updated_at: new Date(),
+            })
+          )
           .returning(friendshipColumns)
           .executeTakeFirstOrThrow()
 
@@ -90,23 +79,20 @@ export const FriendsRepositoryLive = Layer.effect(
         return rows.map((row) => mapFriendshipRowToEntity(row as unknown as FriendshipRow))
       }).pipe(Effect.orDie)
 
-    const updateRequestStatusForAddressee: FriendsRepositoryType['updateRequestStatusForAddressee'] = (
-      friendshipId,
-      addresseeId,
-      status
-    ) =>
-      Effect.promise(async () => {
-        const row = await db
-          .updateTable('friendships')
-          .set({ status, updated_at: new Date() })
-          .where('id', '=', friendshipId)
-          .where('addressee_id', '=', addresseeId)
-          .where('status', '=', 'pending')
-          .returning(friendshipColumns)
-          .executeTakeFirst()
+    const updateRequestStatusForAddressee: FriendsRepositoryType['updateRequestStatusForAddressee'] =
+      (friendshipId, addresseeId, status) =>
+        Effect.promise(async () => {
+          const row = await db
+            .updateTable('friendships')
+            .set({ status, updated_at: new Date() })
+            .where('id', '=', friendshipId)
+            .where('addressee_id', '=', addresseeId)
+            .where('status', '=', 'pending')
+            .returning(friendshipColumns)
+            .executeTakeFirst()
 
-        return row ? mapFriendshipRowToEntity(row as unknown as FriendshipRow) : null
-      }).pipe(Effect.orDie)
+          return row ? mapFriendshipRowToEntity(row as unknown as FriendshipRow) : null
+        }).pipe(Effect.orDie)
 
     const listFriends: FriendsRepositoryType['listFriends'] = (playerId) =>
       Effect.promise(async () => {
@@ -115,7 +101,9 @@ export const FriendsRepositoryLive = Layer.effect(
           .innerJoin('players as requester', 'requester.id', 'f.requester_id')
           .innerJoin('players as addressee', 'addressee.id', 'f.addressee_id')
           .where('f.status', '=', 'accepted')
-          .where((eb) => eb.or([eb('f.requester_id', '=', playerId), eb('f.addressee_id', '=', playerId)]))
+          .where((eb) =>
+            eb.or([eb('f.requester_id', '=', playerId), eb('f.addressee_id', '=', playerId)])
+          )
           .select([
             'f.id as friendship_id',
             'f.requester_id',
@@ -146,7 +134,10 @@ export const FriendsRepositoryLive = Layer.effect(
         return friends
       }).pipe(Effect.orDie)
 
-    const removeFriendRelation: FriendsRepositoryType['removeFriendRelation'] = (playerId, friendPlayerId) =>
+    const removeFriendRelation: FriendsRepositoryType['removeFriendRelation'] = (
+      playerId,
+      friendPlayerId
+    ) =>
       Effect.promise(async () => {
         const deleted = await db
           .deleteFrom('friendships')

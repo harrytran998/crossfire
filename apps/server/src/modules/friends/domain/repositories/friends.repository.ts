@@ -18,5 +18,8 @@ export interface FriendsRepository {
     status: FriendshipStatus
   ) => Effect.Effect<FriendRequest | null>
   readonly listFriends: (playerId: string) => Effect.Effect<readonly FriendPlayer[]>
-  readonly removeFriendRelation: (playerId: string, friendPlayerId: string) => Effect.Effect<boolean>
+  readonly removeFriendRelation: (
+    playerId: string,
+    friendPlayerId: string
+  ) => Effect.Effect<boolean>
 }

@@ -11,7 +11,9 @@ export class LeaderboardNotFoundError extends Data.TaggedError('LeaderboardNotFo
   }
 }
 
-export class LeaderboardQuerySchema extends Schema.Class<LeaderboardQuerySchema>('LeaderboardQuerySchema')({
+export class LeaderboardQuerySchema extends Schema.Class<LeaderboardQuerySchema>(
+  'LeaderboardQuerySchema'
+)({
   metricKey: Schema.optional(Schema.String.pipe(Schema.minLength(1), Schema.maxLength(32))),
   period: Schema.optional(Schema.Literal('daily', 'weekly', 'monthly', 'all_time')),
   mode: Schema.optional(
@@ -25,9 +27,7 @@ export class LeaderboardQuerySchema extends Schema.Class<LeaderboardQuerySchema>
     )
   ),
   page: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.greaterThanOrEqualTo(1))),
-  pageSize: Schema.optional(
-    Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 100))
-  ),
+  pageSize: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 100))),
   includeCurrentPlayerRank: Schema.optional(
     Schema.transform(Schema.String, Schema.Boolean, {
       decode: (input) => input === 'true',

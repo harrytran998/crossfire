@@ -24,7 +24,9 @@ import {
 } from '../../../inventory/infrastructure/repositories/inventory.repository.impl'
 
 export interface LoadoutService {
-  readonly listByUserId: (userId: string) => Effect.Effect<readonly PlayerLoadout[], PlayerNotFoundError>
+  readonly listByUserId: (
+    userId: string
+  ) => Effect.Effect<readonly PlayerLoadout[], PlayerNotFoundError>
   readonly createForUser: (
     userId: string,
     input: Omit<CreateLoadoutInput, 'playerId'>
@@ -79,7 +81,9 @@ export const LoadoutServiceLive = Layer.effect(
         }
       })
 
-    const listByUserId = (userId: string): Effect.Effect<readonly PlayerLoadout[], PlayerNotFoundError> =>
+    const listByUserId = (
+      userId: string
+    ): Effect.Effect<readonly PlayerLoadout[], PlayerNotFoundError> =>
       Effect.gen(function* () {
         const playerId = yield* getPlayerIdByUserId(userId)
         return yield* loadoutRepo.listByPlayerId(playerId)

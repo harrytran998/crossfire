@@ -32,7 +32,9 @@ export class FriendRequestNotFoundError extends Data.TaggedError('FriendRequestN
   }
 }
 
-export class FriendRelationNotFoundError extends Data.TaggedError('FriendRelationNotFoundError')<{}> {
+export class FriendRelationNotFoundError extends Data.TaggedError(
+  'FriendRelationNotFoundError'
+)<{}> {
   [HttpServerRespondable.symbol]() {
     return HttpServerResponse.json({ error: 'Friend not found' }, { status: HTTP_STATUS.NOT_FOUND })
   }
@@ -44,10 +46,14 @@ export class SendFriendRequestSchema extends Schema.Class<SendFriendRequestSchem
   playerId: UuidSchema,
 }) {}
 
-export class FriendshipIdParamSchema extends Schema.Class<FriendshipIdParamSchema>('FriendshipIdParamSchema')({
+export class FriendshipIdParamSchema extends Schema.Class<FriendshipIdParamSchema>(
+  'FriendshipIdParamSchema'
+)({
   friendshipId: UuidSchema,
 }) {}
 
-export class FriendPlayerIdParamSchema extends Schema.Class<FriendPlayerIdParamSchema>('FriendPlayerIdParamSchema')({
+export class FriendPlayerIdParamSchema extends Schema.Class<FriendPlayerIdParamSchema>(
+  'FriendPlayerIdParamSchema'
+)({
   friendPlayerId: UuidSchema,
 }) {}

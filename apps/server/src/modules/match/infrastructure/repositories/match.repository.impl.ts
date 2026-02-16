@@ -1,7 +1,11 @@
 import { Context, Effect, Layer } from 'effect'
 import { DatabaseService } from '../../../../services/database.service'
 import type { MatchRepository as MatchRepositoryType } from '../../domain/repositories/match.repository'
-import type { MatchDetail, MatchParticipant, MatchSummary } from '../../domain/entities/match.entity'
+import type {
+  MatchDetail,
+  MatchParticipant,
+  MatchSummary,
+} from '../../domain/entities/match.entity'
 
 export const MatchRepository = Context.GenericTag<MatchRepositoryType>('MatchRepository')
 

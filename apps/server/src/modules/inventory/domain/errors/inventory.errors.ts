@@ -14,7 +14,9 @@ export class InventoryWeaponNotFoundError extends Data.TaggedError('InventoryWea
   }
 }
 
-export class AcquireInventorySchema extends Schema.Class<AcquireInventorySchema>('AcquireInventorySchema')({
+export class AcquireInventorySchema extends Schema.Class<AcquireInventorySchema>(
+  'AcquireInventorySchema'
+)({
   weaponId: UuidSchema,
   isPermanent: Schema.optional(Schema.Boolean),
   expiresAt: Schema.optional(Schema.DateFromString),

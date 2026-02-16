@@ -33,7 +33,9 @@ export interface FriendsService {
     userId: string,
     friendshipId: string
   ) => Effect.Effect<void, PlayerNotFoundError | FriendRequestNotFoundError>
-  readonly listFriends: (userId: string) => Effect.Effect<readonly FriendPlayer[], PlayerNotFoundError>
+  readonly listFriends: (
+    userId: string
+  ) => Effect.Effect<readonly FriendPlayer[], PlayerNotFoundError>
   readonly removeFriend: (
     userId: string,
     friendPlayerId: string

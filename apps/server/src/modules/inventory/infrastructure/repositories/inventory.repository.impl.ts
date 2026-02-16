@@ -24,10 +24,13 @@ export const InventoryRepositoryLive = Layer.effect(
           .where('id', '=', weaponId)
           .where('is_active', '=', true)
           .executeTakeFirst()
-        if (!weapon) {
-          throw new InventoryWeaponNotFoundError({ weaponId })
-        }
-      }).pipe(Effect.mapError(() => new InventoryWeaponNotFoundError({ weaponId })))
+        return Boolean(weapon)
+      }).pipe(
+        Effect.orDie,
+        Effect.flatMap((found) =>
+          found ? Effect.void : Effect.fail(new InventoryWeaponNotFoundError({ weaponId }))
+        )
+      )
 
     const listByPlayerId: InventoryRepositoryType['listByPlayerId'] = (playerId) =>
       Effect.promise(async () => {
@@ -50,10 +53,14 @@ export const InventoryRepositoryLive = Layer.effect(
           .orderBy('pi.acquired_at', 'desc')
           .execute()
 
-        return rows.map((row) => mapInventoryJoinedRowToEntity(row as unknown as InventoryJoinedRow))
+        return rows.map((row) =>
+          mapInventoryJoinedRowToEntity(row as unknown as InventoryJoinedRow)
+        )
       }).pipe(Effect.orDie)
 
-    const acquireWeapon: InventoryRepositoryType['acquireWeapon'] = (input: AcquireInventoryInput) =>
+    const acquireWeapon: InventoryRepositoryType['acquireWeapon'] = (
+      input: AcquireInventoryInput
+    ) =>
       Effect.gen(function* () {
         yield* assertActiveWeapon(input.weaponId)
 

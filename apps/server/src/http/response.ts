@@ -23,9 +23,11 @@ export const handleTaggedError = (error: unknown): Response => {
     if (tag === 'LoadoutSlotTakenError')
       return errorResponse(HTTP_STATUS.CONFLICT, 'Loadout slot is already used')
     if (tag === 'LoadoutItemOwnershipError')
-      return errorResponse(HTTP_STATUS.FORBIDDEN, 'Selected inventory item does not belong to player')
-    if (tag === 'MatchNotFoundError')
-      return errorResponse(HTTP_STATUS.NOT_FOUND, 'Match not found')
+      return errorResponse(
+        HTTP_STATUS.FORBIDDEN,
+        'Selected inventory item does not belong to player'
+      )
+    if (tag === 'MatchNotFoundError') return errorResponse(HTTP_STATUS.NOT_FOUND, 'Match not found')
     if (tag === 'LeaderboardNotFoundError')
       return errorResponse(HTTP_STATUS.NOT_FOUND, 'Leaderboard not found')
     if (tag === 'FriendRequestNotFoundError')

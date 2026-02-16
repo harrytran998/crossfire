@@ -18,9 +18,9 @@ export class MatchIdParamSchema extends Schema.Class<MatchIdParamSchema>('MatchI
   matchId: UuidSchema,
 }) {}
 
-export class MatchListQuerySchema extends Schema.Class<MatchListQuerySchema>('MatchListQuerySchema')({
+export class MatchListQuerySchema extends Schema.Class<MatchListQuerySchema>(
+  'MatchListQuerySchema'
+)({
   page: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.greaterThanOrEqualTo(1))),
-  pageSize: Schema.optional(
-    Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 100))
-  ),
+  pageSize: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 100))),
 }) {}

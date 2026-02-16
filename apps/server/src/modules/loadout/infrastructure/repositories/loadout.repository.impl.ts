@@ -11,6 +11,23 @@ import { LoadoutNotFoundError, LoadoutSlotTakenError } from '../../domain/errors
 
 export const LoadoutRepository = Context.GenericTag<LoadoutRepositoryType>('LoadoutRepository')
 
+const isSlotConflictError = (error: unknown): boolean => {
+  if (!error || typeof error !== 'object') {
+    return false
+  }
+
+  const maybePgError = error as {
+    readonly code?: string
+    readonly constraint?: string
+  }
+
+  if (maybePgError.code !== '23505') {
+    return false
+  }
+
+  return maybePgError.constraint === 'unique_player_loadout_slot'
+}
+
 const columns = [
   'id',
   'player_id',
@@ -81,12 +98,20 @@ export const LoadoutRepositoryLive = Layer.effect(
                 flash_grenades: input.flashGrenades ?? 1,
                 smoke_grenades: input.smokeGrenades ?? 0,
                 primary_attachments: input.primaryAttachments ? [...input.primaryAttachments] : [],
-                secondary_attachments: input.secondaryAttachments ? [...input.secondaryAttachments] : [],
+                secondary_attachments: input.secondaryAttachments
+                  ? [...input.secondaryAttachments]
+                  : [],
               })
               .returning(columns)
               .executeTakeFirstOrThrow()
           })
-        }).pipe(Effect.mapError(() => new LoadoutSlotTakenError({ slot: input.slot })))
+        }).pipe(
+          Effect.catchAll((error) =>
+            isSlotConflictError(error)
+              ? Effect.fail(new LoadoutSlotTakenError({ slot: input.slot }))
+              : Effect.die(error)
+          )
+        )
 
         return mapPlayerLoadoutRowToEntity(row as unknown as PlayerLoadoutRow)
       })
@@ -119,7 +144,8 @@ export const LoadoutRepositoryLive = Layer.effect(
                   input.primaryWeaponId === undefined ? undefined : input.primaryWeaponId,
                 secondary_weapon_id:
                   input.secondaryWeaponId === undefined ? undefined : input.secondaryWeaponId,
-                melee_weapon_id: input.meleeWeaponId === undefined ? undefined : input.meleeWeaponId,
+                melee_weapon_id:
+                  input.meleeWeaponId === undefined ? undefined : input.meleeWeaponId,
                 frag_grenades: input.fragGrenades,
                 flash_grenades: input.flashGrenades,
                 smoke_grenades: input.smokeGrenades,
@@ -139,8 +165,10 @@ export const LoadoutRepositoryLive = Layer.effect(
               .executeTakeFirst()
           })
         }).pipe(
-          Effect.mapError(() =>
-            new LoadoutSlotTakenError({ slot: input.slot ?? existing.slot })
+          Effect.catchAll((error) =>
+            isSlotConflictError(error)
+              ? Effect.fail(new LoadoutSlotTakenError({ slot: input.slot ?? existing.slot }))
+              : Effect.die(error)
           )
         )
 

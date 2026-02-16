@@ -103,7 +103,11 @@ const updateLoadoutHandler: RouteDefinition['handler'] = async (req, { params, r
   const loadout = await runApp(
     Effect.gen(function* () {
       const loadoutService = yield* LoadoutService
-      return yield* loadoutService.updateForUser(auth.userId, decodedParams.right.loadoutId, decoded.right)
+      return yield* loadoutService.updateForUser(
+        auth.userId,
+        decodedParams.right.loadoutId,
+        decoded.right
+      )
     })
   )
 

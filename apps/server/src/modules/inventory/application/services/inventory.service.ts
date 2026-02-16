@@ -12,7 +12,9 @@ import {
 import { PlayerNotFoundError } from '../../../player/domain/errors/player.errors'
 
 export interface InventoryService {
-  readonly listByUserId: (userId: string) => Effect.Effect<readonly InventoryItem[], PlayerNotFoundError>
+  readonly listByUserId: (
+    userId: string
+  ) => Effect.Effect<readonly InventoryItem[], PlayerNotFoundError>
   readonly acquireForUser: (
     userId: string,
     input: {
@@ -40,7 +42,9 @@ export const InventoryServiceLive = Layer.effect(
         return player.id
       })
 
-    const listByUserId = (userId: string): Effect.Effect<readonly InventoryItem[], PlayerNotFoundError> =>
+    const listByUserId = (
+      userId: string
+    ): Effect.Effect<readonly InventoryItem[], PlayerNotFoundError> =>
       Effect.gen(function* () {
         const playerId = yield* getPlayerIdByUserId(userId)
         return yield* inventoryRepo.listByPlayerId(playerId)

@@ -14,7 +14,10 @@ export class LoadoutNotFoundError extends Data.TaggedError('LoadoutNotFoundError
   readonly loadoutId?: string
 }> {
   [HttpServerRespondable.symbol]() {
-    return HttpServerResponse.json({ error: 'Loadout not found' }, { status: HTTP_STATUS.NOT_FOUND })
+    return HttpServerResponse.json(
+      { error: 'Loadout not found' },
+      { status: HTTP_STATUS.NOT_FOUND }
+    )
   }
 }
 
@@ -68,6 +71,8 @@ export class UpdateLoadoutSchema extends Schema.Class<UpdateLoadoutSchema>('Upda
   secondaryAttachments: Schema.optional(AttachmentIdsSchema),
 }) {}
 
-export class LoadoutIdParamSchema extends Schema.Class<LoadoutIdParamSchema>('LoadoutIdParamSchema')({
+export class LoadoutIdParamSchema extends Schema.Class<LoadoutIdParamSchema>(
+  'LoadoutIdParamSchema'
+)({
   loadoutId: UuidSchema,
 }) {}
