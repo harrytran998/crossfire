@@ -1,8 +1,5 @@
 import { describe, expect, test } from 'bun:test'
 
-const runE2E = process.env.RUN_E2E === 'true'
-const e2eTest = runE2E ? test : test.skip
-
 describe('E2E: Player + Static APIs', () => {
   const API_URL = process.env.API_URL || 'http://localhost:3000'
 
@@ -25,7 +22,7 @@ describe('E2E: Player + Static APIs', () => {
     return { token: data.token as string }
   }
 
-  e2eTest('register/login and create player profile', async () => {
+  test('register/login and create player profile', async () => {
     const { token } = await registerAndGetToken()
 
     const createPlayer = await fetch(`${API_URL}/api/players/me`, {
@@ -46,7 +43,7 @@ describe('E2E: Player + Static APIs', () => {
     expect(payload.player.displayName).toBe('E2E Soldier')
   })
 
-  e2eTest('get player stats and progression', async () => {
+  test('get player stats and progression', async () => {
     const { token } = await registerAndGetToken()
     await fetch(`${API_URL}/api/players/me`, {
       method: 'POST',
@@ -68,7 +65,7 @@ describe('E2E: Player + Static APIs', () => {
     expect(progression.status).toBe(200)
   })
 
-  e2eTest('get weapons and maps static data', async () => {
+  test('get weapons and maps static data', async () => {
     const weaponsRes = await fetch(`${API_URL}/api/static/weapons`)
     expect(weaponsRes.status).toBe(200)
 

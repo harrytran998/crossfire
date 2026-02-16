@@ -1,8 +1,5 @@
 import { describe, test, expect } from 'bun:test'
 
-const runE2E = process.env.RUN_E2E === 'true'
-const e2eTest = runE2E ? test : test.skip
-
 describe('E2E: Auth API', () => {
   const API_URL = process.env.API_URL || 'http://localhost:3000'
 
@@ -28,7 +25,7 @@ describe('E2E: Auth API', () => {
     return { identity, token: data.token as string }
   }
 
-  e2eTest('POST /api/auth/register - should register new user', async () => {
+  test('POST /api/auth/register - should register new user', async () => {
     const testUser = createIdentity()
     const response = await fetch(`${API_URL}/api/auth/register`, {
       method: 'POST',
@@ -44,7 +41,7 @@ describe('E2E: Auth API', () => {
     expect(data.token).toBeDefined()
   })
 
-  e2eTest('POST /api/auth/login - should login existing user', async () => {
+  test('POST /api/auth/login - should login existing user', async () => {
     const { identity } = await registerAndGetToken()
 
     const response = await fetch(`${API_URL}/api/auth/login`, {
@@ -63,7 +60,7 @@ describe('E2E: Auth API', () => {
     expect(data.token).toBeDefined()
   })
 
-  e2eTest('GET /api/auth/session - should return current session', async () => {
+  test('GET /api/auth/session - should return current session', async () => {
     const { identity, token } = await registerAndGetToken()
 
     const response = await fetch(`${API_URL}/api/auth/session`, {
@@ -79,7 +76,7 @@ describe('E2E: Auth API', () => {
     expect(data.user.email).toBe(identity.email)
   })
 
-  e2eTest('POST /api/auth/refresh - should refresh token', async () => {
+  test('POST /api/auth/refresh - should refresh token', async () => {
     const { token } = await registerAndGetToken()
 
     const response = await fetch(`${API_URL}/api/auth/refresh`, {
@@ -96,7 +93,7 @@ describe('E2E: Auth API', () => {
     expect(data.token).not.toBe(token)
   })
 
-  e2eTest('POST /api/auth/logout - should logout user', async () => {
+  test('POST /api/auth/logout - should logout user', async () => {
     const { token } = await registerAndGetToken()
 
     const response = await fetch(`${API_URL}/api/auth/logout`, {
