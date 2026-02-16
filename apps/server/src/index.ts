@@ -12,10 +12,15 @@ import {
 } from './services/outbox-dispatcher.service'
 import { OutboxServiceLive } from './services/outbox.service'
 import { handleTaggedError } from './http/response'
-import { applySecurityHeaders, handlePreflightRequest } from './http/security'
+import {
+  applySecurityHeaders,
+  enforceRequestSecurity,
+  handlePreflightRequest,
+} from './http/security'
 import { RadixRouter, type RouteDefinition } from './http/radix-router'
 import { HTTP_STATUS } from './http/status'
 import { authRoutes } from './modules/auth'
+import { AuthThrottleServiceLive } from './modules/auth'
 import { playerRoutes } from './modules/player'
 import { staticDataRoutes } from './modules/static-data'
 
@@ -23,6 +28,7 @@ const BaseLayer = Layer.mergeAll(ConfigLayer, DatabaseServiceLive)
 
 const AppLayer = Layer.mergeAll(
   Layer.provide(AuthServiceLive, BaseLayer),
+  Layer.provide(AuthThrottleServiceLive, ConfigLayer),
   Layer.provide(PlayerServiceLive, BaseLayer),
   Layer.provide(StaticDataServiceLive, BaseLayer),
   Layer.provide(OutboxServiceLive, BaseLayer),
@@ -120,6 +126,11 @@ const Program = Effect.gen(function* () {
       const preflight = handlePreflightRequest(req)
       if (preflight) {
         return applySecurityHeaders(preflight, req)
+      }
+
+      const securityRejection = enforceRequestSecurity(req)
+      if (securityRejection) {
+        return applySecurityHeaders(securityRejection, req)
       }
 
       try {
