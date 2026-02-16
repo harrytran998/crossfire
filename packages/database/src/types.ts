@@ -378,7 +378,8 @@ export interface Sessions {
   expires_at: Timestamp
   id: Generated<string>
   ip_address: string | null
-  refresh_token: string
+  refresh_token_fingerprint: string
+  refresh_token_hash: string
   revoked_at: Timestamp | null
   user_agent: string | null
   user_id: string
