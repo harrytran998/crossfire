@@ -3,6 +3,7 @@ import { HttpRouter, HttpServerResponse, HttpServerRequest } from '@effect/platf
 import { AuthService as AuthServiceTag } from '../../application/services/auth.service'
 import { RegistrationSchema, LoginSchema, UnauthorizedError } from '../../domain/errors/auth.errors'
 import type { User, Session } from '../../domain/entities/user.entity'
+import { HTTP_STATUS } from '../../../../http/status'
 
 export interface CurrentAuth {
   readonly user: User
@@ -56,7 +57,7 @@ const registerHandler = Effect.gen(function* () {
       },
       token: result.token,
     },
-    { status: 201 }
+    { status: HTTP_STATUS.CREATED }
   )
 })
 
