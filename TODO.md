@@ -124,37 +124,37 @@
 
 ### Wave 5: Inventory & Loadouts (Week 3-4)
 
-- [ ] **P2-W5-T19** | Create Inventory service (Kysely)
+- [x] **P2-W5-T19** | Create Inventory service (Kysely)
   - Category: integration | Est: 6-8h
 
-- [ ] **P2-W5-T20** | Create Loadout service
+- [x] **P2-W5-T20** | Create Loadout service
   - Category: integration | Est: 6-8h
 
-- [ ] **P2-W5-T21** | Implement Inventory & Loadout REST API
+- [x] **P2-W5-T21** | Implement Inventory & Loadout REST API
   - Category: integration | Est: 5-6h
 
 ### Wave 6: Match History (Week 3-4) - PARALLEL
 
-- [ ] **P2-W6-T22** | Create Match service
+- [x] **P2-W6-T22** | Create Match service
   - Category: integration | Est: 6-8h
 
-- [ ] **P2-W6-T23** | Implement Match History REST API
+- [x] **P2-W6-T23** | Implement Match History REST API
   - Category: integration | Est: 4-5h
 
 ### Wave 7: Leaderboards (Week 4) - PARALLEL
 
-- [ ] **P2-W7-T24** | Create Leaderboard service
+- [x] **P2-W7-T24** | Create Leaderboard service
   - Category: integration | Est: 6-8h
 
-- [ ] **P2-W7-T25** | Implement Leaderboard REST API
+- [x] **P2-W7-T25** | Implement Leaderboard REST API
   - Category: integration | Est: 3-4h
 
 ### Wave 8: Friends & Social (Week 4-5) - PARALLEL
 
-- [ ] **P2-W8-T26** | Create Friends service
+- [x] **P2-W8-T26** | Create Friends service
   - Category: integration | Est: 6-8h
 
-- [ ] **P2-W8-T27** | Implement Friends REST API
+- [x] **P2-W8-T27** | Implement Friends REST API
   - Category: integration | Est: 4-5h
 
 ---
