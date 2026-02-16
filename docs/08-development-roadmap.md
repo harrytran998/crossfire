@@ -68,7 +68,7 @@ This document outlines the phased development plan for the Crossfire web game, f
 | Task              | Description              | Priority |
 | ----------------- | ------------------------ | -------- |
 | User registration | Email/password signup    | P0       |
-| Password hashing  | bcrypt implementation    | P0       |
+| Password hashing  | argon2 implementation    | P0       |
 | JWT token system  | Access + refresh tokens  | P0       |
 | Login/logout      | Session management       | P0       |
 | Effect services   | Auth service with Effect | P0       |

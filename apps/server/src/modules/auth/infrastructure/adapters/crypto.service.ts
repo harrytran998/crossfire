@@ -1,5 +1,6 @@
 import { Effect, Context, Layer } from 'effect'
-import * as bcrypt from 'bcrypt'
+import { argon2id, hash, verify } from 'argon2'
+import { base64url } from 'jose'
 
 export interface CryptoService {
   readonly hashPassword: (password: string) => Effect.Effect<string>
@@ -12,34 +13,38 @@ export interface CryptoService {
 
 export const CryptoService = Context.GenericTag<CryptoService>('CryptoService')
 
-const SALT_ROUNDS = 12
+const ARGON2_CONFIG = {
+  type: argon2id,
+} as const
+
+const toHex = (bytes: Uint8Array): string =>
+  Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')
 
 export const CryptoServiceLive = Layer.sync(CryptoService, () => {
   const hashPassword = (password: string): Effect.Effect<string> =>
-    Effect.promise(async () => bcrypt.hash(password, SALT_ROUNDS)).pipe(Effect.orDie)
+    Effect.promise(async () => hash(password, ARGON2_CONFIG)).pipe(Effect.orDie)
 
   const verifyPassword = (password: string, hash: string): Effect.Effect<boolean> =>
-    Effect.promise(async () => bcrypt.compare(password, hash)).pipe(Effect.orDie)
+    Effect.promise(async () => verify(hash, password)).pipe(Effect.orDie)
 
   const generateToken = (): Effect.Effect<string> =>
     Effect.sync(() => {
       const bytes = new Uint8Array(32)
       crypto.getRandomValues(bytes)
-      return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('')
+      return base64url.encode(bytes)
     })
 
   const hashRefreshToken = (token: string): Effect.Effect<string> =>
-    Effect.promise(async () => bcrypt.hash(token, SALT_ROUNDS)).pipe(Effect.orDie)
+    Effect.promise(async () => hash(token, ARGON2_CONFIG)).pipe(Effect.orDie)
 
   const verifyRefreshToken = (token: string, hash: string): Effect.Effect<boolean> =>
-    Effect.promise(async () => bcrypt.compare(token, hash)).pipe(Effect.orDie)
+    Effect.promise(async () => verify(hash, token)).pipe(Effect.orDie)
 
   const fingerprintToken = (token: string): Effect.Effect<string> =>
     Effect.promise(async () => {
       const encoded = new TextEncoder().encode(token)
       const digest = await crypto.subtle.digest('SHA-256', encoded)
-      const bytes = new Uint8Array(digest)
-      return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('')
+      return toHex(new Uint8Array(digest))
     }).pipe(Effect.orDie)
 
   return CryptoService.of({
