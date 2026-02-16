@@ -19,6 +19,21 @@ const extractBearerToken = (request: HttpServerRequest.HttpServerRequest): strin
   return authHeader.slice(7)
 }
 
+const headerValue = (
+  headers: HttpServerRequest.HttpServerRequest['headers'],
+  key: string
+): string | null => {
+  const value = headers[key]
+  return typeof value === 'string' ? value : null
+}
+
+const getSessionContext = (request: HttpServerRequest.HttpServerRequest) => ({
+  ipAddress:
+    headerValue(request.headers, 'x-forwarded-for') ??
+    headerValue(request.headers, 'cf-connecting-ip'),
+  userAgent: headerValue(request.headers, 'user-agent'),
+})
+
 export const AuthMiddleware = Effect.gen(function* () {
   const authService = yield* AuthServiceTag
 
@@ -39,12 +54,17 @@ export const AuthMiddleware = Effect.gen(function* () {
 
 const registerHandler = Effect.gen(function* () {
   const authService = yield* AuthServiceTag
+  const request = yield* HttpServerRequest.HttpServerRequest
   const body = yield* HttpServerRequest.schemaBodyJson(RegistrationSchema)
-  const result = yield* authService.register({
-    username: body.username,
-    email: body.email,
-    password: body.password,
-  })
+  const sessionContext = getSessionContext(request)
+  const result = yield* authService.register(
+    {
+      username: body.username,
+      email: body.email,
+      password: body.password,
+    },
+    sessionContext
+  )
 
   yield* Effect.logInfo(`User registered: ${result.user.id}`)
 
@@ -63,11 +83,16 @@ const registerHandler = Effect.gen(function* () {
 
 const loginHandler = Effect.gen(function* () {
   const authService = yield* AuthServiceTag
+  const request = yield* HttpServerRequest.HttpServerRequest
   const body = yield* HttpServerRequest.schemaBodyJson(LoginSchema)
-  const result = yield* authService.login({
-    email: body.email,
-    password: body.password,
-  })
+  const sessionContext = getSessionContext(request)
+  const result = yield* authService.login(
+    {
+      email: body.email,
+      password: body.password,
+    },
+    sessionContext
+  )
 
   return yield* HttpServerResponse.json({
     user: {
@@ -92,7 +117,15 @@ const logoutHandler = Effect.gen(function* () {
 })
 
 const sessionHandler = Effect.gen(function* () {
-  const { user } = yield* CurrentAuth
+  const request = yield* HttpServerRequest.HttpServerRequest
+  const token = extractBearerToken(request)
+  if (!token) {
+    return yield* Effect.fail(new UnauthorizedError())
+  }
+
+  const authService = yield* AuthServiceTag
+  const sessionContext = getSessionContext(request)
+  const { user } = yield* authService.validateSession(token, sessionContext)
 
   return yield* HttpServerResponse.json({
     user: {
@@ -113,7 +146,8 @@ const refreshHandler = Effect.gen(function* () {
     return yield* Effect.fail(new UnauthorizedError())
   }
 
-  const result = yield* authService.refreshSession(token)
+  const sessionContext = getSessionContext(request)
+  const result = yield* authService.refreshSession(token, sessionContext)
 
   return yield* HttpServerResponse.json({
     token: result.token,
