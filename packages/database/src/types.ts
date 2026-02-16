@@ -206,6 +206,42 @@ export interface MatchWeaponUsage {
   weapon_id: string
 }
 
+export interface OutboxConsumers {
+  consumer_name: string
+  id: Generated<string>
+  idempotency_key: string
+  metadata: Json | null
+  processed_at: Generated<Timestamp>
+}
+
+export interface OutboxDeadLetters {
+  created_at: Generated<Timestamp>
+  event_type: string
+  failed_at: Generated<Timestamp>
+  failure_reason: string | null
+  id: Generated<string>
+  idempotency_key: string
+  outbox_message_id: string
+  payload: Json
+}
+
+export interface OutboxMessages {
+  aggregate_id: string | null
+  aggregate_type: string
+  attempts: Generated<number>
+  created_at: Generated<Timestamp>
+  event_type: string
+  id: Generated<string>
+  idempotency_key: string
+  last_error: string | null
+  max_attempts: Generated<number>
+  next_attempt_at: Generated<Timestamp>
+  payload: Json
+  processed_at: Timestamp | null
+  status: Generated<string>
+  updated_at: Generated<Timestamp>
+}
+
 export interface PlayerAchievements {
   achievement_id: string
   player_id: string
@@ -419,6 +455,9 @@ export interface DB {
   match_participants: MatchParticipants
   match_weapon_usage: MatchWeaponUsage
   matches: Matches
+  outbox_consumers: OutboxConsumers
+  outbox_dead_letters: OutboxDeadLetters
+  outbox_messages: OutboxMessages
   player_achievements: PlayerAchievements
   player_inventory: PlayerInventory
   player_loadouts: PlayerLoadouts
