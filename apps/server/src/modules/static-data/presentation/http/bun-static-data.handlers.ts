@@ -1,7 +1,20 @@
-import { Effect } from 'effect'
+import { Effect, ParseResult, Schema } from 'effect'
 import { StaticDataService } from '../../application/services/static-data.service'
-import { errorResponse } from '../../../../http/response'
 import type { RouteDefinition } from '../../../../http/radix-router'
+import { HTTP_STATUS } from '../../../../http/status'
+
+const WeaponKeyParamSchema = Schema.Struct({
+  weaponKey: Schema.String.pipe(Schema.pattern(/^[a-z0-9_-]{1,64}$/i)),
+})
+
+const validationErrorResponse = (error: ParseResult.ParseError): Response =>
+  Response.json(
+    {
+      error: 'Invalid request params',
+      details: ParseResult.ArrayFormatter.formatErrorSync(error),
+    },
+    { status: HTTP_STATUS.BAD_REQUEST }
+  )
 
 const getWeaponsHandler: RouteDefinition['handler'] = async (_req, { runApp }) => {
   const weapons = await runApp(
@@ -18,10 +31,14 @@ const getWeaponAttachmentsHandler: RouteDefinition['handler'] = async (
   _req,
   { params, runApp }
 ) => {
-  const weaponKey = params.weaponKey ?? ''
-  if (!/^[a-z0-9_-]{1,64}$/i.test(weaponKey)) {
-    return errorResponse(400, 'Invalid weapon key')
+  const decoded = Schema.decodeUnknownEither(WeaponKeyParamSchema)({
+    weaponKey: params.weaponKey ?? '',
+  })
+  if (decoded._tag === 'Left') {
+    return validationErrorResponse(decoded.left)
   }
+
+  const { weaponKey } = decoded.right
 
   const attachments = await runApp(
     Effect.gen(function* () {

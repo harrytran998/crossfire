@@ -9,6 +9,7 @@ import { StaticDataServiceLive } from './modules/static-data/application/service
 import { handleTaggedError } from './http/response'
 import { applySecurityHeaders, handlePreflightRequest } from './http/security'
 import { RadixRouter, type RouteDefinition } from './http/radix-router'
+import { HTTP_STATUS } from './http/status'
 import { authRoutes } from './modules/auth'
 import { playerRoutes } from './modules/player'
 import { staticDataRoutes } from './modules/static-data'
@@ -30,7 +31,7 @@ const baseRoutes: readonly RouteDefinition[] = [
   {
     method: 'GET',
     path: '/health',
-    handler: async () => new Response('OK', { status: 200 }),
+    handler: async () => new Response('OK', { status: HTTP_STATUS.OK }),
   },
   {
     method: 'GET',
@@ -53,12 +54,12 @@ const dispatchRoute = async (req: Request, path: string): Promise<Response> => {
   const match = router.match(req.method, path)
 
   if (match.kind === 'not_found') {
-    return new Response('Not Found', { status: 404 })
+    return new Response('Not Found', { status: HTTP_STATUS.NOT_FOUND })
   }
 
   if (match.kind === 'method_not_allowed') {
     return new Response('Method Not Allowed', {
-      status: 405,
+      status: HTTP_STATUS.METHOD_NOT_ALLOWED,
       headers: {
         Allow: match.allow.join(', '),
       },

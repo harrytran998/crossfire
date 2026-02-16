@@ -1,36 +1,11 @@
-import { Effect } from 'effect'
+import { Effect, ParseResult, Schema } from 'effect'
 import { PlayerService } from '../../application/services/player.service'
 import { AuthService } from '../../../auth/application/services/auth.service'
+import { CreatePlayerSchema, UpdatePlayerSchema } from '../../domain/errors/player.errors'
 import { errorResponse } from '../../../../http/response'
 import { extractBearerToken, parseJsonObject } from '../../../../http/request'
 import type { RouteDefinition } from '../../../../http/radix-router'
-
-const allowedRegions = new Set(['ASIA', 'EU', 'NA', 'SA', 'AF', 'OC', 'ME'])
-
-const validOptionalString = (value: unknown, maxLength: number) =>
-  typeof value === 'string' && value.length > 0 && value.length <= maxLength
-
-const isValidDisplayName = (value: unknown): value is string =>
-  typeof value === 'string' && value.length >= 3 && value.length <= 64
-
-const isValidRegion = (value: unknown): value is string =>
-  typeof value === 'string' && allowedRegions.has(value)
-
-const isValidLanguage = (value: unknown): value is string =>
-  typeof value === 'string' && /^[a-z]{2}(-[A-Z]{2})?$/.test(value)
-
-const isValidAvatarUrl = (value: unknown): value is string => {
-  if (typeof value !== 'string' || value.length === 0 || value.length > 512) {
-    return false
-  }
-
-  try {
-    const url = new URL(value)
-    return url.protocol === 'http:' || url.protocol === 'https:'
-  } catch {
-    return false
-  }
-}
+import { HTTP_STATUS } from '../../../../http/status'
 
 const requireAuthUser = async (
   req: Request,
@@ -38,7 +13,7 @@ const requireAuthUser = async (
 ): Promise<{ userId: string } | Response> => {
   const token = extractBearerToken(req)
   if (!token) {
-    return errorResponse(401, 'Unauthorized')
+    return errorResponse(HTTP_STATUS.UNAUTHORIZED, 'Unauthorized')
   }
 
   const authSession = await runApp(
@@ -51,6 +26,15 @@ const requireAuthUser = async (
   return { userId: authSession.user.id }
 }
 
+const validationErrorResponse = (error: ParseResult.ParseError): Response =>
+  Response.json(
+    {
+      error: 'Invalid request body',
+      details: ParseResult.ArrayFormatter.formatErrorSync(error),
+    },
+    { status: HTTP_STATUS.BAD_REQUEST }
+  )
+
 const createProfileHandler: RouteDefinition['handler'] = async (req, { runApp }) => {
   const auth = await requireAuthUser(req, runApp)
   if (auth instanceof Response) {
@@ -60,34 +44,25 @@ const createProfileHandler: RouteDefinition['handler'] = async (req, { runApp })
   const parsed = await parseJsonObject(req)
   if (!parsed.ok) return parsed.response
 
-  const rawDisplayName = parsed.body.displayName
-  if (!isValidDisplayName(rawDisplayName)) {
-    return errorResponse(400, 'displayName must be between 3 and 64 characters')
+  const decoded = Schema.decodeUnknownEither(CreatePlayerSchema)(parsed.body)
+  if (decoded._tag === 'Left') {
+    return validationErrorResponse(decoded.left)
   }
 
-  if (parsed.body.region !== undefined && !isValidRegion(parsed.body.region)) {
-    return errorResponse(400, 'region must be one of: ASIA, EU, NA, SA, AF, OC, ME')
-  }
-  if (parsed.body.language !== undefined && !isValidLanguage(parsed.body.language)) {
-    return errorResponse(400, 'language must be in ISO format like en or en-US')
-  }
-
-  const region = typeof parsed.body.region === 'string' ? parsed.body.region : undefined
-  const language = typeof parsed.body.language === 'string' ? parsed.body.language : undefined
-
+  const body = decoded.right
   const player = await runApp(
     Effect.gen(function* () {
       const playerService = yield* PlayerService
       return yield* playerService.createProfile({
         userId: auth.userId,
-        displayName: rawDisplayName,
-        region,
-        language,
+        displayName: body.displayName,
+        region: body.region,
+        language: body.language,
       })
     })
   )
 
-  return Response.json({ player }, { status: 201 })
+  return Response.json({ player }, { status: HTTP_STATUS.CREATED })
 }
 
 const getProfileHandler: RouteDefinition['handler'] = async (req, { runApp }) => {
@@ -115,32 +90,21 @@ const updateProfileHandler: RouteDefinition['handler'] = async (req, { runApp })
   const parsed = await parseJsonObject(req)
   if (!parsed.ok) return parsed.response
 
-  if (parsed.body.displayName !== undefined && !isValidDisplayName(parsed.body.displayName)) {
-    return errorResponse(400, 'displayName must be between 3 and 64 characters')
-  }
-  if (parsed.body.avatarUrl !== undefined && !isValidAvatarUrl(parsed.body.avatarUrl)) {
-    return errorResponse(400, 'avatarUrl must be a valid http/https URL up to 512 characters')
-  }
-  if (parsed.body.bio !== undefined && !validOptionalString(parsed.body.bio, 500)) {
-    return errorResponse(400, 'bio must be a non-empty string up to 500 characters')
-  }
-  if (parsed.body.region !== undefined && !isValidRegion(parsed.body.region)) {
-    return errorResponse(400, 'region must be one of: ASIA, EU, NA, SA, AF, OC, ME')
-  }
-  if (parsed.body.language !== undefined && !isValidLanguage(parsed.body.language)) {
-    return errorResponse(400, 'language must be in ISO format like en or en-US')
+  const decoded = Schema.decodeUnknownEither(UpdatePlayerSchema)(parsed.body)
+  if (decoded._tag === 'Left') {
+    return validationErrorResponse(decoded.left)
   }
 
+  const body = decoded.right
   const player = await runApp(
     Effect.gen(function* () {
       const playerService = yield* PlayerService
       return yield* playerService.updateProfile(auth.userId, {
-        displayName:
-          typeof parsed.body.displayName === 'string' ? parsed.body.displayName : undefined,
-        avatarUrl: typeof parsed.body.avatarUrl === 'string' ? parsed.body.avatarUrl : undefined,
-        bio: typeof parsed.body.bio === 'string' ? parsed.body.bio : undefined,
-        region: typeof parsed.body.region === 'string' ? parsed.body.region : undefined,
-        language: typeof parsed.body.language === 'string' ? parsed.body.language : undefined,
+        displayName: body.displayName,
+        avatarUrl: body.avatarUrl,
+        bio: body.bio,
+        region: body.region,
+        language: body.language,
       })
     })
   )

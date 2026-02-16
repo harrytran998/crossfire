@@ -1,10 +1,12 @@
-import { Effect } from 'effect'
+import { Effect, ParseResult, Schema } from 'effect'
 import { AuthService } from '../../application/services/auth.service'
 import { BetterAuthConfig } from '../../infrastructure/adapters/better-auth.config'
 import type { AuthResult } from '../../domain/entities/user.entity'
+import { LoginSchema, RegistrationSchema } from '../../domain/errors/auth.errors'
 import { errorResponse } from '../../../../http/response'
 import { extractBearerToken, getClientIp, parseJsonObject } from '../../../../http/request'
 import type { RouteDefinition } from '../../../../http/radix-router'
+import { HTTP_STATUS } from '../../../../http/status'
 import {
   clearLoginFailures,
   consumeAuthRateLimit,
@@ -12,16 +14,14 @@ import {
   recordLoginFailure,
 } from './auth-security'
 
-const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
-const isValidUsername = (value: string) => /^[a-zA-Z0-9_]{3,32}$/.test(value)
-const isStrongPassword = (value: string) =>
-  value.length >= 8 &&
-  /[a-z]/.test(value) &&
-  /[A-Z]/.test(value) &&
-  /\d/.test(value) &&
-  /[^a-zA-Z0-9]/.test(value)
-
-const getString = (value: unknown): string => (typeof value === 'string' ? value : '')
+const validationErrorResponse = (error: ParseResult.ParseError): Response =>
+  Response.json(
+    {
+      error: 'Invalid request body',
+      details: ParseResult.ArrayFormatter.formatErrorSync(error),
+    },
+    { status: HTTP_STATUS.BAD_REQUEST }
+  )
 
 const registerHandler: RouteDefinition['handler'] = async (req, { runApp }) => {
   const ip = getClientIp(req)
@@ -30,7 +30,7 @@ const registerHandler: RouteDefinition['handler'] = async (req, { runApp }) => {
     return Response.json(
       { error: 'Too many requests, please try again later' },
       {
-        status: 429,
+        status: HTTP_STATUS.TOO_MANY_REQUESTS,
         headers: {
           'Retry-After': String(rateLimit.retryAfterSeconds),
         },
@@ -41,28 +41,20 @@ const registerHandler: RouteDefinition['handler'] = async (req, { runApp }) => {
   const parsed = await parseJsonObject(req)
   if (!parsed.ok) return parsed.response
 
-  const email = getString(parsed.body.email)
-  const username = getString(parsed.body.username)
-  const password = getString(parsed.body.password)
-
-  if (!isValidEmail(email)) return errorResponse(400, 'Invalid email format')
-  if (!isValidUsername(username)) {
-    return errorResponse(
-      400,
-      'Username must be 3-32 characters and use letters, numbers, underscore'
-    )
-  }
-  if (!isStrongPassword(password)) {
-    return errorResponse(
-      400,
-      'Password must be at least 8 chars and include uppercase, lowercase, number, special char'
-    )
+  const decoded = Schema.decodeUnknownEither(RegistrationSchema)(parsed.body)
+  if (decoded._tag === 'Left') {
+    return validationErrorResponse(decoded.left)
   }
 
+  const body = decoded.right
   const result = await runApp(
     Effect.gen(function* () {
       const auth = yield* AuthService
-      return yield* auth.register({ email, username, password })
+      return yield* auth.register({
+        email: body.email,
+        username: body.username,
+        password: body.password,
+      })
     })
   )
 
@@ -75,7 +67,7 @@ const registerHandler: RouteDefinition['handler'] = async (req, { runApp }) => {
       },
       token: result.token,
     },
-    { status: 201 }
+    { status: HTTP_STATUS.CREATED }
   )
 }
 
@@ -86,7 +78,7 @@ const loginHandler: RouteDefinition['handler'] = async (req, { runApp }) => {
     return Response.json(
       { error: 'Too many requests, please try again later' },
       {
-        status: 429,
+        status: HTTP_STATUS.TOO_MANY_REQUESTS,
         headers: {
           'Retry-After': String(rateLimit.retryAfterSeconds),
         },
@@ -97,19 +89,18 @@ const loginHandler: RouteDefinition['handler'] = async (req, { runApp }) => {
   const parsed = await parseJsonObject(req)
   if (!parsed.ok) return parsed.response
 
-  const email = getString(parsed.body.email)
-  const password = getString(parsed.body.password)
-
-  if (!isValidEmail(email) || password.length === 0) {
-    return errorResponse(400, 'Email and password are required')
+  const decoded = Schema.decodeUnknownEither(LoginSchema)(parsed.body)
+  if (decoded._tag === 'Left') {
+    return validationErrorResponse(decoded.left)
   }
 
-  const lockout = getLoginLockout(ip, email)
+  const body = decoded.right
+  const lockout = getLoginLockout(ip, body.email)
   if (lockout.locked) {
     return Response.json(
       { error: 'Too many failed login attempts, please try again later' },
       {
-        status: 429,
+        status: HTTP_STATUS.TOO_MANY_REQUESTS,
         headers: {
           'Retry-After': String(lockout.retryAfterSeconds),
         },
@@ -122,15 +113,18 @@ const loginHandler: RouteDefinition['handler'] = async (req, { runApp }) => {
     result = await runApp(
       Effect.gen(function* () {
         const auth = yield* AuthService
-        return yield* auth.login({ email, password })
+        return yield* auth.login({
+          email: body.email,
+          password: body.password,
+        })
       })
     )
-    clearLoginFailures(ip, email)
+    clearLoginFailures(ip, body.email)
   } catch (error) {
     if (error && typeof error === 'object' && '_tag' in error) {
       const tag = (error as { _tag: string })._tag
       if (tag === 'InvalidCredentialsError') {
-        recordLoginFailure(ip, email)
+        recordLoginFailure(ip, body.email)
       }
     }
 
@@ -149,7 +143,7 @@ const loginHandler: RouteDefinition['handler'] = async (req, { runApp }) => {
 
 const sessionHandler: RouteDefinition['handler'] = async (req, { runApp }) => {
   const token = extractBearerToken(req)
-  if (!token) return errorResponse(401, 'Unauthorized')
+  if (!token) return errorResponse(HTTP_STATUS.UNAUTHORIZED, 'Unauthorized')
 
   const result = await runApp(
     Effect.gen(function* () {
@@ -173,7 +167,7 @@ const sessionHandler: RouteDefinition['handler'] = async (req, { runApp }) => {
 
 const refreshHandler: RouteDefinition['handler'] = async (req, { runApp }) => {
   const token = extractBearerToken(req)
-  if (!token) return errorResponse(401, 'Unauthorized')
+  if (!token) return errorResponse(HTTP_STATUS.UNAUTHORIZED, 'Unauthorized')
 
   const result = await runApp(
     Effect.gen(function* () {
@@ -187,7 +181,7 @@ const refreshHandler: RouteDefinition['handler'] = async (req, { runApp }) => {
 
 const logoutHandler: RouteDefinition['handler'] = async (req, { runApp }) => {
   const token = extractBearerToken(req)
-  if (!token) return errorResponse(401, 'Unauthorized')
+  if (!token) return errorResponse(HTTP_STATUS.UNAUTHORIZED, 'Unauthorized')
 
   await runApp(
     Effect.gen(function* () {
