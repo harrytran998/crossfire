@@ -24,6 +24,9 @@ const isAllowedOrigin = (origin: string | null): origin is string => {
   return allowedOrigins.has(origin)
 }
 
+const isStateChangingMethod = (method: string): boolean =>
+  method === 'POST' || method === 'PUT' || method === 'PATCH' || method === 'DELETE'
+
 const applyCorsHeaders = (headers: Headers, origin: string | null): void => {
   if (!isAllowedOrigin(origin)) {
     return
@@ -31,7 +34,7 @@ const applyCorsHeaders = (headers: Headers, origin: string | null): void => {
 
   headers.set('Access-Control-Allow-Origin', origin)
   headers.set('Access-Control-Allow-Methods', 'GET,POST,PATCH,OPTIONS')
-  headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-CSRF-Token')
   headers.set('Access-Control-Max-Age', '600')
   headers.set('Vary', 'Origin')
 }
@@ -50,6 +53,32 @@ export const handlePreflightRequest = (req: Request): Response | null => {
   applyCorsHeaders(headers, origin)
 
   return new Response(null, { status: HTTP_STATUS.NO_CONTENT, headers })
+}
+
+export const enforceRequestSecurity = (req: Request): Response | null => {
+  const origin = req.headers.get('origin')
+  if (origin && !isAllowedOrigin(origin)) {
+    return Response.json({ error: 'Origin not allowed' }, { status: HTTP_STATUS.FORBIDDEN })
+  }
+
+  if (!isStateChangingMethod(req.method)) {
+    return null
+  }
+
+  const cookie = req.headers.get('cookie')
+  if (!cookie) {
+    return null
+  }
+
+  const csrfToken = req.headers.get('x-csrf-token')
+  if (!csrfToken) {
+    return Response.json(
+      { error: 'Missing CSRF token for cookie-authenticated request' },
+      { status: HTTP_STATUS.FORBIDDEN }
+    )
+  }
+
+  return null
 }
 
 export const applySecurityHeaders = (res: Response, req: Request): Response => {
