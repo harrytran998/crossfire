@@ -100,30 +100,55 @@ export const AuthRepositoryLive = Layer.effect(
       userAgent: string | null,
       expiresAt: Date
     ): Effect.Effect<Session> =>
-      Effect.promise(async () => {
-        const row = await db
-          .insertInto('sessions')
-          .values({
-            user_id: userId,
-            refresh_token: refreshToken,
-            ip_address: ipAddress,
-            user_agent: userAgent,
-            expires_at: expiresAt,
-          })
-          .returningAll()
-          .executeTakeFirstOrThrow()
+      Effect.gen(function* () {
+        const refreshTokenHash = yield* crypto.hashRefreshToken(refreshToken)
+        const refreshTokenFingerprint = yield* crypto.fingerprintToken(refreshToken)
+
+        const row = yield* Effect.promise(async () => {
+          return await db
+            .insertInto('sessions')
+            .values({
+              user_id: userId,
+              refresh_token_hash: refreshTokenHash,
+              refresh_token_fingerprint: refreshTokenFingerprint,
+              ip_address: ipAddress,
+              user_agent: userAgent,
+              expires_at: expiresAt,
+            })
+            .returningAll()
+            .executeTakeFirstOrThrow()
+        }).pipe(Effect.orDie)
+
         return mapSessionRowToEntity(row as unknown as SessionRow)
-      }).pipe(Effect.orDie)
+      })
 
     const findSessionByToken = (refreshToken: string): Effect.Effect<Session | null> =>
-      Effect.promise(async () => {
-        const row = await db
-          .selectFrom('sessions')
-          .where('refresh_token', '=', refreshToken)
-          .selectAll()
-          .executeTakeFirst()
-        return row ? mapSessionRowToEntity(row as unknown as SessionRow) : null
-      }).pipe(Effect.orDie)
+      Effect.gen(function* () {
+        const refreshTokenFingerprint = yield* crypto.fingerprintToken(refreshToken)
+
+        const row = yield* Effect.promise(async () => {
+          return await db
+            .selectFrom('sessions')
+            .where('refresh_token_fingerprint', '=', refreshTokenFingerprint)
+            .selectAll()
+            .executeTakeFirst()
+        }).pipe(Effect.orDie)
+
+        if (!row) {
+          return null
+        }
+
+        const safeRow = row as unknown as SessionRow
+        const isValid = yield* crypto.verifyRefreshToken(
+          refreshToken,
+          String(safeRow.refresh_token_hash)
+        )
+        if (!isValid) {
+          return null
+        }
+
+        return mapSessionRowToEntity(safeRow)
+      })
 
     const revokeSession = (sessionId: string): Effect.Effect<void> =>
       Effect.promise(async () => {
