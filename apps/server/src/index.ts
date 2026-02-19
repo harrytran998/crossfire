@@ -1,9 +1,12 @@
 import { Effect, Layer } from 'effect'
 import { serve } from 'bun'
-import { ServerConfig } from '@crossfire/shared'
+import { ServerConfig, WebSocketConfig } from '@crossfire/shared'
 import { ConfigLayer } from './layers'
 import { DatabaseServiceLive } from './services/database.service'
-import { AuthServiceLive } from './modules/auth/application/services/auth.service'
+import {
+  AuthService,
+  AuthServiceLive,
+} from './modules/auth/application/services/auth.service'
 import { PlayerServiceLive } from './modules/player/application/services/player.service'
 import { StaticDataServiceLive } from './modules/static-data/application/services/static-data.service'
 import { InventoryServiceLive } from './modules/inventory/application/services/inventory.service'
@@ -33,8 +36,17 @@ import { loadoutRoutes } from './modules/loadout'
 import { matchRoutes } from './modules/match'
 import { leaderboardRoutes } from './modules/leaderboard'
 import { friendsRoutes } from './modules/friends'
+import {
+  type WebSocketConnectionContext,
+  authenticateWebSocketUpgrade,
+  ConnectionRegistryService,
+  ConnectionRegistryServiceLive,
+  HeartbeatService,
+  HeartbeatServiceLive,
+} from './realtime'
 
 const BaseLayer = Layer.mergeAll(ConfigLayer, DatabaseServiceLive)
+const RealtimeLayer = Layer.provideMerge(HeartbeatServiceLive, ConnectionRegistryServiceLive)
 
 const AppLayer = Layer.mergeAll(
   Layer.provide(AuthServiceLive, BaseLayer),
@@ -46,6 +58,7 @@ const AppLayer = Layer.mergeAll(
   Layer.provide(MatchServiceLive, BaseLayer),
   Layer.provide(LeaderboardServiceLive, BaseLayer),
   Layer.provide(FriendsServiceLive, BaseLayer),
+  Layer.provide(RealtimeLayer, ConfigLayer),
   Layer.provide(OutboxServiceLive, BaseLayer),
   Layer.provide(OutboxDispatcherServiceLive, Layer.provide(OutboxServiceLive, BaseLayer))
 )
@@ -107,6 +120,10 @@ const dispatchRoute = async (req: Request, path: string): Promise<Response> => {
 
 const Program = Effect.gen(function* () {
   const config = yield* ServerConfig
+  const websocketConfig = yield* WebSocketConfig
+  const authService = yield* AuthService
+  const connectionRegistry = yield* ConnectionRegistryService
+  const heartbeat = yield* HeartbeatService
 
   yield* Effect.logInfo(`Server starting on ${config.host}:${config.port}`)
   yield* Effect.logInfo(`Environment: ${config.nodeEnv}`)
@@ -137,10 +154,14 @@ const Program = Effect.gen(function* () {
       })
   }, 3000)
 
-  const server = serve({
+  setInterval(() => {
+    Effect.runSync(heartbeat.tick())
+  }, websocketConfig.tickIntervalMs)
+
+  const server = serve<WebSocketConnectionContext>({
     hostname: config.host,
     port: config.port,
-    async fetch(req) {
+    async fetch(req, server) {
       const path = new URL(req.url).pathname
 
       const preflight = handlePreflightRequest(req)
@@ -153,12 +174,65 @@ const Program = Effect.gen(function* () {
         return applySecurityHeaders(securityRejection, req)
       }
 
+      if (path === websocketConfig.path) {
+        const authResult = await authenticateWebSocketUpgrade(req, authService)
+        if (!authResult.ok) {
+          return applySecurityHeaders(authResult.response, req)
+        }
+
+        const upgraded = server.upgrade(req, {
+          data: {
+            connectionId: crypto.randomUUID(),
+            playerId: authResult.playerId,
+          },
+        })
+
+        if (upgraded) {
+          return
+        }
+
+        return applySecurityHeaders(
+          new Response('WebSocket upgrade failed', { status: HTTP_STATUS.BAD_REQUEST }),
+          req
+        )
+      }
+
       try {
         const response = await dispatchRoute(req, path)
         return applySecurityHeaders(response, req)
       } catch (error) {
         return applySecurityHeaders(handleTaggedError(error), req)
       }
+    },
+    websocket: {
+      open(ws) {
+        Effect.runSync(
+          Effect.gen(function* () {
+            yield* connectionRegistry.registerConnection(
+              ws.data.connectionId,
+              ws,
+              ws.data.playerId
+            )
+            yield* heartbeat.registerConnection(ws.data.connectionId)
+          })
+        )
+      },
+      message(ws, message) {
+        if (typeof message === 'string' && message.toLowerCase() === 'pong') {
+          Effect.runSync(heartbeat.acknowledgePong(ws.data.connectionId))
+        }
+      },
+      pong(ws) {
+        Effect.runSync(heartbeat.acknowledgePong(ws.data.connectionId))
+      },
+      close(ws) {
+        Effect.runSync(
+          Effect.gen(function* () {
+            yield* heartbeat.unregisterConnection(ws.data.connectionId)
+            yield* connectionRegistry.unregisterConnection(ws.data.connectionId)
+          })
+        )
+      },
     },
   })
 

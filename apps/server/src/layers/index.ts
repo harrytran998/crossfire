@@ -5,6 +5,7 @@ import {
   RedisConfig,
   AuthConfig,
   LoggingConfig,
+  WebSocketConfig,
 } from '@crossfire/shared'
 
 export const ConfigLayer = Layer.mergeAll(
@@ -12,5 +13,6 @@ export const ConfigLayer = Layer.mergeAll(
   DatabaseConfig.Default,
   RedisConfig.Default,
   AuthConfig.Default,
-  LoggingConfig.Default
+  LoggingConfig.Default,
+  WebSocketConfig.Default
 )
