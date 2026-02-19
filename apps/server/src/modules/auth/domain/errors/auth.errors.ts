@@ -74,6 +74,17 @@ export class EmailNotVerifiedError extends Data.TaggedError('EmailNotVerifiedErr
   }
 }
 
+export class ForbiddenError extends Data.TaggedError('ForbiddenError')<{
+  readonly message: string
+}> {
+  [HttpServerRespondable.symbol]() {
+    return HttpServerResponse.json(
+      { error: this.message },
+      { status: HTTP_STATUS.FORBIDDEN }
+    )
+  }
+}
+
 export class RegistrationSchema extends Schema.Class<RegistrationSchema>('RegistrationSchema')({
   username: Schema.String.pipe(
     Schema.minLength(3),
