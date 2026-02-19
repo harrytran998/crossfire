@@ -39,17 +39,27 @@ export const parseJsonObject = async (
 }
 
 export const getClientIp = (req: Request): string => {
-  const forwardedFor = req.headers.get('x-forwarded-for')
-  if (forwardedFor) {
-    const first = forwardedFor.split(',')[0]?.trim()
-    if (first) {
-      return first
-    }
-  }
-
   const connectingIp = req.headers.get('cf-connecting-ip')?.trim()
   if (connectingIp) {
     return connectingIp
+  }
+
+  const trustProxy =
+    process.env.TRUST_PROXY === 'true' || process.env.TRUST_X_FORWARDED_FOR === 'true'
+
+  if (trustProxy) {
+    const forwardedFor = req.headers.get('x-forwarded-for')
+    if (forwardedFor) {
+      const first = forwardedFor.split(',')[0]?.trim()
+      if (first) {
+        return first
+      }
+    }
+
+    const realIp = req.headers.get('x-real-ip')?.trim()
+    if (realIp) {
+      return realIp
+    }
   }
 
   return 'unknown'

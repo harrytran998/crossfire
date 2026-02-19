@@ -11,8 +11,31 @@ const LOCKOUT_AFTER_FAILURES = 5
 const LOCKOUT_DURATION_MS = 10 * 60_000
 
 type AuthRoute = 'login' | 'register'
+type ApiRoute = 'inventory-acquire' | 'friends-request' | 'leaderboards-read'
+
+const API_ROUTE_LIMITS: Record<
+  ApiRoute,
+  {
+    readonly maxRequests: number
+    readonly windowMs: number
+  }
+> = {
+  'inventory-acquire': {
+    maxRequests: 20,
+    windowMs: 60_000,
+  },
+  'friends-request': {
+    maxRequests: 10,
+    windowMs: 60_000,
+  },
+  'leaderboards-read': {
+    maxRequests: 60,
+    windowMs: 60_000,
+  },
+}
 
 const rateLimitKey = (route: AuthRoute, ip: string) => `auth:ratelimit:${route}:${ip}`
+const apiRateLimitKey = (route: ApiRoute, subject: string) => `api:ratelimit:${route}:${subject}`
 const lockoutKey = (ip: string, email: string) => `auth:lockout:${ip}:${email.toLowerCase()}`
 const loginFailureKey = (ip: string, email: string) =>
   `auth:login-fail:${ip}:${email.toLowerCase()}`
@@ -50,6 +73,10 @@ export class AuthThrottleService extends Context.Tag('AuthThrottleService')<
     ) => Effect.Effect<LoginLockoutResult | LoginLockoutBlockedResult>
     readonly recordLoginFailure: (ip: string, email: string) => Effect.Effect<void>
     readonly clearLoginFailures: (ip: string, email: string) => Effect.Effect<void>
+    readonly consumeApiRateLimit: (
+      route: ApiRoute,
+      subject: string
+    ) => Effect.Effect<AuthRateLimitResult | AuthRateLimitBlockedResult>
   }
 >() {}
 
@@ -140,11 +167,41 @@ export const AuthThrottleServiceLive = Layer.effect(
           error instanceof Error ? error : new Error('Failed to clear login failures'),
       }).pipe(Effect.orDie)
 
+    const consumeApiRateLimit = (
+      route: ApiRoute,
+      subject: string
+    ): Effect.Effect<AuthRateLimitResult | AuthRateLimitBlockedResult> =>
+      Effect.tryPromise({
+        try: async () => {
+          const key = apiRateLimitKey(route, subject)
+          const config = API_ROUTE_LIMITS[route]
+          const windowSeconds = ttlSeconds(config.windowMs)
+
+          const count = await redis.client.incr(key)
+          if (count === 1) {
+            await redis.client.expire(key, windowSeconds)
+          }
+
+          if (count <= config.maxRequests) {
+            return { allowed: true as const }
+          }
+
+          const ttl = await redis.client.ttl(key)
+          return {
+            allowed: false as const,
+            retryAfterSeconds: ttl > 0 ? ttl : windowSeconds,
+          }
+        },
+        catch: (error) =>
+          error instanceof Error ? error : new Error('Failed to evaluate api rate limit'),
+      }).pipe(Effect.orDie)
+
     return AuthThrottleService.of({
       consumeAuthRateLimit,
       getLoginLockout,
       recordLoginFailure,
       clearLoginFailures,
+      consumeApiRateLimit,
     })
   })
 ).pipe(Layer.provide(RedisServiceLive))

@@ -6,6 +6,11 @@ import { DatabaseServiceLive } from './services/database.service'
 import { AuthServiceLive } from './modules/auth/application/services/auth.service'
 import { PlayerServiceLive } from './modules/player/application/services/player.service'
 import { StaticDataServiceLive } from './modules/static-data/application/services/static-data.service'
+import { InventoryServiceLive } from './modules/inventory/application/services/inventory.service'
+import { LoadoutServiceLive } from './modules/loadout/application/services/loadout.service'
+import { MatchServiceLive } from './modules/match/application/services/match.service'
+import { LeaderboardServiceLive } from './modules/leaderboard/application/services/leaderboard.service'
+import { FriendsServiceLive } from './modules/friends/application/services/friends.service'
 import {
   OutboxDispatcherService,
   OutboxDispatcherServiceLive,
@@ -23,6 +28,11 @@ import { authRoutes } from './modules/auth'
 import { AuthThrottleServiceLive } from './modules/auth'
 import { playerRoutes } from './modules/player'
 import { staticDataRoutes } from './modules/static-data'
+import { inventoryRoutes } from './modules/inventory'
+import { loadoutRoutes } from './modules/loadout'
+import { matchRoutes } from './modules/match'
+import { leaderboardRoutes } from './modules/leaderboard'
+import { friendsRoutes } from './modules/friends'
 
 const BaseLayer = Layer.mergeAll(ConfigLayer, DatabaseServiceLive)
 
@@ -31,6 +41,11 @@ const AppLayer = Layer.mergeAll(
   Layer.provide(AuthThrottleServiceLive, ConfigLayer),
   Layer.provide(PlayerServiceLive, BaseLayer),
   Layer.provide(StaticDataServiceLive, BaseLayer),
+  Layer.provide(InventoryServiceLive, BaseLayer),
+  Layer.provide(LoadoutServiceLive, BaseLayer),
+  Layer.provide(MatchServiceLive, BaseLayer),
+  Layer.provide(LeaderboardServiceLive, BaseLayer),
+  Layer.provide(FriendsServiceLive, BaseLayer),
   Layer.provide(OutboxServiceLive, BaseLayer),
   Layer.provide(OutboxDispatcherServiceLive, Layer.provide(OutboxServiceLive, BaseLayer))
 )
@@ -62,6 +77,11 @@ router.addMany(baseRoutes)
 router.addMany(authRoutes)
 router.addMany(playerRoutes)
 router.addMany(staticDataRoutes)
+router.addMany(inventoryRoutes)
+router.addMany(loadoutRoutes)
+router.addMany(matchRoutes)
+router.addMany(leaderboardRoutes)
+router.addMany(friendsRoutes)
 
 const dispatchRoute = async (req: Request, path: string): Promise<Response> => {
   const match = router.match(req.method, path)
