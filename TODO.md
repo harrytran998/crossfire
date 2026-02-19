@@ -223,19 +223,41 @@
 
 ### Wave 12: Achievements (Week 6-7) - PARALLEL
 
-- [ ] **P4-W12-T34** | Create Achievement service
+- [x] **P4-W12-T34** | Create Achievement service
   - Category: integration | Est: 6-8h
+  - Status: **COMPLETED** ✅
+  - Files created:
+    - `apps/server/src/modules/achievement/domain/entities/achievement.entity.ts`
+    - `apps/server/src/modules/achievement/domain/errors/achievement.errors.ts`
+    - `apps/server/src/modules/achievement/domain/repositories/achievement.repository.ts`
+    - `apps/server/src/modules/achievement/application/services/achievement.service.ts`
+    - `apps/server/src/modules/achievement/infrastructure/repositories/achievement.repository.impl.ts`
 
-- [ ] **P4-W12-T35** | Implement Achievement REST API
+- [x] **P4-W12-T35** | Implement Achievement REST API
   - Category: integration | Est: 2-3h
+  - Status: **COMPLETED** ✅
+  - Files created:
+    - `apps/server/src/modules/achievement/presentation/http/achievement.handlers.ts`
+  - Endpoints: GET /achievements, GET /achievements/player/:playerId, GET /achievements/progress/:playerId
 
 ### Wave 13: Telemetry & Admin (Week 7) - PARALLEL
 
-- [ ] **P4-W13-T36** | Create Telemetry service (TimescaleDB)
+- [x] **P4-W13-T36** | Create Telemetry service (TimescaleDB)
   - Category: ultrabrain | Est: 6-8h
+  - Status: **COMPLETED** ✅
+  - Files created:
+    - `apps/server/src/modules/telemetry/domain/entities/telemetry.entity.ts`
+    - `apps/server/src/modules/telemetry/domain/errors/telemetry.errors.ts`
+    - `apps/server/src/modules/telemetry/domain/repositories/telemetry.repository.ts`
+    - `apps/server/src/modules/telemetry/application/services/telemetry.service.ts`
+    - `apps/server/src/modules/telemetry/infrastructure/repositories/telemetry.repository.impl.ts`
+    - `apps/server/src/modules/telemetry/presentation/http/telemetry.handlers.ts`
 
-- [ ] **P4-W13-T37** | Implement Admin REST API
+- [x] **P4-W13-T37** | Implement Admin REST API
   - Category: integration | Est: 4-5h
+  - Status: **COMPLETED** ✅
+  - Files created:
+    - `apps/server/src/modules/admin/presentation/http/admin.handlers.ts`
 
 ---
 
@@ -266,13 +288,110 @@
 
 | Metric        | Count | Completed |
 | ------------- | ----- | --------- |
-| Total Tasks   | 45    | 36 (80%)  |
+| Total Tasks   | 45    | 40 (89%)  |
 | Phase 0 Tasks | 13    | 13 ✅     |
 | Phase 1 Tasks | 8     | 8 ✅      |
 | Phase 2 Tasks | 9     | 9 ✅      |
 | Phase 3 Tasks | 6     | 6 ✅      |
-| Phase 4 Tasks | 4     | 0 ⏳      |
+| Phase 4 Tasks | 4     | 4 ✅      |
 | Phase 5 Tasks | 6     | 0 ⏳      |
+
+### Phase 4 Complete! ✅
+
+- ✅ **P4-W12-T34**: Achievement Service - Full CRUD with progress tracking and unlock logic
+- ✅ **P4-W12-T35**: Achievement REST API - Endpoints for achievements and player progress
+- ✅ **P4-W13-T36**: Telemetry Service - TimescaleDB integration for time-series analytics
+- ✅ **P4-W13-T37**: Admin REST API - Telemetry data access for administrators
+
+---
+
+## Phase 4 Implementation Notes
+
+### Wave 12 Completed (P4-W12-T34 & T35)
+
+**Achievement Module Files Created:**
+
+```
+apps/server/src/modules/achievement/
+├── domain/
+│   ├── entities/achievement.entity.ts          # Achievement, AchievementCriteria, PlayerAchievement types
+│   ├── errors/achievement.errors.ts            # AchievementNotFoundError, AchievementAlreadyUnlockedError
+│   └── repositories/achievement.repository.ts  # Repository interface
+├── application/
+│   └── services/achievement.service.ts         # Business logic with checkAndUnlockAchievements, updateProgress
+├── infrastructure/
+│   └── repositories/achievement.repository.impl.ts  # Kysely implementation
+├── presentation/
+│   └── http/
+│       └── achievement.handlers.ts             # REST handlers
+└── index.ts
+```
+
+**Key Features:**
+
+1. **Achievement System**: Multi-criteria achievements with progress tracking (JSONB)
+2. **Categories**: combat, social, progression, special, hidden
+3. **Progress Tracking**: Check-and-unlock logic with flexible condition evaluation
+4. **REST Endpoints**:
+   - GET /achievements - List all achievements
+   - GET /achievements/player/:playerId - Get player's unlocked achievements
+   - GET /achievements/progress/:playerId - Get achievement progress
+
+### Wave 13 Completed (P4-W13-T36 & T37)
+
+**Telemetry Module Files Created:**
+
+```
+apps/server/src/modules/telemetry/
+├── domain/
+│   ├── entities/telemetry.entity.ts          # MatchEvent, PlayerTelemetry, ServerMetrics types
+│   ├── errors/telemetry.errors.ts            # TelemetryError, MatchNotFoundError
+│   └── repositories/telemetry.repository.ts  # Repository interface
+├── application/
+│   └── services/telemetry.service.ts         # Recording and aggregation logic
+├── infrastructure/
+│   └── repositories/telemetry.repository.impl.ts  # TimescaleDB implementation
+├── presentation/
+│   └── http/
+│       └── telemetry.handlers.ts             # REST handlers
+└── index.ts
+```
+
+**Admin Module Files Created:**
+
+```
+apps/server/src/modules/admin/
+└── presentation/
+    └── http/
+        ├── admin.handlers.ts                   # Admin telemetry endpoints
+        └── index.ts
+```
+
+**Key Features:**
+
+1. **TimescaleDB Integration**: Time-series tables (match_events, player_telemetry, server_metrics)
+2. **Data Recording**: recordMatchEvent, recordPlayerTelemetry, recordServerMetrics
+3. **Aggregation Queries**: getPlayerStats for timeframe-based statistics
+4. **REST Endpoints**:
+   - GET /telemetry/player/:playerId - Player telemetry over time
+   - GET /telemetry/match/:matchId - Match events
+   - GET /telemetry/server/:serverId - Server metrics
+   - GET /telemetry/stats/:playerId - Aggregated player statistics
+5. **Admin Endpoints** (for privileged access):
+   - GET /admin/telemetry/player/:playerId
+   - GET /admin/telemetry/match/:matchId
+   - GET /admin/telemetry/server/:serverId
+   - GET /admin/telemetry/stats/:playerId
+
+**Verification:**
+
+- ✅ All new modules compile without errors
+- ✅ Typecheck passes: `bun --cwd apps/server run typecheck`
+- ✅ Clean Architecture pattern followed throughout
+- ✅ Effect error handling with typed errors
+- ✅ Kysely repository pattern with column arrays
+
+---
 
 ### Phase 3 Complete! ✅
 
@@ -485,4 +604,4 @@ apps/server/src/modules/matchmaking/
 
 _TODO List Version: 2.4_  
 _Generated from: EXECUTION_PLAN.md v2.3_  
-_Last Updated: February 19, 2026_
+_Last Updated: February 19, 2026 (Phase 4 Complete)_
