@@ -163,27 +163,59 @@
 
 ### Wave 9: WebSocket Foundation (Week 5)
 
-- [ ] **P3-W9-T28** | Setup Bun WebSocket server with Effect
+- [x] **P3-W9-T28** | Setup Bun WebSocket server with Effect
   - Category: ultrabrain | Est: 8-10h
+  - Status: **COMPLETED** ✅
+  - Files: `apps/server/src/realtime/connection-registry.service.ts`, `heartbeat.service.ts`, `ws-auth.ts`, `ws-context.ts`, `index.ts`
+  - WebSocket integrated into existing Bun.serve() with auth, heartbeat, connection tracking
 
-- [ ] **P3-W9-T29** | Implement Message Protocol (MessagePack)
+- [x] **P3-W9-T29** | Implement Message Protocol (MessagePack)
   - Category: integration | Est: 6-8h
+  - Status: **COMPLETED** ✅
+  - Files: `apps/server/src/realtime/protocol/message-envelope.ts`, `message-codec.ts`, `message-router.ts`, `message-schemas.ts`, `index.ts`
+  - MessagePack encoding/decoding, message routing, schema validation, unit tests
 
 ### Wave 10: Room System (Week 5-6)
 
-- [ ] **P3-W10-T30** | Create Room service with Redis state
+- [x] **P3-W10-T30** | Create Room service with Redis state
   - Category: ultrabrain | Est: 10-12h
+  - Status: **COMPLETED** ✅
+  - Files created:
+    - `apps/server/src/modules/room/domain/entities/room.entity.ts`
+    - `apps/server/src/modules/room/domain/errors/room.errors.ts`
+    - `apps/server/src/modules/room/domain/repositories/room.repository.ts`
+    - `apps/server/src/modules/room/application/services/room.service.ts`
+    - `apps/server/src/modules/room/infrastructure/repositories/room.repository.impl.ts`
+  - Redis-backed room state with player management, status tracking
 
-- [ ] **P3-W10-T31** | Implement Room WebSocket handlers
+- [x] **P3-W10-T31** | Implement Room WebSocket handlers
   - Category: integration | Est: 6-8h
+  - Status: **COMPLETED** ✅
+  - Files created:
+    - `apps/server/src/modules/room/presentation/websocket/bun-room.handlers.ts`
+  - Handlers for create_room, join_room, leave_room, set_ready, kick_player
+    - Handler registration in message router
+    - Unit tests
 
 ### Wave 11: Matchmaking (Week 6) - PARALLEL
 
-- [ ] **P3-W11-T32** | Create Matchmaking service
+- [x] **P3-W11-T32** | Create Matchmaking service
   - Category: ultrabrain | Est: 8-10h
+  - Status: **COMPLETED** ✅
+  - Files created:
+    - `apps/server/src/modules/matchmaking/domain/entities/matchmaking.entity.ts`
+    - `apps/server/src/modules/matchmaking/domain/errors/matchmaking.errors.ts`
+    - `apps/server/src/modules/matchmaking/domain/repositories/matchmaking.repository.ts`
+    - `apps/server/src/modules/matchmaking/application/services/matchmaking.service.ts`
+    - `apps/server/src/modules/matchmaking/infrastructure/repositories/matchmaking.repository.impl.ts`
+  - Redis-backed matchmaking queue with skill-based matching
 
-- [ ] **P3-W11-T33** | Implement Matchmaking REST API
+- [x] **P3-W11-T33** | Implement Matchmaking REST API
   - Category: integration | Est: 3-4h
+  - Status: **COMPLETED** ✅
+  - Files created:
+    - `apps/server/src/modules/matchmaking/presentation/http/matchmaking.handlers.ts`
+  - Endpoints: POST /matchmaking/queue, DELETE /matchmaking/queue, GET /matchmaking/status
 
 ---
 
@@ -232,15 +264,23 @@
 
 ## Summary Statistics
 
-| Metric        | Count |
-| ------------- | ----- |
-| Total Tasks   | 45    |
-| Phase 0 Tasks | 13    |
-| Phase 1 Tasks | 8     |
-| Phase 2 Tasks | 9     |
-| Phase 3 Tasks | 6     |
-| Phase 4 Tasks | 4     |
-| Phase 5 Tasks | 6     |
+| Metric        | Count | Completed |
+| ------------- | ----- | --------- |
+| Total Tasks   | 45    | 36 (80%)  |
+| Phase 0 Tasks | 13    | 13 ✅     |
+| Phase 1 Tasks | 8     | 8 ✅      |
+| Phase 2 Tasks | 9     | 9 ✅      |
+| Phase 3 Tasks | 6     | 6 ✅      |
+| Phase 4 Tasks | 4     | 0 ⏳      |
+| Phase 5 Tasks | 6     | 0 ⏳      |
+
+### Phase 3 Complete! ✅
+- ✅ **P3-W9-T28**: WebSocket Foundation - Bun WS server with auth, heartbeat, connection registry
+- ✅ **P3-W9-T29**: Message Protocol - MessagePack codec, router, schemas, tests
+- ✅ **P3-W10-T30**: Room Service - Redis-backed room state with player management
+- ✅ **P3-W10-T31**: Room WS Handlers - WebSocket handlers for room operations
+- ✅ **P3-W11-T32**: Matchmaking Service - Queue and skill-based matching
+- ✅ **P3-W11-T33**: Matchmaking REST API - Queue endpoints
 
 ### Estimated Total Effort
 
@@ -324,6 +364,103 @@ CREATE TABLE users (
 
 ---
 
+## Phase 3 Implementation Notes
+
+### Wave 9 Completed (P3-W9-T28 & T29)
+
+**Files Created:**
+```
+apps/server/src/realtime/
+├── connection-registry.service.ts   # Track active WS connections
+├── heartbeat.service.ts             # Ping/pong and stale detection
+├── ws-auth.ts                       # JWT extraction and validation
+├── ws-context.ts                    # WebSocket context types
+├── index.ts                         # Realtime module exports
+└── protocol/
+    ├── message-envelope.ts          # Message envelope types
+    ├── message-codec.ts             # MessagePack encode/decode
+    ├── message-router.ts            # Message dispatch/routing
+    ├── message-schemas.ts           # Schema validation
+    └── index.ts                     # Protocol exports
+
+packages/shared/src/config/
+└── websocket.config.ts              # WebSocket configuration
+
+apps/server/tests/unit/realtime/
+└── message-protocol.test.ts         # Protocol unit tests
+```
+
+**Key Features Implemented:**
+1. **WebSocket Server Integration**: Bun's native WebSocket integrated into existing `Bun.serve()` alongside HTTP routes
+2. **Authentication**: Bearer token validation on WebSocket upgrade at `/ws` endpoint
+3. **Connection Management**: Connection registry mapping connectionId to player data and WebSocket instance
+4. **Heartbeat**: Server sends ping every 30s, closes connection if no pong within 10s
+5. **Message Protocol**: MessagePack binary encoding with typed envelope `{ type, seq?, ts, payload }`
+6. **Message Router**: Map-based routing (no switch statements) with schema validation
+7. **Error Handling**: Typed ProtocolError for decode failures, invalid envelopes, unknown message types
+
+**Verification:**
+- ✅ Typecheck passes: `bun --cwd apps/server run typecheck`
+- ✅ Build passes: `bun run --cwd apps/server build`
+- ✅ Tests pass: `bun --cwd apps/server test tests/unit/realtime/message-protocol.test.ts`
+
+### Wave 10 Completed (P3-W10-T30 & T31)
+
+**Room Module Files Created:**
+```
+apps/server/src/modules/room/
+├── domain/
+│   ├── entities/room.entity.ts          # Room and RoomPlayer types
+│   ├── errors/room.errors.ts            # Room domain errors
+│   └── repositories/room.repository.ts  # Repository interface
+├── application/
+│   └── services/room.service.ts         # Room business logic
+├── infrastructure/
+│   └── repositories/room.repository.impl.ts  # Redis implementation
+├── presentation/
+│   └── websocket/
+│       └── bun-room.handlers.ts         # WS handlers
+└── index.ts
+```
+
+**Key Features:**
+1. **Room State**: Redis-backed with room:{id}, room:{id}:players, rooms:active keys
+2. **Room Lifecycle**: waiting → starting → in_progress → finished
+3. **Business Logic**: Host validation, ready checks, capacity limits, password protection
+4. **WebSocket Handlers**: create_room, join_room, leave_room, set_ready, kick_player
+
+### Wave 11 Completed (P3-W11-T32 & T33)
+
+**Matchmaking Module Files Created:**
+```
+apps/server/src/modules/matchmaking/
+├── domain/
+│   ├── entities/matchmaking.entity.ts          # Ticket and Match types
+│   ├── errors/matchmaking.errors.ts            # Domain errors
+│   └── repositories/matchmaking.repository.ts  # Repository interface
+├── application/
+│   └── services/matchmaking.service.ts         # Matchmaking logic
+├── infrastructure/
+│   └── repositories/matchmaking.repository.impl.ts  # Redis implementation
+├── presentation/
+│   └── http/
+│       └── matchmaking.handlers.ts             # REST handlers
+└── index.ts
+```
+
+**Key Features:**
+1. **Matchmaking Queue**: Redis sorted set with skill rating
+2. **Ticket Management**: Create, cancel, status check
+3. **Match Creation**: Skill-based matching with configurable player count
+4. **REST API**: POST /matchmaking/queue, DELETE /matchmaking/queue, GET /matchmaking/status
+
+**Verification:**
+- ✅ All new modules compile without errors
+- ✅ Typecheck passes: `bun --cwd apps/server run typecheck`
+- ✅ Clean Architecture pattern followed throughout
+
+---
+
 ## Key Changes from v1.0
 
 | Old             | New                                   | Reason                               |
@@ -337,6 +474,6 @@ CREATE TABLE users (
 
 ---
 
-_TODO List Version: 2.3_  
+_TODO List Version: 2.4_  
 _Generated from: EXECUTION_PLAN.md v2.3_  
-_Last Updated: February 2026_
+_Last Updated: February 19, 2026_
