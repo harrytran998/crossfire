@@ -2,7 +2,11 @@ import { Effect, Context, Layer } from 'effect'
 import { RedisService } from '../../../../services/redis.service'
 import { RedisError } from '../../../../errors'
 import type { MatchmakingRepository } from '../../domain/repositories/matchmaking.repository'
-import type { MatchmakingTicket, Match, CreateTicketInput } from '../../domain/entities/matchmaking.entity'
+import type {
+  MatchmakingTicket,
+  Match,
+  CreateTicketInput,
+} from '../../domain/entities/matchmaking.entity'
 import {
   TicketNotFoundError,
   PlayerAlreadyQueuedError,
@@ -57,7 +61,9 @@ export const MatchmakingRepositoryLive = Layer.effect(
   Effect.gen(function* () {
     const redis = yield* RedisService
 
-    const createTicket = (input: CreateTicketInput): Effect.Effect<MatchmakingTicket, MatchmakingDomainError> =>
+    const createTicket = (
+      input: CreateTicketInput
+    ): Effect.Effect<MatchmakingTicket, MatchmakingDomainError> =>
       Effect.gen(function* () {
         const existingTicket = yield* findTicketByPlayer(input.playerId)
         if (existingTicket && existingTicket.status === 'queued') {
@@ -78,13 +84,13 @@ export const MatchmakingRepositoryLive = Layer.effect(
         const playerKey = `${PLAYER_TICKET_PREFIX}${input.playerId}`
         const queueKey = `${QUEUE_PREFIX}${input.gameMode}`
 
-        yield* redis.set(ticketKey, serializeTicket(ticket), DEFAULT_TTL).pipe(
-          Effect.catchAll(err => Effect.fail(mapRedisError(err)))
-        )
-        yield* redis.set(playerKey, id, DEFAULT_TTL).pipe(
-          Effect.catchAll(err => Effect.fail(mapRedisError(err)))
-        )
-        
+        yield* redis
+          .set(ticketKey, serializeTicket(ticket), DEFAULT_TTL)
+          .pipe(Effect.catchAll((err) => Effect.fail(mapRedisError(err))))
+        yield* redis
+          .set(playerKey, id, DEFAULT_TTL)
+          .pipe(Effect.catchAll((err) => Effect.fail(mapRedisError(err))))
+
         yield* Effect.tryPromise({
           try: () => redis.client.zadd(queueKey, input.skillRating, id),
           catch: () => new MatchmakingError({ message: 'Failed to add to queue' }),
@@ -93,20 +99,24 @@ export const MatchmakingRepositoryLive = Layer.effect(
         return ticket
       })
 
-    const findTicketById = (ticketId: string): Effect.Effect<MatchmakingTicket | null, MatchmakingDomainError> =>
+    const findTicketById = (
+      ticketId: string
+    ): Effect.Effect<MatchmakingTicket | null, MatchmakingDomainError> =>
       Effect.gen(function* () {
-        const data = yield* redis.get(`${TICKET_KEY_PREFIX}${ticketId}`).pipe(
-          Effect.catchAll(err => Effect.fail(mapRedisError(err)))
-        )
+        const data = yield* redis
+          .get(`${TICKET_KEY_PREFIX}${ticketId}`)
+          .pipe(Effect.catchAll((err) => Effect.fail(mapRedisError(err))))
         if (!data) return null
         return deserializeTicket(data)
       })
 
-    const findTicketByPlayer = (playerId: string): Effect.Effect<MatchmakingTicket | null, MatchmakingDomainError> =>
+    const findTicketByPlayer = (
+      playerId: string
+    ): Effect.Effect<MatchmakingTicket | null, MatchmakingDomainError> =>
       Effect.gen(function* () {
-        const ticketId = yield* redis.get(`${PLAYER_TICKET_PREFIX}${playerId}`).pipe(
-          Effect.catchAll(err => Effect.fail(mapRedisError(err)))
-        )
+        const ticketId = yield* redis
+          .get(`${PLAYER_TICKET_PREFIX}${playerId}`)
+          .pipe(Effect.catchAll((err) => Effect.fail(mapRedisError(err))))
         if (!ticketId) return null
         return yield* findTicketById(ticketId)
       })
@@ -121,10 +131,10 @@ export const MatchmakingRepositoryLive = Layer.effect(
         if (!ticket) return yield* new TicketNotFoundError({ ticketId })
 
         const updated: MatchmakingTicket = { ...ticket, status, matchId }
-        yield* redis.set(`${TICKET_KEY_PREFIX}${ticketId}`, serializeTicket(updated), DEFAULT_TTL).pipe(
-          Effect.catchAll(err => Effect.fail(mapRedisError(err)))
-        )
-        
+        yield* redis
+          .set(`${TICKET_KEY_PREFIX}${ticketId}`, serializeTicket(updated), DEFAULT_TTL)
+          .pipe(Effect.catchAll((err) => Effect.fail(mapRedisError(err))))
+
         return updated
       })
 
@@ -132,12 +142,12 @@ export const MatchmakingRepositoryLive = Layer.effect(
       Effect.gen(function* () {
         const ticket = yield* findTicketById(ticketId)
         if (ticket) {
-          yield* redis.del(`${TICKET_KEY_PREFIX}${ticketId}`).pipe(
-            Effect.catchAll(err => Effect.fail(mapRedisError(err)))
-          )
-          yield* redis.del(`${PLAYER_TICKET_PREFIX}${ticket.playerId}`).pipe(
-            Effect.catchAll(err => Effect.fail(mapRedisError(err)))
-          )
+          yield* redis
+            .del(`${TICKET_KEY_PREFIX}${ticketId}`)
+            .pipe(Effect.catchAll((err) => Effect.fail(mapRedisError(err))))
+          yield* redis
+            .del(`${PLAYER_TICKET_PREFIX}${ticket.playerId}`)
+            .pipe(Effect.catchAll((err) => Effect.fail(mapRedisError(err))))
           yield* Effect.tryPromise({
             try: () => redis.client.zrem(`${QUEUE_PREFIX}${ticket.gameMode}`, ticketId),
             catch: () => new MatchmakingError({ message: 'Failed to remove from queue' }),
@@ -145,7 +155,9 @@ export const MatchmakingRepositoryLive = Layer.effect(
         }
       })
 
-    const findQueuedTickets = (gameMode: string): Effect.Effect<MatchmakingTicket[], MatchmakingDomainError> =>
+    const findQueuedTickets = (
+      gameMode: string
+    ): Effect.Effect<MatchmakingTicket[], MatchmakingDomainError> =>
       Effect.gen(function* () {
         const ticketIds = yield* Effect.tryPromise({
           try: () => redis.client.zrange(`${QUEUE_PREFIX}${gameMode}`, 0, -1),
@@ -153,13 +165,11 @@ export const MatchmakingRepositoryLive = Layer.effect(
         })
 
         const tickets = yield* Effect.all(
-          ticketIds.map(id => findTicketById(id)),
+          ticketIds.map((id) => findTicketById(id)),
           { concurrency: 5 }
         )
 
-        return tickets.filter((t): t is MatchmakingTicket => 
-          t !== null && t.status === 'queued'
-        )
+        return tickets.filter((t): t is MatchmakingTicket => t !== null && t.status === 'queued')
       })
 
     const createMatch = (
@@ -177,17 +187,17 @@ export const MatchmakingRepositoryLive = Layer.effect(
           createdAt: new Date(),
         }
 
-        yield* redis.set(`${MATCH_KEY_PREFIX}${id}`, serializeMatch(match), DEFAULT_TTL).pipe(
-          Effect.catchAll(err => Effect.fail(mapRedisError(err)))
-        )
+        yield* redis
+          .set(`${MATCH_KEY_PREFIX}${id}`, serializeMatch(match), DEFAULT_TTL)
+          .pipe(Effect.catchAll((err) => Effect.fail(mapRedisError(err))))
         return match
       })
 
     const findMatchById = (matchId: string): Effect.Effect<Match | null, MatchmakingDomainError> =>
       Effect.gen(function* () {
-        const data = yield* redis.get(`${MATCH_KEY_PREFIX}${matchId}`).pipe(
-          Effect.catchAll(err => Effect.fail(mapRedisError(err)))
-        )
+        const data = yield* redis
+          .get(`${MATCH_KEY_PREFIX}${matchId}`)
+          .pipe(Effect.catchAll((err) => Effect.fail(mapRedisError(err))))
         if (!data) return null
         return deserializeMatch(data)
       })

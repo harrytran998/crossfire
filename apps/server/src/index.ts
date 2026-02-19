@@ -3,10 +3,7 @@ import { serve } from 'bun'
 import { ServerConfig, WebSocketConfig } from '@crossfire/shared'
 import { ConfigLayer } from './layers'
 import { DatabaseServiceLive } from './services/database.service'
-import {
-  AuthService,
-  AuthServiceLive,
-} from './modules/auth/application/services/auth.service'
+import { AuthService, AuthServiceLive } from './modules/auth/application/services/auth.service'
 import { PlayerServiceLive } from './modules/player/application/services/player.service'
 import { StaticDataServiceLive } from './modules/static-data/application/services/static-data.service'
 import { InventoryServiceLive } from './modules/inventory/application/services/inventory.service'
@@ -208,11 +205,7 @@ const Program = Effect.gen(function* () {
       open(ws) {
         Effect.runSync(
           Effect.gen(function* () {
-            yield* connectionRegistry.registerConnection(
-              ws.data.connectionId,
-              ws,
-              ws.data.playerId
-            )
+            yield* connectionRegistry.registerConnection(ws.data.connectionId, ws, ws.data.playerId)
             yield* heartbeat.registerConnection(ws.data.connectionId)
           })
         )

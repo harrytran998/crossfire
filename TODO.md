@@ -275,6 +275,7 @@
 | Phase 5 Tasks | 6     | 0 ⏳      |
 
 ### Phase 3 Complete! ✅
+
 - ✅ **P3-W9-T28**: WebSocket Foundation - Bun WS server with auth, heartbeat, connection registry
 - ✅ **P3-W9-T29**: Message Protocol - MessagePack codec, router, schemas, tests
 - ✅ **P3-W10-T30**: Room Service - Redis-backed room state with player management
@@ -369,6 +370,7 @@ CREATE TABLE users (
 ### Wave 9 Completed (P3-W9-T28 & T29)
 
 **Files Created:**
+
 ```
 apps/server/src/realtime/
 ├── connection-registry.service.ts   # Track active WS connections
@@ -391,6 +393,7 @@ apps/server/tests/unit/realtime/
 ```
 
 **Key Features Implemented:**
+
 1. **WebSocket Server Integration**: Bun's native WebSocket integrated into existing `Bun.serve()` alongside HTTP routes
 2. **Authentication**: Bearer token validation on WebSocket upgrade at `/ws` endpoint
 3. **Connection Management**: Connection registry mapping connectionId to player data and WebSocket instance
@@ -400,6 +403,7 @@ apps/server/tests/unit/realtime/
 7. **Error Handling**: Typed ProtocolError for decode failures, invalid envelopes, unknown message types
 
 **Verification:**
+
 - ✅ Typecheck passes: `bun --cwd apps/server run typecheck`
 - ✅ Build passes: `bun run --cwd apps/server build`
 - ✅ Tests pass: `bun --cwd apps/server test tests/unit/realtime/message-protocol.test.ts`
@@ -407,6 +411,7 @@ apps/server/tests/unit/realtime/
 ### Wave 10 Completed (P3-W10-T30 & T31)
 
 **Room Module Files Created:**
+
 ```
 apps/server/src/modules/room/
 ├── domain/
@@ -424,6 +429,7 @@ apps/server/src/modules/room/
 ```
 
 **Key Features:**
+
 1. **Room State**: Redis-backed with room:{id}, room:{id}:players, rooms:active keys
 2. **Room Lifecycle**: waiting → starting → in_progress → finished
 3. **Business Logic**: Host validation, ready checks, capacity limits, password protection
@@ -432,6 +438,7 @@ apps/server/src/modules/room/
 ### Wave 11 Completed (P3-W11-T32 & T33)
 
 **Matchmaking Module Files Created:**
+
 ```
 apps/server/src/modules/matchmaking/
 ├── domain/
@@ -449,12 +456,14 @@ apps/server/src/modules/matchmaking/
 ```
 
 **Key Features:**
+
 1. **Matchmaking Queue**: Redis sorted set with skill rating
 2. **Ticket Management**: Create, cancel, status check
 3. **Match Creation**: Skill-based matching with configurable player count
 4. **REST API**: POST /matchmaking/queue, DELETE /matchmaking/queue, GET /matchmaking/status
 
 **Verification:**
+
 - ✅ All new modules compile without errors
 - ✅ Typecheck passes: `bun --cwd apps/server run typecheck`
 - ✅ Clean Architecture pattern followed throughout

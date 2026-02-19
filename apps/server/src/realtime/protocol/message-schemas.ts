@@ -145,7 +145,8 @@ const decodeWithSchema = <A>(
     return Effect.fail(
       new ProtocolError({
         code,
-        message: code === 'INVALID_ENVELOPE' ? 'Invalid message envelope' : 'Invalid message payload',
+        message:
+          code === 'INVALID_ENVELOPE' ? 'Invalid message envelope' : 'Invalid message payload',
         type,
         cause: decoded.left,
       })
@@ -159,7 +160,9 @@ export const validateEnvelope = (input: unknown): Effect.Effect<MessageEnvelope,
   decodeWithSchema(BaseEnvelopeSchema, input, 'INVALID_ENVELOPE')
 
 const clientMessageDecoders: {
-  readonly [K in ClientMessageType]: (input: unknown) => Effect.Effect<ClientMessageEnvelope, ProtocolError>
+  readonly [K in ClientMessageType]: (
+    input: unknown
+  ) => Effect.Effect<ClientMessageEnvelope, ProtocolError>
 } = {
   join_lobby: (input) =>
     decodeWithSchema(JoinLobbyMessageSchema, input, 'INVALID_PAYLOAD', 'join_lobby').pipe(
@@ -188,7 +191,9 @@ const clientMessageDecoders: {
 }
 
 const serverMessageDecoders: {
-  readonly [K in ServerMessageType]: (input: unknown) => Effect.Effect<ServerMessageEnvelope, ProtocolError>
+  readonly [K in ServerMessageType]: (
+    input: unknown
+  ) => Effect.Effect<ServerMessageEnvelope, ProtocolError>
 } = {
   welcome: (input) =>
     decodeWithSchema(WelcomeMessageSchema, input, 'INVALID_PAYLOAD', 'welcome').pipe(
@@ -212,7 +217,9 @@ const serverMessageDecoders: {
     ),
 }
 
-export const decodeClientMessage = (input: unknown): Effect.Effect<ClientMessageEnvelope, ProtocolError> =>
+export const decodeClientMessage = (
+  input: unknown
+): Effect.Effect<ClientMessageEnvelope, ProtocolError> =>
   validateEnvelope(input).pipe(
     Effect.flatMap((envelope) => {
       if (!isClientMessageType(envelope.type)) {
@@ -229,7 +236,9 @@ export const decodeClientMessage = (input: unknown): Effect.Effect<ClientMessage
     })
   )
 
-export const decodeServerMessage = (input: unknown): Effect.Effect<ServerMessageEnvelope, ProtocolError> =>
+export const decodeServerMessage = (
+  input: unknown
+): Effect.Effect<ServerMessageEnvelope, ProtocolError> =>
   validateEnvelope(input).pipe(
     Effect.flatMap((envelope) => {
       if (!isServerMessageType(envelope.type)) {
@@ -246,15 +255,21 @@ export const decodeServerMessage = (input: unknown): Effect.Effect<ServerMessage
     })
   )
 
-export const decodeKnownMessage = (input: unknown): Effect.Effect<KnownMessageEnvelope, ProtocolError> =>
+export const decodeKnownMessage = (
+  input: unknown
+): Effect.Effect<KnownMessageEnvelope, ProtocolError> =>
   validateEnvelope(input).pipe(
     Effect.flatMap((envelope) => {
       if (isClientMessageType(envelope.type)) {
-        return decodeClientMessage(envelope).pipe(Effect.map((message) => message as KnownMessageEnvelope))
+        return decodeClientMessage(envelope).pipe(
+          Effect.map((message) => message as KnownMessageEnvelope)
+        )
       }
 
       if (isServerMessageType(envelope.type)) {
-        return decodeServerMessage(envelope).pipe(Effect.map((message) => message as KnownMessageEnvelope))
+        return decodeServerMessage(envelope).pipe(
+          Effect.map((message) => message as KnownMessageEnvelope)
+        )
       }
 
       return Effect.fail(

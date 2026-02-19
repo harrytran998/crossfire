@@ -28,12 +28,18 @@ export type ClientMessage =
       }
     }
   | { readonly type: 'leave_room'; readonly payload: { readonly roomId: string } }
-  | { readonly type: 'set_ready'; readonly payload: { readonly roomId: string; readonly ready: boolean } }
+  | {
+      readonly type: 'set_ready'
+      readonly payload: { readonly roomId: string; readonly ready: boolean }
+    }
   | { readonly type: 'heartbeat'; readonly payload: Record<string, never> }
 
 export type ServerMessage =
   | { readonly type: 'welcome'; readonly payload: { readonly connectionId: string } }
-  | { readonly type: 'error'; readonly payload: { readonly code: string; readonly message: string } }
+  | {
+      readonly type: 'error'
+      readonly payload: { readonly code: string; readonly message: string }
+    }
   | {
       readonly type: 'room_state'
       readonly payload: {
@@ -41,8 +47,14 @@ export type ServerMessage =
         readonly players: ReadonlyArray<{ readonly id: string; readonly ready: boolean }>
       }
     }
-  | { readonly type: 'player_joined'; readonly payload: { readonly playerId: string; readonly roomId: string } }
-  | { readonly type: 'player_left'; readonly payload: { readonly playerId: string; readonly roomId: string } }
+  | {
+      readonly type: 'player_joined'
+      readonly payload: { readonly playerId: string; readonly roomId: string }
+    }
+  | {
+      readonly type: 'player_left'
+      readonly payload: { readonly playerId: string; readonly roomId: string }
+    }
 
 export const CLIENT_MESSAGE_TYPES = [
   'join_lobby',

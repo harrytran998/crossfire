@@ -76,10 +76,10 @@ export const RoomRepositoryLive = Layer.effect(
         }
 
         const roomKey = `${ROOM_KEY_PREFIX}${id}`
-        yield* redis.set(roomKey, serializeRoom(room), DEFAULT_ROOM_TTL).pipe(
-          Effect.catchAll(err => Effect.fail(mapRedisError(err)))
-        )
-        
+        yield* redis
+          .set(roomKey, serializeRoom(room), DEFAULT_ROOM_TTL)
+          .pipe(Effect.catchAll((err) => Effect.fail(mapRedisError(err))))
+
         yield* Effect.tryPromise({
           try: () => redis.client.sadd(ACTIVE_ROOMS_KEY, id),
           catch: () => new RoomNotFoundError({ roomId: id }),
@@ -91,16 +91,16 @@ export const RoomRepositoryLive = Layer.effect(
     const findById = (roomId: string): Effect.Effect<Room | null, RoomError> =>
       Effect.gen(function* () {
         const roomKey = `${ROOM_KEY_PREFIX}${roomId}`
-        const roomData = yield* redis.get(roomKey).pipe(
-          Effect.catchAll(err => Effect.fail(mapRedisError(err)))
-        )
+        const roomData = yield* redis
+          .get(roomKey)
+          .pipe(Effect.catchAll((err) => Effect.fail(mapRedisError(err))))
 
         if (!roomData) return null
 
         const playersKey = `${ROOM_PLAYERS_PREFIX}${roomId}`
-        const playersData = yield* redis.hgetall(playersKey).pipe(
-          Effect.catchAll(err => Effect.fail(mapRedisError(err)))
-        )
+        const playersData = yield* redis
+          .hgetall(playersKey)
+          .pipe(Effect.catchAll((err) => Effect.fail(mapRedisError(err))))
         const players = Object.values(playersData).map(deserializePlayer)
 
         return deserializeRoom(roomData, players)
@@ -111,17 +111,17 @@ export const RoomRepositoryLive = Layer.effect(
         const room = yield* findById(roomId)
         if (!room) return yield* new RoomNotFoundError({ roomId })
 
-        if (room.players.some(p => p.id === player.id)) {
+        if (room.players.some((p) => p.id === player.id)) {
           return yield* new PlayerAlreadyInRoomError({ roomId, playerId: player.id })
         }
 
         const playersKey = `${ROOM_PLAYERS_PREFIX}${roomId}`
-        yield* redis.hset(playersKey, player.id, serializePlayer(player)).pipe(
-          Effect.catchAll(err => Effect.fail(mapRedisError(err)))
-        )
-        yield* redis.expire(playersKey, DEFAULT_ROOM_TTL).pipe(
-          Effect.catchAll(err => Effect.fail(mapRedisError(err)))
-        )
+        yield* redis
+          .hset(playersKey, player.id, serializePlayer(player))
+          .pipe(Effect.catchAll((err) => Effect.fail(mapRedisError(err))))
+        yield* redis
+          .expire(playersKey, DEFAULT_ROOM_TTL)
+          .pipe(Effect.catchAll((err) => Effect.fail(mapRedisError(err))))
 
         const updatedRoom = yield* findById(roomId)
         if (!updatedRoom) return yield* new RoomNotFoundError({ roomId })
@@ -160,14 +160,14 @@ export const RoomRepositoryLive = Layer.effect(
         const room = yield* findById(roomId)
         if (!room) return yield* new RoomNotFoundError({ roomId })
 
-        const player = room.players.find(p => p.id === playerId)
+        const player = room.players.find((p) => p.id === playerId)
         if (!player) return yield* new RoomNotFoundError({ roomId })
 
         const updatedPlayer = { ...player, ready }
         const playersKey = `${ROOM_PLAYERS_PREFIX}${roomId}`
-        yield* redis.hset(playersKey, playerId, serializePlayer(updatedPlayer)).pipe(
-          Effect.catchAll(err => Effect.fail(mapRedisError(err)))
-        )
+        yield* redis
+          .hset(playersKey, playerId, serializePlayer(updatedPlayer))
+          .pipe(Effect.catchAll((err) => Effect.fail(mapRedisError(err))))
 
         const result = yield* findById(roomId)
         if (!result) return yield* new RoomNotFoundError({ roomId })
@@ -181,9 +181,9 @@ export const RoomRepositoryLive = Layer.effect(
 
         const updatedRoom = { ...room, status }
         const roomKey = `${ROOM_KEY_PREFIX}${roomId}`
-        yield* redis.set(roomKey, serializeRoom(updatedRoom), DEFAULT_ROOM_TTL).pipe(
-          Effect.catchAll(err => Effect.fail(mapRedisError(err)))
-        )
+        yield* redis
+          .set(roomKey, serializeRoom(updatedRoom), DEFAULT_ROOM_TTL)
+          .pipe(Effect.catchAll((err) => Effect.fail(mapRedisError(err))))
 
         return updatedRoom
       })
@@ -192,13 +192,9 @@ export const RoomRepositoryLive = Layer.effect(
       Effect.gen(function* () {
         const roomKey = `${ROOM_KEY_PREFIX}${roomId}`
         const playersKey = `${ROOM_PLAYERS_PREFIX}${roomId}`
-        
-        yield* redis.del(roomKey).pipe(
-          Effect.catchAll(err => Effect.fail(mapRedisError(err)))
-        )
-        yield* redis.del(playersKey).pipe(
-          Effect.catchAll(err => Effect.fail(mapRedisError(err)))
-        )
+
+        yield* redis.del(roomKey).pipe(Effect.catchAll((err) => Effect.fail(mapRedisError(err))))
+        yield* redis.del(playersKey).pipe(Effect.catchAll((err) => Effect.fail(mapRedisError(err))))
         yield* Effect.tryPromise({
           try: () => redis.client.srem(ACTIVE_ROOMS_KEY, roomId),
           catch: () => new RoomNotFoundError({ roomId }),
@@ -213,7 +209,7 @@ export const RoomRepositoryLive = Layer.effect(
         })
 
         const rooms = yield* Effect.all(
-          roomIds.map(id => findById(id)),
+          roomIds.map((id) => findById(id)),
           { concurrency: 5 }
         )
 

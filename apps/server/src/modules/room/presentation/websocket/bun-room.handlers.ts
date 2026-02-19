@@ -50,7 +50,7 @@ export const createRoomHandler = (
       isPrivate: payload.isPrivate,
       password: payload.password,
     })
-    
+
     const state = yield* service.getRoomState(room.id)
     return { type: 'room_state', payload: state! }
   })
@@ -67,7 +67,7 @@ export const joinRoomHandler = (
       loadoutId: payload.loadoutId,
       password: payload.password,
     })
-    
+
     const state = yield* service.getRoomState(payload.roomId)
     return { type: 'room_state', payload: state! }
   })
@@ -75,49 +75,61 @@ export const joinRoomHandler = (
 export const leaveRoomHandler = (
   playerId: string,
   payload: LeaveRoomPayload
-): Effect.Effect<{ type: string; payload: { roomId: string; playerId: string } }, RoomError, RoomServiceContext> =>
+): Effect.Effect<
+  { type: string; payload: { roomId: string; playerId: string } },
+  RoomError,
+  RoomServiceContext
+> =>
   Effect.gen(function* () {
     const service = yield* RoomServiceContext
     yield* service.leaveRoom(payload.roomId, playerId)
-    
-    return { 
-      type: 'player_left', 
-      payload: { roomId: payload.roomId, playerId } 
+
+    return {
+      type: 'player_left',
+      payload: { roomId: payload.roomId, playerId },
     }
   })
 
 export const setReadyHandler = (
   playerId: string,
   payload: SetReadyPayload
-): Effect.Effect<{ type: string; payload: { roomId: string; playerId: string; ready: boolean } }, RoomError, RoomServiceContext> =>
+): Effect.Effect<
+  { type: string; payload: { roomId: string; playerId: string; ready: boolean } },
+  RoomError,
+  RoomServiceContext
+> =>
   Effect.gen(function* () {
     const service = yield* RoomServiceContext
     yield* service.setReady(payload.roomId, playerId, payload.ready)
-    
-    return { 
-      type: 'player_ready', 
-      payload: { 
-        roomId: payload.roomId, 
-        playerId, 
-        ready: payload.ready 
-      } 
+
+    return {
+      type: 'player_ready',
+      payload: {
+        roomId: payload.roomId,
+        playerId,
+        ready: payload.ready,
+      },
     }
   })
 
 export const kickPlayerHandler = (
   hostId: string,
   payload: KickPlayerPayload
-): Effect.Effect<{ type: string; payload: { roomId: string; playerId: string } }, RoomError, RoomServiceContext> =>
+): Effect.Effect<
+  { type: string; payload: { roomId: string; playerId: string } },
+  RoomError,
+  RoomServiceContext
+> =>
   Effect.gen(function* () {
     const service = yield* RoomServiceContext
     yield* service.kickPlayer(payload.roomId, hostId, payload.playerId)
-    
-    return { 
-      type: 'player_left', 
-      payload: { 
-        roomId: payload.roomId, 
-        playerId: payload.playerId 
-      } 
+
+    return {
+      type: 'player_left',
+      payload: {
+        roomId: payload.roomId,
+        playerId: payload.playerId,
+      },
     }
   })
 

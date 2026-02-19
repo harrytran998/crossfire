@@ -56,7 +56,11 @@ export const authenticateWebSocketUpgrade = async (
   } catch (error) {
     const tag = getTaggedErrorName(error)
 
-    if (tag === 'UnauthorizedError' || tag === 'InvalidCredentialsError' || tag === 'UserBannedError') {
+    if (
+      tag === 'UnauthorizedError' ||
+      tag === 'InvalidCredentialsError' ||
+      tag === 'UserBannedError'
+    ) {
       return {
         ok: false,
         response: errorResponse(HTTP_STATUS.FORBIDDEN, 'Forbidden'),

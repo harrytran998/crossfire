@@ -56,7 +56,9 @@ export const ConnectionRegistryServiceLive = Layer.effect(
         connections.delete(connectionId)
       })
 
-    const getConnection = (connectionId: string): Effect.Effect<RegisteredWebSocketConnection | null> =>
+    const getConnection = (
+      connectionId: string
+    ): Effect.Effect<RegisteredWebSocketConnection | null> =>
       Effect.sync(() => {
         const entry = connections.get(connectionId)
         if (!entry) {

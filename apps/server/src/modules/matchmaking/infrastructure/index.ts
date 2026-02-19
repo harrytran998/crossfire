@@ -1,1 +1,4 @@
-export { MatchmakingRepositoryImpl, MatchmakingRepositoryLive } from './repositories/matchmaking.repository.impl'
+export {
+  MatchmakingRepositoryImpl,
+  MatchmakingRepositoryLive,
+} from './repositories/matchmaking.repository.impl'

@@ -1,9 +1,5 @@
 import { Effect } from 'effect'
-import {
-  type ClientMessageEnvelope,
-  type MessageEnvelope,
-  ProtocolError,
-} from './message-envelope'
+import { type ClientMessageEnvelope, type MessageEnvelope, ProtocolError } from './message-envelope'
 import { decodeClientMessage } from './message-schemas'
 
 export type MessageHandler<TMessage extends ClientMessageEnvelope = ClientMessageEnvelope> = (

@@ -58,7 +58,7 @@ export const mapRoomToState = (room: Room): RoomState => ({
   hostId: room.hostId,
   mapId: room.mapId,
   status: room.status,
-  players: room.players.map(p => ({ id: p.id, ready: p.ready })),
+  players: room.players.map((p) => ({ id: p.id, ready: p.ready })),
   maxPlayers: room.maxPlayers,
   isPrivate: room.isPrivate,
 })

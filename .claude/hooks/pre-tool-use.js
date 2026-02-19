@@ -44,9 +44,9 @@ function detectSecrets(toolContext) {
   if (commandStr.includes('git commit') && !commandStr.includes('--allow-empty')) {
     try {
       // This would require additional file system access in real implementation
-      const stagedFilesCheck = `git diff --cached`
+      const _stagedFilesCheck = `git diff --cached`
       // Pattern matching would happen on actual file contents
-    } catch (err) {
+    } catch (_err) {
       // Silently continue if unable to check
     }
   }

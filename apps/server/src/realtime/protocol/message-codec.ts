@@ -3,9 +3,7 @@ import { pack, unpack } from 'msgpackr'
 import { type MessageEnvelope, ProtocolError } from './message-envelope'
 import { validateEnvelope } from './message-schemas'
 
-export const encodeMessage = (
-  message: MessageEnvelope
-): Effect.Effect<Uint8Array, ProtocolError> =>
+export const encodeMessage = (message: MessageEnvelope): Effect.Effect<Uint8Array, ProtocolError> =>
   validateEnvelope(message).pipe(
     Effect.flatMap((validated) =>
       Effect.try({

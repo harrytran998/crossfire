@@ -1,6 +1,12 @@
 import { Effect, Context, Layer } from 'effect'
 import { RoomRepositoryImpl } from '../../infrastructure/repositories/room.repository.impl'
-import type { Room, RoomPlayer, CreateRoomInput, RoomState, JoinRoomInput } from '../../domain/entities/room.entity'
+import type {
+  Room,
+  RoomPlayer,
+  CreateRoomInput,
+  RoomState,
+  JoinRoomInput,
+} from '../../domain/entities/room.entity'
 import {
   RoomNotFoundError,
   RoomFullError,
@@ -16,17 +22,22 @@ export interface RoomService {
   readonly createRoom: (input: CreateRoomInput) => Effect.Effect<Room, RoomError>
   readonly joinRoom: (input: JoinRoomInput) => Effect.Effect<Room, RoomError>
   readonly leaveRoom: (roomId: string, playerId: string) => Effect.Effect<Room, RoomError>
-  readonly setReady: (roomId: string, playerId: string, ready: boolean) => Effect.Effect<Room, RoomError>
+  readonly setReady: (
+    roomId: string,
+    playerId: string,
+    ready: boolean
+  ) => Effect.Effect<Room, RoomError>
   readonly startGame: (roomId: string, playerId: string) => Effect.Effect<Room, RoomError>
-  readonly kickPlayer: (roomId: string, hostId: string, playerId: string) => Effect.Effect<Room, RoomError>
+  readonly kickPlayer: (
+    roomId: string,
+    hostId: string,
+    playerId: string
+  ) => Effect.Effect<Room, RoomError>
   readonly getRoomState: (roomId: string) => Effect.Effect<RoomState | null, RoomError>
   readonly getActiveRooms: () => Effect.Effect<RoomState[], RoomError>
 }
 
-export class RoomServiceTag extends Context.Tag('RoomService')<
-  RoomServiceTag,
-  RoomService
->() {}
+export class RoomServiceTag extends Context.Tag('RoomService')<RoomServiceTag, RoomService>() {}
 
 export const RoomServiceLive = Layer.effect(
   RoomServiceTag,
@@ -46,10 +57,10 @@ export const RoomServiceLive = Layer.effect(
         }
 
         if (room.players.length >= room.maxPlayers) {
-          return yield* new RoomFullError({ 
-            roomId: input.roomId, 
-            currentPlayers: room.players.length, 
-            maxPlayers: room.maxPlayers 
+          return yield* new RoomFullError({
+            roomId: input.roomId,
+            currentPlayers: room.players.length,
+            maxPlayers: room.maxPlayers,
           })
         }
 
@@ -79,7 +90,11 @@ export const RoomServiceLive = Layer.effect(
         return yield* repository.removePlayer(roomId, playerId)
       })
 
-    const setReady = (roomId: string, playerId: string, ready: boolean): Effect.Effect<Room, RoomError> =>
+    const setReady = (
+      roomId: string,
+      playerId: string,
+      ready: boolean
+    ): Effect.Effect<Room, RoomError> =>
       Effect.gen(function* () {
         const room = yield* repository.findById(roomId)
         if (!room) return yield* new RoomNotFoundError({ roomId })
@@ -112,7 +127,11 @@ export const RoomServiceLive = Layer.effect(
         return yield* repository.updateStatus(roomId, 'starting')
       })
 
-    const kickPlayer = (roomId: string, hostId: string, playerId: string): Effect.Effect<Room, RoomError> =>
+    const kickPlayer = (
+      roomId: string,
+      hostId: string,
+      playerId: string
+    ): Effect.Effect<Room, RoomError> =>
       Effect.gen(function* () {
         const room = yield* repository.findById(roomId)
         if (!room) return yield* new RoomNotFoundError({ roomId })
