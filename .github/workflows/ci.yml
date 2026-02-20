@@ -128,11 +128,31 @@ jobs:
           sudo mv migrate /usr/local/bin/migrate
           sudo chmod +x /usr/local/bin/migrate
 
+      - name: Wait for database to be ready
+        run: |
+          for i in {1..30}; do
+            if pg_isready -h localhost -p 5432 -U postgres; then
+              echo "Database is ready!"
+              exit 0
+            fi
+            echo "Waiting for database... attempt $i"
+            sleep 2
+          done
+          echo "Database failed to start"
+          exit 1
+
       - name: Run database migrations
         run: migrate -database "$DATABASE_URL?sslmode=disable" -path packages/database/migrations up
 
       - name: Run unit tests
         run: bun test apps/server/tests/unit/
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          REDIS_URL: ${{ env.REDIS_URL }}
+          AUTH_SECRET: ${{ env.AUTH_SECRET }}
+          JWT_SECRET: ${{ env.JWT_SECRET }}
+          JWT_EXPIRES_IN: ${{ env.JWT_EXPIRES_IN }}
+          NODE_ENV: ${{ env.NODE_ENV }}
 
   build:
     name: Build
