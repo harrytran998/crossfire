@@ -16,6 +16,7 @@ import {
   OutboxDispatcherServiceLive,
 } from './services/outbox-dispatcher.service'
 import { OutboxServiceLive } from './services/outbox.service'
+import { RedisServiceLive } from './services/redis.service'
 import { handleTaggedError } from './http/response'
 import {
   applySecurityHeaders,
@@ -33,6 +34,13 @@ import { loadoutRoutes } from './modules/loadout'
 import { matchRoutes } from './modules/match'
 import { leaderboardRoutes } from './modules/leaderboard'
 import { friendsRoutes } from './modules/friends'
+import { achievementRoutes } from './modules/achievement'
+import { AchievementServiceLive } from './modules/achievement'
+import { matchmakingRoutes } from './modules/matchmaking'
+import { MatchmakingServiceLive, MatchmakingRepositoryLive } from './modules/matchmaking'
+import { telemetryRoutes } from './modules/telemetry'
+import { TelemetryServiceLive } from './modules/telemetry'
+import { adminRoutes } from './modules/admin'
 import {
   type WebSocketConnectionContext,
   authenticateWebSocketUpgrade,
@@ -42,12 +50,24 @@ import {
   HeartbeatServiceLive,
 } from './realtime'
 
-const BaseLayer = Layer.mergeAll(ConfigLayer, DatabaseServiceLive)
-const RealtimeLayer = Layer.provideMerge(HeartbeatServiceLive, ConnectionRegistryServiceLive)
+// Infrastructure layers (no dependencies)
+const InfraLayer = Layer.mergeAll(ConfigLayer, DatabaseServiceLive)
 
+// Redis depends on Config
+const RedisLayer = Layer.provide(RedisServiceLive, ConfigLayer)
+
+// Base includes infra + redis
+const BaseLayer = Layer.mergeAll(InfraLayer, RedisLayer)
+
+const RealtimeServicesLayer = Layer.provide(
+  Layer.merge(HeartbeatServiceLive, ConnectionRegistryServiceLive),
+  ConfigLayer
+)
+
+// Service layers with dependencies
 const AppLayer = Layer.mergeAll(
   Layer.provide(AuthServiceLive, BaseLayer),
-  Layer.provide(AuthThrottleServiceLive, ConfigLayer),
+  Layer.provide(AuthThrottleServiceLive, BaseLayer),
   Layer.provide(PlayerServiceLive, BaseLayer),
   Layer.provide(StaticDataServiceLive, BaseLayer),
   Layer.provide(InventoryServiceLive, BaseLayer),
@@ -55,7 +75,10 @@ const AppLayer = Layer.mergeAll(
   Layer.provide(MatchServiceLive, BaseLayer),
   Layer.provide(LeaderboardServiceLive, BaseLayer),
   Layer.provide(FriendsServiceLive, BaseLayer),
-  Layer.provide(RealtimeLayer, ConfigLayer),
+  Layer.provide(AchievementServiceLive, BaseLayer),
+  Layer.provide(MatchmakingServiceLive, Layer.provide(MatchmakingRepositoryLive, BaseLayer)),
+  Layer.provide(TelemetryServiceLive, BaseLayer),
+  RealtimeServicesLayer,
   Layer.provide(OutboxServiceLive, BaseLayer),
   Layer.provide(OutboxDispatcherServiceLive, Layer.provide(OutboxServiceLive, BaseLayer))
 )
@@ -92,6 +115,10 @@ router.addMany(loadoutRoutes)
 router.addMany(matchRoutes)
 router.addMany(leaderboardRoutes)
 router.addMany(friendsRoutes)
+router.addMany(achievementRoutes)
+router.addMany(matchmakingRoutes)
+router.addMany(telemetryRoutes)
+router.addMany(adminRoutes)
 
 const dispatchRoute = async (req: Request, path: string): Promise<Response> => {
   const match = router.match(req.method, path)
