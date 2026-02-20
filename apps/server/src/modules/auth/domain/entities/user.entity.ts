@@ -3,6 +3,8 @@ import type { Users, Sessions } from '@crossfire/database'
 export type UserRow = Users
 export type SessionRow = Sessions
 
+export type UserRole = 'player' | 'moderator' | 'admin'
+
 export interface User {
   readonly id: string
   readonly username: string
@@ -13,6 +15,7 @@ export interface User {
   readonly isBanned: boolean
   readonly bannedUntil: Date | null
   readonly banReason: string | null
+  readonly role: UserRole
   readonly createdAt: Date
   readonly updatedAt: Date
   readonly lastLoginAt: Date | null
@@ -57,6 +60,7 @@ export const mapUserRowToEntity = (row: UserRow): User => {
     isBanned: Boolean(safeRow.is_banned ?? false),
     bannedUntil: safeRow.banned_until as Date | null,
     banReason: safeRow.ban_reason as string | null,
+    role: (safeRow.role as UserRole) ?? 'player',
     createdAt: safeRow.created_at as Date,
     updatedAt: safeRow.updated_at as Date,
     lastLoginAt: safeRow.last_login_at as Date | null,
