@@ -70,7 +70,7 @@ export const RoomRepositoryLive = Layer.effect(
           configId: input.configId,
           status: 'waiting',
           players: [],
-          maxPlayers: input.maxPlayers ?? 10,
+          maxPlayers: input.maxPlayers ?? gameConfig.defaultMaxPlayersPerRoom,
           isPrivate: input.isPrivate ?? false,
           password: input.password ?? null,
           createdAt: now,
