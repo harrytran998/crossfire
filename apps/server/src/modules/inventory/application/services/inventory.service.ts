@@ -19,8 +19,8 @@ export interface InventoryService {
     userId: string,
     input: {
       readonly weaponId: string
-      readonly isPermanent?: boolean
-      readonly expiresAt?: Date | null
+      readonly isPermanent?: boolean | undefined
+      readonly expiresAt?: Date | null | undefined
     }
   ) => Effect.Effect<InventoryItem, PlayerNotFoundError | InventoryWeaponNotFoundError>
 }
@@ -54,8 +54,8 @@ export const InventoryServiceLive = Layer.effect(
       userId: string,
       input: {
         readonly weaponId: string
-        readonly isPermanent?: boolean
-        readonly expiresAt?: Date | null
+        readonly isPermanent?: boolean | undefined
+        readonly expiresAt?: Date | null | undefined
       }
     ): Effect.Effect<InventoryItem, PlayerNotFoundError | InventoryWeaponNotFoundError> =>
       Effect.gen(function* () {

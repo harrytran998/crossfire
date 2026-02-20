@@ -12,7 +12,7 @@ const CACHE_KEY_PREFIX = 'leaderboard:'
 
 const buildCacheKey = (
   playerId: string,
-  filters: { metricKey?: string; period?: string; mode?: string },
+  filters: { metricKey?: string | undefined; period?: string | undefined; mode?: string | undefined },
   page: number,
   pageSize: number,
   includePlayerRank: boolean

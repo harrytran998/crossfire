@@ -24,29 +24,29 @@ export interface CreateLoadoutInput {
   readonly playerId: string
   readonly name: string
   readonly slot: number
-  readonly isDefault?: boolean
-  readonly primaryWeaponId?: string | null
-  readonly secondaryWeaponId?: string | null
-  readonly meleeWeaponId?: string | null
-  readonly fragGrenades?: number
-  readonly flashGrenades?: number
-  readonly smokeGrenades?: number
-  readonly primaryAttachments?: readonly string[]
-  readonly secondaryAttachments?: readonly string[]
+  readonly isDefault?: boolean | undefined
+  readonly primaryWeaponId?: string | null | undefined
+  readonly secondaryWeaponId?: string | null | undefined
+  readonly meleeWeaponId?: string | null | undefined
+  readonly fragGrenades?: number | undefined
+  readonly flashGrenades?: number | undefined
+  readonly smokeGrenades?: number | undefined
+  readonly primaryAttachments?: readonly string[] | undefined
+  readonly secondaryAttachments?: readonly string[] | undefined
 }
 
 export interface UpdateLoadoutInput {
-  readonly name?: string
-  readonly slot?: number
-  readonly isDefault?: boolean
-  readonly primaryWeaponId?: string | null
-  readonly secondaryWeaponId?: string | null
-  readonly meleeWeaponId?: string | null
-  readonly fragGrenades?: number
-  readonly flashGrenades?: number
-  readonly smokeGrenades?: number
-  readonly primaryAttachments?: readonly string[]
-  readonly secondaryAttachments?: readonly string[]
+  readonly name?: string | undefined
+  readonly slot?: number | undefined
+  readonly isDefault?: boolean | undefined
+  readonly primaryWeaponId?: string | null | undefined
+  readonly secondaryWeaponId?: string | null | undefined
+  readonly meleeWeaponId?: string | null | undefined
+  readonly fragGrenades?: number | undefined
+  readonly flashGrenades?: number | undefined
+  readonly smokeGrenades?: number | undefined
+  readonly primaryAttachments?: readonly string[] | undefined
+  readonly secondaryAttachments?: readonly string[] | undefined
 }
 
 export const mapPlayerLoadoutRowToEntity = (row: PlayerLoadoutRow): PlayerLoadout => ({

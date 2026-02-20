@@ -3,9 +3,9 @@ import type { Effect } from 'effect'
 import type { LeaderboardResult } from '../entities/leaderboard.entity'
 
 export interface LeaderboardFilters {
-  readonly metricKey?: string
-  readonly period?: LeaderboardPeriod
-  readonly mode?: GameMode
+  readonly metricKey?: string | undefined
+  readonly period?: LeaderboardPeriod | undefined
+  readonly mode?: GameMode | undefined
 }
 
 export interface LeaderboardRepository {

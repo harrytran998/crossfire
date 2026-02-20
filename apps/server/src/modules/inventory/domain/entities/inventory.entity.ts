@@ -18,8 +18,8 @@ export interface InventoryItem {
 export interface AcquireInventoryInput {
   readonly playerId: string
   readonly weaponId: string
-  readonly isPermanent?: boolean
-  readonly expiresAt?: Date | null
+  readonly isPermanent?: boolean | undefined
+  readonly expiresAt?: Date | null | undefined
 }
 
 export type InventoryJoinedRow = PlayerInventoryRow & {

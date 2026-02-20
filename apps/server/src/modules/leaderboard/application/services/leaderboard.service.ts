@@ -15,9 +15,9 @@ export interface LeaderboardService {
   readonly getForUser: (
     userId: string,
     options: {
-      readonly metricKey?: string
-      readonly period?: LeaderboardPeriod
-      readonly mode?: GameMode
+      readonly metricKey?: string | undefined
+      readonly period?: LeaderboardPeriod | undefined
+      readonly mode?: GameMode | undefined
       readonly page: number
       readonly pageSize: number
       readonly includeCurrentPlayerRank: boolean
