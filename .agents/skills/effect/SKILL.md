@@ -234,3 +234,82 @@ const cached = (effect: Effect.Effect<string, never, never>) =>
     )
   })
 ```
+
+### Layer Composition with `Layer.provideMerge`
+
+When building an application with multiple service layers that have inter-dependencies, `Layer.mergeAll` alone is **not sufficient** — it creates all layers in parallel so layers within the same `mergeAll` cannot see each other's outputs.
+
+Use `Layer.provideMerge(consumer, provider)` (non-curried form) to chain tiers so each tier's outputs feed into the next tier's requirements.
+
+**Key rules:**
+- `Layer.provideMerge(consumer, provider)` — provider's outputs satisfy consumer's requirements, result outputs both
+- `Layer.mergeAll(A, B)` — only for layers that are truly independent (no dependency between A and B)
+- If layer B depends on layer A at construction time (via `yield*` inside `Layer.effect`), they **cannot** be in the same `mergeAll`
+
+**Correct pattern — tiered composition:**
+
+```typescript
+import { Layer } from 'effect'
+
+const ConfigLayer = Layer.mergeAll(
+  ServerConfig.Default,
+  DatabaseConfig.Default,
+  RedisConfig.Default,
+)
+
+const InfraLayer = Layer.provideMerge(
+  Layer.mergeAll(DatabaseServiceLive, RedisServiceLive),
+  ConfigLayer,
+)
+
+// HeartbeatServiceLive depends on ConnectionRegistryService at construction time,
+// so they cannot be in the same mergeAll — split into two steps
+const ConnectionLayer = Layer.provideMerge(
+  ConnectionRegistryServiceLive,
+  InfraLayer,
+)
+
+const RealtimeLayer = Layer.provideMerge(
+  HeartbeatServiceLive,
+  ConnectionLayer,
+)
+
+const DomainLayer = Layer.provideMerge(
+  Layer.mergeAll(
+    AuthServiceLive,
+    PlayerServiceLive,
+    // ... other independent domain services
+  ),
+  RealtimeLayer,
+)
+
+const AppLayer = Layer.provideMerge(
+  Layer.mergeAll(MatchmakingServiceLive, OutboxDispatcherServiceLive),
+  DomainLayer,
+)
+```
+
+**Wrong — flat mergeAll (runtime crash):**
+
+```typescript
+// BROKEN: layers cannot resolve inter-dependencies
+const AppLayer = Layer.mergeAll(
+  ConfigLayer,
+  DatabaseServiceLive,    // needs DatabaseConfig — not available
+  RedisServiceLive,       // needs RedisConfig — not available
+  HeartbeatServiceLive,   // needs ConnectionRegistryService — not available
+  ConnectionRegistryServiceLive,
+)
+```
+
+**Wrong — `.pipe(Layer.provideMerge(...))` with accumulation (direction is reversed):**
+
+```typescript
+// BROKEN: in .pipe form, the argument PROVIDES FOR the receiver, not the other way around
+// This feeds InfraLayer's outputs into ConfigLayer's requirements (wrong direction)
+const AppLayer = ConfigLayer.pipe(
+  Layer.provideMerge(Layer.mergeAll(DatabaseServiceLive, RedisServiceLive)),
+)
+```
+
+**Note on transitive dependencies:** When a service layer internally bundles repo dependencies via `.pipe(Layer.provide(RepoLive))`, the repo's unsatisfied requirements (e.g., `DatabaseService`) bubble up as the service layer's own requirements. These are resolved by the outer `provideMerge` chain.

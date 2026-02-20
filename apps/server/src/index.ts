@@ -50,37 +50,43 @@ import {
   HeartbeatServiceLive,
 } from './realtime'
 
-// Infrastructure layers (no dependencies)
-const InfraLayer = Layer.mergeAll(ConfigLayer, DatabaseServiceLive)
-
-// Redis depends on Config
-const RedisLayer = Layer.provide(RedisServiceLive, ConfigLayer)
-
-// Base includes infra + redis
-const BaseLayer = Layer.mergeAll(InfraLayer, RedisLayer)
-
-const RealtimeServicesLayer = Layer.provide(
-  Layer.merge(HeartbeatServiceLive, ConnectionRegistryServiceLive),
-  ConfigLayer
+const InfraLayer = Layer.provideMerge(
+  Layer.mergeAll(DatabaseServiceLive, RedisServiceLive),
+  ConfigLayer,
 )
 
-// Service layers with dependencies
-const AppLayer = Layer.mergeAll(
-  Layer.provide(AuthServiceLive, BaseLayer),
-  Layer.provide(AuthThrottleServiceLive, BaseLayer),
-  Layer.provide(PlayerServiceLive, BaseLayer),
-  Layer.provide(StaticDataServiceLive, BaseLayer),
-  Layer.provide(InventoryServiceLive, BaseLayer),
-  Layer.provide(LoadoutServiceLive, BaseLayer),
-  Layer.provide(MatchServiceLive, BaseLayer),
-  Layer.provide(LeaderboardServiceLive, BaseLayer),
-  Layer.provide(FriendsServiceLive, BaseLayer),
-  Layer.provide(AchievementServiceLive, BaseLayer),
-  Layer.provide(MatchmakingServiceLive, Layer.provide(MatchmakingRepositoryLive, BaseLayer)),
-  Layer.provide(TelemetryServiceLive, BaseLayer),
-  RealtimeServicesLayer,
-  Layer.provide(OutboxServiceLive, BaseLayer),
-  Layer.provide(OutboxDispatcherServiceLive, Layer.provide(OutboxServiceLive, BaseLayer))
+const ConnectionLayer = Layer.provideMerge(
+  ConnectionRegistryServiceLive,
+  InfraLayer,
+)
+
+const RealtimeLayer = Layer.provideMerge(
+  HeartbeatServiceLive,
+  ConnectionLayer,
+)
+
+const DomainLayer = Layer.provideMerge(
+  Layer.mergeAll(
+    AuthServiceLive,
+    AuthThrottleServiceLive,
+    PlayerServiceLive,
+    StaticDataServiceLive,
+    InventoryServiceLive,
+    LoadoutServiceLive,
+    MatchServiceLive,
+    LeaderboardServiceLive,
+    FriendsServiceLive,
+    AchievementServiceLive,
+    TelemetryServiceLive,
+    OutboxServiceLive,
+    MatchmakingRepositoryLive,
+  ),
+  RealtimeLayer,
+)
+
+const AppLayer = Layer.provideMerge(
+  Layer.mergeAll(MatchmakingServiceLive, OutboxDispatcherServiceLive),
+  DomainLayer,
 )
 
 const runApp = <A, E, R>(effect: Effect.Effect<A, E, R>) =>
