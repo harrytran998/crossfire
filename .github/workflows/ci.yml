@@ -144,6 +144,11 @@ jobs:
       - name: Run database migrations
         run: migrate -database "$DATABASE_URL?sslmode=disable" -path packages/database/migrations up
 
+      - name: Seed database with test data
+        run: bun run packages/database/scripts/seed.ts
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
       - name: Run unit tests
         run: bun test apps/server/tests/unit/
         env:
