@@ -23,6 +23,7 @@
     "sourceMap": true,
     "strict": true,
     "strictNullChecks": true,
+    "noUncheckedIndexedAccess": true,
     "target": "ESNext",
     "verbatimModuleSyntax": true,
     "allowImportingTsExtensions": true,
