@@ -13,7 +13,9 @@ const MAX_DATE_RANGE_MS = 90 * 24 * 60 * 60 * 1000
 const validateDateRange = (start: Date, end: Date): Effect.Effect<void, ForbiddenError> => {
   const rangeMs = end.getTime() - start.getTime()
   if (rangeMs < 0) {
-    return Effect.fail(new ForbiddenError({ message: 'Invalid date range: start must be before end' }))
+    return Effect.fail(
+      new ForbiddenError({ message: 'Invalid date range: start must be before end' })
+    )
   }
   if (rangeMs > MAX_DATE_RANGE_MS) {
     return Effect.fail(new ForbiddenError({ message: `Date range too large. Maximum: 90 days` }))
@@ -25,13 +27,15 @@ const requireAdmin = (): Effect.Effect<void, ForbiddenError, CurrentAuth> =>
   Effect.gen(function* () {
     const { user } = yield* CurrentAuth
     if (user.role !== 'admin') {
-      return yield* Effect.fail(
-        new ForbiddenError({ message: 'Admin access required' })
-      )
+      return yield* Effect.fail(new ForbiddenError({ message: 'Admin access required' }))
     }
   })
 
-export const getAdminPlayerTelemetryHandler = (playerId: string, start: Date, end: Date): Effect.Effect<
+export const getAdminPlayerTelemetryHandler = (
+  playerId: string,
+  start: Date,
+  end: Date
+): Effect.Effect<
   { status: number; body: unknown },
   never,
   AdminTelemetryServiceContext | CurrentAuth
@@ -56,7 +60,9 @@ export const getAdminPlayerTelemetryHandler = (playerId: string, start: Date, en
     })
   )
 
-export const getAdminMatchEventsHandler = (matchId: string): Effect.Effect<
+export const getAdminMatchEventsHandler = (
+  matchId: string
+): Effect.Effect<
   { status: number; body: unknown },
   never,
   AdminTelemetryServiceContext | CurrentAuth
@@ -80,7 +86,11 @@ export const getAdminMatchEventsHandler = (matchId: string): Effect.Effect<
     })
   )
 
-export const getAdminServerMetricsHandler = (serverId: string, start: Date, end: Date): Effect.Effect<
+export const getAdminServerMetricsHandler = (
+  serverId: string,
+  start: Date,
+  end: Date
+): Effect.Effect<
   { status: number; body: unknown },
   never,
   AdminTelemetryServiceContext | CurrentAuth
@@ -105,7 +115,11 @@ export const getAdminServerMetricsHandler = (serverId: string, start: Date, end:
     })
   )
 
-export const getAdminAggregatedStatsHandler = (playerId: string, start: Date, end: Date): Effect.Effect<
+export const getAdminAggregatedStatsHandler = (
+  playerId: string,
+  start: Date,
+  end: Date
+): Effect.Effect<
   { status: number; body: unknown },
   never,
   AdminTelemetryServiceContext | CurrentAuth

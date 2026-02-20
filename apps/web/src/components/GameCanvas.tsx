@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls, Box } from '@react-three/drei'
+import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 
 function GameScene() {
@@ -18,7 +18,7 @@ function GameScene() {
     <>
       <ambientLight intensity={0.5} />
       <pointLight position={[10, 10, 10]} />
-      
+
       <mesh
         ref={meshRef}
         onPointerOver={() => setHovered(true)}
@@ -28,7 +28,7 @@ function GameScene() {
         <boxGeometry args={[1, 1, 1]} />
         <meshStandardMaterial color={hovered ? 'hotpink' : 'orange'} />
       </mesh>
-      
+
       <OrbitControls />
     </>
   )

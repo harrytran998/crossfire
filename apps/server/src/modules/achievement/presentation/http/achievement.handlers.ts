@@ -16,14 +16,18 @@ export const getAllAchievementsHandler = (): Effect.Effect<
   Effect.gen(function* () {
     const service = yield* AchievementServiceContext
     const achievements = yield* service.getAllAchievements()
-    
+
     return {
       status: 200,
       body: { achievements },
     }
-  }).pipe(Effect.catchAll(() => Effect.succeed({ status: 500, body: { error: 'Internal server error' } })))
+  }).pipe(
+    Effect.catchAll(() => Effect.succeed({ status: 500, body: { error: 'Internal server error' } }))
+  )
 
-export const getPlayerAchievementsHandler = (playerId: string): Effect.Effect<
+export const getPlayerAchievementsHandler = (
+  playerId: string
+): Effect.Effect<
   { status: number; body: unknown },
   never,
   AchievementServiceContext | CurrentAuth
@@ -54,7 +58,9 @@ export const getPlayerAchievementsHandler = (playerId: string): Effect.Effect<
     })
   )
 
-export const getAchievementProgressHandler = (playerId: string): Effect.Effect<
+export const getAchievementProgressHandler = (
+  playerId: string
+): Effect.Effect<
   { status: number; body: unknown },
   never,
   AchievementServiceContext | CurrentAuth
@@ -71,7 +77,7 @@ export const getAchievementProgressHandler = (playerId: string): Effect.Effect<
     const service = yield* AchievementServiceContext
     const achievements = yield* service.getPlayerAchievements(playerId)
 
-    const progress = achievements.map(pa => ({
+    const progress = achievements.map((pa) => ({
       achievementId: pa.achievementId,
       name: pa.achievement.name,
       progress: pa.progress,

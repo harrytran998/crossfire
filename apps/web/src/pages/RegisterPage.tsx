@@ -106,9 +106,7 @@ export function RegisterPage() {
               required
               minLength={8}
             />
-            <p className="mt-1 text-xs text-gray-500">
-              Must be at least 8 characters
-            </p>
+            <p className="mt-1 text-xs text-gray-500">Must be at least 8 characters</p>
           </div>
 
           <button

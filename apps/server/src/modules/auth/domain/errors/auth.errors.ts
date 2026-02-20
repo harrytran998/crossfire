@@ -78,10 +78,7 @@ export class ForbiddenError extends Data.TaggedError('ForbiddenError')<{
   readonly message: string
 }> {
   [HttpServerRespondable.symbol]() {
-    return HttpServerResponse.json(
-      { error: this.message },
-      { status: HTTP_STATUS.FORBIDDEN }
-    )
+    return HttpServerResponse.json({ error: this.message }, { status: HTTP_STATUS.FORBIDDEN })
   }
 }
 

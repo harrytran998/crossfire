@@ -16,8 +16,9 @@ export const useWebSocketStore = create<WebSocketState>((set) => ({
   messages: [],
   setConnected: (connected) => set({ connected }),
   setError: (error) => set({ error }),
-  addMessage: (message) => set((state) => ({ 
-    messages: [...state.messages, message] 
-  })),
+  addMessage: (message) =>
+    set((state) => ({
+      messages: [...state.messages, message],
+    })),
   clearMessages: () => set({ messages: [] }),
 }))

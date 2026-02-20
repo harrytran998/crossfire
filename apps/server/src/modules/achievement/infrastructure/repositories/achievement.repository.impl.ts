@@ -1,10 +1,10 @@
 import { Context, Effect, Layer } from 'effect'
 import { DatabaseService } from '../../../../services/database.service'
 import type { AchievementRepository as AchievementRepositoryType } from '../../domain/repositories/achievement.repository'
-import type { Achievement, AchievementWithCriteria, PlayerAchievement, PlayerAchievementWithDetails } from '../../domain/entities/achievement.entity'
-import { AchievementNotFoundError } from '../../domain/errors/achievement.errors'
+import type { Achievement, PlayerAchievement } from '../../domain/entities/achievement.entity'
 
-export const AchievementRepository = Context.GenericTag<AchievementRepositoryType>('AchievementRepository')
+export const AchievementRepository =
+  Context.GenericTag<AchievementRepositoryType>('AchievementRepository')
 
 const achievementColumns = [
   'id',
@@ -30,12 +30,7 @@ const criteriaColumns = [
   'created_at',
 ] as const
 
-const playerAchievementColumns = [
-  'player_id',
-  'achievement_id',
-  'progress',
-  'unlocked_at',
-] as const
+const playerAchievementColumns = ['player_id', 'achievement_id', 'progress', 'unlocked_at'] as const
 
 const mapAchievementRow = (row: Record<string, unknown>): Achievement => ({
   id: String(row.id),
@@ -110,7 +105,7 @@ export const AchievementRepositoryLive = Layer.effect(
           .where('id', '=', id)
           .select(achievementColumns)
           .executeTakeFirst()
-        
+
         if (!achievement) return null
 
         const criteria = await db
@@ -138,11 +133,9 @@ export const AchievementRepositoryLive = Layer.effect(
           .select(criteriaColumns)
           .execute()
 
-        return achievements.map(ach => ({
+        return achievements.map((ach) => ({
           ...mapAchievementRow(ach),
-          criteria: allCriteria
-            .filter(c => c.achievement_id === ach.id)
-            .map(mapCriteriaRow),
+          criteria: allCriteria.filter((c) => c.achievement_id === ach.id).map(mapCriteriaRow),
         }))
       }).pipe(Effect.orDie)
 
@@ -164,13 +157,13 @@ export const AchievementRepositoryLive = Layer.effect(
           .select(criteriaColumns)
           .execute()
 
-        return playerAchs.map(pa => {
-          const ach = achievements.find(a => a.id === pa.achievement_id)
+        return playerAchs.map((pa) => {
+          const ach = achievements.find((a) => a.id === pa.achievement_id)
           return {
             ...mapPlayerAchievementRow(pa),
             achievement: ach ? mapAchievementRow(ach) : null!,
             criteria: allCriteria
-              .filter(c => c.achievement_id === pa.achievement_id)
+              .filter((c) => c.achievement_id === pa.achievement_id)
               .map(mapCriteriaRow),
           }
         })
@@ -187,7 +180,11 @@ export const AchievementRepositoryLive = Layer.effect(
         return row ? mapPlayerAchievementRow(row) : null
       }).pipe(Effect.orDie)
 
-    const createPlayerAchievement = (playerId: string, achievementId: string, progress?: Record<string, number>) =>
+    const createPlayerAchievement = (
+      playerId: string,
+      achievementId: string,
+      progress?: Record<string, number>
+    ) =>
       Effect.promise(async () => {
         const row = await db
           .insertInto('player_achievements')
@@ -201,7 +198,11 @@ export const AchievementRepositoryLive = Layer.effect(
         return mapPlayerAchievementRow(row)
       }).pipe(Effect.orDie)
 
-    const updatePlayerProgress = (playerId: string, achievementId: string, progress: Record<string, number>) =>
+    const updatePlayerProgress = (
+      playerId: string,
+      achievementId: string,
+      progress: Record<string, number>
+    ) =>
       Effect.promise(async () => {
         await db
           .updateTable('player_achievements')

@@ -665,16 +665,16 @@ apps/web/
 
 **Tech Stack:**
 
-| Category | Technology | Version |
-|----------|------------|---------|
-| Framework | React | 19.2.4 |
-| Build Tool | Vite | 7.3.1 |
-| Styling | Tailwind CSS | 3.4.0 |
-| 3D Engine | Three.js | 0.182.0 |
-| React 3D | React Three Fiber | 9.5.0 |
-| Physics | Rapier3D | 0.19.0 |
-| State | Zustand | 5.0.11 |
-| Routing | React Router | 7.0.0 |
+| Category   | Technology        | Version |
+| ---------- | ----------------- | ------- |
+| Framework  | React             | 19.2.4  |
+| Build Tool | Vite              | 7.3.1   |
+| Styling    | Tailwind CSS      | 3.4.0   |
+| 3D Engine  | Three.js          | 0.182.0 |
+| React 3D   | React Three Fiber | 9.5.0   |
+| Physics    | Rapier3D          | 0.19.0  |
+| State      | Zustand           | 5.0.11  |
+| Routing    | React Router      | 7.0.0   |
 
 **Verification:**
 

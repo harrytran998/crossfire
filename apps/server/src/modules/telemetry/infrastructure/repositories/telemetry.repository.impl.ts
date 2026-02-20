@@ -1,9 +1,15 @@
 import { Context, Effect, Layer } from 'effect'
 import { DatabaseService } from '../../../../services/database.service'
 import type { TelemetryRepository as TelemetryRepositoryType } from '../../domain/repositories/telemetry.repository'
-import type { MatchEvent, PlayerTelemetry, ServerMetrics, TelemetryTimeRange } from '../../domain/entities/telemetry.entity'
+import type {
+  MatchEvent,
+  PlayerTelemetry,
+  ServerMetrics,
+  TelemetryTimeRange,
+} from '../../domain/entities/telemetry.entity'
 
-export const TelemetryRepository = Context.GenericTag<TelemetryRepositoryType>('TelemetryRepository')
+export const TelemetryRepository =
+  Context.GenericTag<TelemetryRepositoryType>('TelemetryRepository')
 
 export const TelemetryRepositoryLive = Layer.effect(
   TelemetryRepository,
@@ -81,8 +87,8 @@ export const TelemetryRepositoryLive = Layer.effect(
           .orderBy('time', 'desc')
           .selectAll()
           .execute()
-        
-        return rows.map(row => ({
+
+        return rows.map((row) => ({
           time: new Date(row.time),
           matchId: String(row.match_id),
           eventType: String(row.event_type),
@@ -110,8 +116,8 @@ export const TelemetryRepositoryLive = Layer.effect(
           .orderBy('time', 'desc')
           .selectAll()
           .execute()
-        
-        return rows.map(row => ({
+
+        return rows.map((row) => ({
           time: new Date(row.time),
           playerId: String(row.player_id),
           matchId: String(row.match_id),
@@ -137,8 +143,8 @@ export const TelemetryRepositoryLive = Layer.effect(
           .orderBy('time', 'desc')
           .selectAll()
           .execute()
-        
-        return rows.map(row => ({
+
+        return rows.map((row) => ({
           time: new Date(row.time),
           serverId: String(row.server_id),
           cpuPercent: row.cpu_percent ? Number(row.cpu_percent) : undefined,
@@ -169,7 +175,7 @@ export const TelemetryRepositoryLive = Layer.effect(
             db.fn.count('match_id').as('matches_played'),
           ])
           .executeTakeFirst()
-        
+
         return {
           playerId,
           totalKills: Number(result?.total_kills || 0),

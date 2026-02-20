@@ -1,1 +1,4 @@
-export { TelemetryRepository, TelemetryRepositoryLive } from './repositories/telemetry.repository.impl'
+export {
+  TelemetryRepository,
+  TelemetryRepositoryLive,
+} from './repositories/telemetry.repository.impl'

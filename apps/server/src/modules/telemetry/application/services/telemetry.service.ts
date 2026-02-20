@@ -1,5 +1,11 @@
 import { Context, Effect, Layer } from 'effect'
-import type { MatchEvent, PlayerTelemetry, ServerMetrics, TelemetryTimeRange, PlayerStatsAggregation } from '../../domain/entities/telemetry.entity'
+import type {
+  MatchEvent,
+  PlayerTelemetry,
+  ServerMetrics,
+  TelemetryTimeRange,
+  PlayerStatsAggregation,
+} from '../../domain/entities/telemetry.entity'
 import { TelemetryError } from '../../domain/errors/telemetry.errors'
 import {
   TelemetryRepository,
@@ -11,9 +17,18 @@ export interface TelemetryService {
   readonly recordPlayerTelemetry: (data: PlayerTelemetry) => Effect.Effect<void, TelemetryError>
   readonly recordServerMetrics: (data: ServerMetrics) => Effect.Effect<void, TelemetryError>
   readonly getMatchEvents: (matchId: string) => Effect.Effect<MatchEvent[], TelemetryError>
-  readonly getPlayerTelemetry: (playerId: string, timeRange: TelemetryTimeRange) => Effect.Effect<PlayerTelemetry[], TelemetryError>
-  readonly getServerMetrics: (serverId: string, timeRange: TelemetryTimeRange) => Effect.Effect<ServerMetrics[], TelemetryError>
-  readonly getPlayerStats: (playerId: string, timeRange: TelemetryTimeRange) => Effect.Effect<PlayerStatsAggregation, TelemetryError>
+  readonly getPlayerTelemetry: (
+    playerId: string,
+    timeRange: TelemetryTimeRange
+  ) => Effect.Effect<PlayerTelemetry[], TelemetryError>
+  readonly getServerMetrics: (
+    serverId: string,
+    timeRange: TelemetryTimeRange
+  ) => Effect.Effect<ServerMetrics[], TelemetryError>
+  readonly getPlayerStats: (
+    playerId: string,
+    timeRange: TelemetryTimeRange
+  ) => Effect.Effect<PlayerStatsAggregation, TelemetryError>
 }
 
 export const TelemetryService = Context.GenericTag<TelemetryService>('TelemetryService')
@@ -23,17 +38,13 @@ export const TelemetryServiceLive = Layer.effect(
   Effect.gen(function* () {
     const repo = yield* TelemetryRepository
 
-    const recordMatchEvent = (event: MatchEvent) =>
-      repo.recordMatchEvent(event)
+    const recordMatchEvent = (event: MatchEvent) => repo.recordMatchEvent(event)
 
-    const recordPlayerTelemetry = (data: PlayerTelemetry) =>
-      repo.recordPlayerTelemetry(data)
+    const recordPlayerTelemetry = (data: PlayerTelemetry) => repo.recordPlayerTelemetry(data)
 
-    const recordServerMetrics = (data: ServerMetrics) =>
-      repo.recordServerMetrics(data)
+    const recordServerMetrics = (data: ServerMetrics) => repo.recordServerMetrics(data)
 
-    const getMatchEvents = (matchId: string) =>
-      repo.getMatchEvents(matchId)
+    const getMatchEvents = (matchId: string) => repo.getMatchEvents(matchId)
 
     const getPlayerTelemetry = (playerId: string, timeRange: TelemetryTimeRange) =>
       repo.getPlayerTelemetry(playerId, timeRange)

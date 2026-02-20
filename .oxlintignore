@@ -4,3 +4,5 @@ build
 .moon
 coverage
 *.min.js
+.agents
+.claude
