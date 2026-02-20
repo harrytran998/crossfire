@@ -1,4 +1,5 @@
 import { Effect, Context, Layer } from 'effect'
+import { GameConfig } from '@crossfire/shared'
 import { RedisService } from '../../../../services/redis.service'
 import { RedisError } from '../../../../errors'
 import type { RoomRepository } from '../../domain/repositories/room.repository'
@@ -12,7 +13,6 @@ import {
 const ROOM_KEY_PREFIX = 'room:'
 const ROOM_PLAYERS_PREFIX = 'room_players:'
 const ACTIVE_ROOMS_KEY = 'rooms:active'
-const DEFAULT_ROOM_TTL = 3600
 
 const mapRedisError = (_error: RedisError): RoomError =>
   new RoomNotFoundError({ roomId: 'unknown' })
@@ -56,6 +56,7 @@ export const RoomRepositoryLive = Layer.effect(
   RoomRepositoryImpl,
   Effect.gen(function* () {
     const redis = yield* RedisService
+    const gameConfig = yield* GameConfig
 
     const create = (input: CreateRoomInput): Effect.Effect<Room, RoomError> =>
       Effect.gen(function* () {
@@ -77,7 +78,7 @@ export const RoomRepositoryLive = Layer.effect(
 
         const roomKey = `${ROOM_KEY_PREFIX}${id}`
         yield* redis
-          .set(roomKey, serializeRoom(room), DEFAULT_ROOM_TTL)
+          .set(roomKey, serializeRoom(room), gameConfig.roomTtlSeconds)
           .pipe(Effect.catchAll((err) => Effect.fail(mapRedisError(err))))
 
         yield* Effect.tryPromise({
@@ -120,7 +121,7 @@ export const RoomRepositoryLive = Layer.effect(
           .hset(playersKey, player.id, serializePlayer(player))
           .pipe(Effect.catchAll((err) => Effect.fail(mapRedisError(err))))
         yield* redis
-          .expire(playersKey, DEFAULT_ROOM_TTL)
+          .expire(playersKey, gameConfig.roomTtlSeconds)
           .pipe(Effect.catchAll((err) => Effect.fail(mapRedisError(err))))
 
         const updatedRoom = yield* findById(roomId)
@@ -182,7 +183,7 @@ export const RoomRepositoryLive = Layer.effect(
         const updatedRoom = { ...room, status }
         const roomKey = `${ROOM_KEY_PREFIX}${roomId}`
         yield* redis
-          .set(roomKey, serializeRoom(updatedRoom), DEFAULT_ROOM_TTL)
+          .set(roomKey, serializeRoom(updatedRoom), gameConfig.roomTtlSeconds)
           .pipe(Effect.catchAll((err) => Effect.fail(mapRedisError(err))))
 
         return updatedRoom
@@ -210,7 +211,7 @@ export const RoomRepositoryLive = Layer.effect(
 
         const rooms = yield* Effect.all(
           roomIds.map((id) => findById(id)),
-          { concurrency: 5 }
+          { concurrency: gameConfig.roomMaxConcurrency }
         )
 
         return rooms.filter((r): r is Room => r !== null)

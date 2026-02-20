@@ -1,4 +1,5 @@
 import { Effect, Context, Layer } from 'effect'
+import { GameConfig } from '@crossfire/shared'
 import { RedisService } from '../../../../services/redis.service'
 import { RedisError } from '../../../../errors'
 import type { MatchmakingRepository } from '../../domain/repositories/matchmaking.repository'
@@ -18,7 +19,6 @@ const TICKET_KEY_PREFIX = 'mm:ticket:'
 const PLAYER_TICKET_PREFIX = 'mm:player:'
 const QUEUE_PREFIX = 'mm:queue:'
 const MATCH_KEY_PREFIX = 'mm:match:'
-const DEFAULT_TTL = 3600
 
 const mapRedisError = (_err: RedisError): MatchmakingDomainError =>
   new MatchmakingError({ message: 'Redis operation failed' })
@@ -60,6 +60,7 @@ export const MatchmakingRepositoryLive = Layer.effect(
   MatchmakingRepositoryImpl,
   Effect.gen(function* () {
     const redis = yield* RedisService
+    const gameConfig = yield* GameConfig
 
     const createTicket = (
       input: CreateTicketInput
@@ -85,10 +86,10 @@ export const MatchmakingRepositoryLive = Layer.effect(
         const queueKey = `${QUEUE_PREFIX}${input.gameMode}`
 
         yield* redis
-          .set(ticketKey, serializeTicket(ticket), DEFAULT_TTL)
+          .set(ticketKey, serializeTicket(ticket), gameConfig.roomTtlSeconds)
           .pipe(Effect.catchAll((err) => Effect.fail(mapRedisError(err))))
         yield* redis
-          .set(playerKey, id, DEFAULT_TTL)
+          .set(playerKey, id, gameConfig.roomTtlSeconds)
           .pipe(Effect.catchAll((err) => Effect.fail(mapRedisError(err))))
 
         yield* Effect.tryPromise({
@@ -132,7 +133,7 @@ export const MatchmakingRepositoryLive = Layer.effect(
 
         const updated: MatchmakingTicket = { ...ticket, status, matchId }
         yield* redis
-          .set(`${TICKET_KEY_PREFIX}${ticketId}`, serializeTicket(updated), DEFAULT_TTL)
+          .set(`${TICKET_KEY_PREFIX}${ticketId}`, serializeTicket(updated), gameConfig.roomTtlSeconds)
           .pipe(Effect.catchAll((err) => Effect.fail(mapRedisError(err))))
 
         return updated
@@ -166,7 +167,7 @@ export const MatchmakingRepositoryLive = Layer.effect(
 
         const tickets = yield* Effect.all(
           ticketIds.map((id) => findTicketById(id)),
-          { concurrency: 5 }
+          { concurrency: gameConfig.matchmakingMaxConcurrency }
         )
 
         return tickets.filter((t): t is MatchmakingTicket => t !== null && t.status === 'queued')
@@ -188,7 +189,7 @@ export const MatchmakingRepositoryLive = Layer.effect(
         }
 
         yield* redis
-          .set(`${MATCH_KEY_PREFIX}${id}`, serializeMatch(match), DEFAULT_TTL)
+          .set(`${MATCH_KEY_PREFIX}${id}`, serializeMatch(match), gameConfig.roomTtlSeconds)
           .pipe(Effect.catchAll((err) => Effect.fail(mapRedisError(err))))
         return match
       })
