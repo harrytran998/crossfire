@@ -38,13 +38,11 @@ tasks:
   test-watch:
     command: 'bun test --watch'
     description: 'Run tests in watch mode'
-    local: true
     env:
       NODE_ENV: 'test'
 
   dev:
     description: 'Start development server'
-    local: true
     env:
       NODE_ENV: 'development'
 
