@@ -31,5 +31,5 @@ tasks:
       - '~:build'
 
   typecheck:
-    command: 'tsc --noEmit'
+    command: 'bunx tsc --noEmit'
     description: 'Type check web client code'

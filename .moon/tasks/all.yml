@@ -18,7 +18,7 @@ tasks:
     description: 'Check formatting without making changes'
 
   typecheck:
-    command: 'bun tsc --noEmit'
+    command: 'node_modules/.bin/tsc --noEmit'
     description: 'Type check TypeScript files'
     env:
       NODE_ENV: 'development'
