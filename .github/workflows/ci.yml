@@ -64,6 +64,9 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Install moon
+        run: bun add -g @moonrepo/cli
+
       - name: Run typecheck
         run: bun run typecheck
 
