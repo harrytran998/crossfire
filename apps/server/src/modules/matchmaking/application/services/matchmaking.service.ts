@@ -103,8 +103,8 @@ export const MatchmakingServiceLive = Layer.effect(
     const getQueueHealth = (): Effect.Effect<QueueHealth, never> =>
       Effect.gen(function* () {
         const allTickets = yield* repository.findAllTickets()
-        const queued = allTickets.filter(t => t.status === 'queued')
-        const matches = allTickets.filter(t => t.status === 'matched')
+        const queued = allTickets.filter((t) => t.status === 'queued')
+        const matches = allTickets.filter((t) => t.status === 'matched')
 
         const byGameMode: Record<string, number> = {}
         for (const ticket of queued) {
@@ -112,16 +112,15 @@ export const MatchmakingServiceLive = Layer.effect(
         }
 
         const now = Date.now()
-        const waitTimes = queued.map(t => now - t.queuedAt.getTime())
-        const averageWaitTime = waitTimes.length > 0
-          ? waitTimes.reduce((a, b) => a + b, 0) / waitTimes.length / 1000
-          : 0
+        const waitTimes = queued.map((t) => now - t.queuedAt.getTime())
+        const averageWaitTime =
+          waitTimes.length > 0 ? waitTimes.reduce((a, b) => a + b, 0) / waitTimes.length / 1000 : 0
 
         return {
           totalQueued: queued.length,
           byGameMode,
           averageWaitTime: Math.round(averageWaitTime),
-          matchesCreated: matches.length
+          matchesCreated: matches.length,
         }
       })
 
