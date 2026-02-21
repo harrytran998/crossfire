@@ -6,10 +6,11 @@ import {
 } from '../../src/modules/auth/application/services/auth.service'
 import { InvalidCredentialsError } from '../../src/modules/auth/domain/errors/auth.errors'
 import { DatabaseServiceLive } from '../../src/services/database.service'
+import { RedisServiceLive } from '../../src/services/redis.service'
 import { ConfigLayer } from '../../src/layers/index'
 
 describe('AuthService', () => {
-  const TestLayer = Layer.provide(AuthServiceLive, Layer.mergeAll(ConfigLayer, DatabaseServiceLive))
+  const TestLayer = Layer.provide(AuthServiceLive, Layer.mergeAll(ConfigLayer, DatabaseServiceLive, RedisServiceLive))
 
   const runTest = <A, E>(effect: Effect.Effect<A, E, AuthService>) =>
     Effect.runPromise(Effect.provide(effect, TestLayer) as Effect.Effect<A, E, never>)

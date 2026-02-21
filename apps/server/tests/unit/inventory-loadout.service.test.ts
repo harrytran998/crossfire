@@ -22,9 +22,10 @@ import {
 } from '../../src/modules/static-data/application/services/static-data.service'
 import { ConfigLayer } from '../../src/layers'
 import { DatabaseServiceLive } from '../../src/services/database.service'
+import { RedisServiceLive } from '../../src/services/redis.service'
 
 describe('Inventory + Loadout services', () => {
-  const BaseLayer = Layer.mergeAll(ConfigLayer, DatabaseServiceLive)
+  const BaseLayer = Layer.mergeAll(ConfigLayer, DatabaseServiceLive, RedisServiceLive)
   const TestLayer = Layer.mergeAll(
     Layer.provide(AuthServiceLive, BaseLayer),
     Layer.provide(PlayerServiceLive, BaseLayer),

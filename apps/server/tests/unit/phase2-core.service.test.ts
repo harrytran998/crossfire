@@ -30,9 +30,10 @@ import {
 } from '../../src/modules/friends/application/services/friends.service'
 import { ConfigLayer } from '../../src/layers/index'
 import { DatabaseService, DatabaseServiceLive } from '../../src/services/database.service'
+import { RedisService, RedisServiceLive } from '../../src/services/redis.service'
 
 describe('Phase 2 Core Services', () => {
-  const BaseLayer = Layer.mergeAll(ConfigLayer, DatabaseServiceLive)
+  const BaseLayer = Layer.mergeAll(ConfigLayer, DatabaseServiceLive, RedisServiceLive)
   const TestLayer = Layer.mergeAll(
     BaseLayer,
     Layer.provide(AuthServiceLive, BaseLayer),
