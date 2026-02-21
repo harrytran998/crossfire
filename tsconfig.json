@@ -5,5 +5,19 @@
     "noEmit": true
   },
   "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules", "dist", "apps", "packages"]
+  "exclude": ["node_modules", "dist", "apps", "packages"],
+  "references": [
+    {
+      "path": "apps/server"
+    },
+    {
+      "path": "apps/web"
+    },
+    {
+      "path": "packages/database"
+    },
+    {
+      "path": "packages/shared"
+    }
+  ]
 }

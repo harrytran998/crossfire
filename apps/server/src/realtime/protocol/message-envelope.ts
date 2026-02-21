@@ -2,7 +2,7 @@ import { Data } from 'effect'
 
 export interface MessageEnvelope<TType extends string = string, TPayload = unknown> {
   readonly type: TType
-  readonly seq?: number
+  readonly seq?: number | undefined
   readonly ts: number
   readonly payload: TPayload
 }
@@ -106,6 +106,6 @@ export type ProtocolErrorCode =
 export class ProtocolError extends Data.TaggedError('ProtocolError')<{
   readonly code: ProtocolErrorCode
   readonly message: string
-  readonly type?: string
-  readonly cause?: unknown
+  readonly type?: string | undefined
+  readonly cause?: unknown | undefined
 }> {}

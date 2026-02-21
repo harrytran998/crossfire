@@ -2,17 +2,17 @@ export interface MatchEvent {
   readonly time: Date
   readonly matchId: string
   readonly eventType: string
-  readonly sourcePlayerId?: string
-  readonly targetPlayerId?: string
-  readonly weaponId?: string
-  readonly damageAmount?: number
-  readonly hitZone?: string
-  readonly positionX?: number
-  readonly positionY?: number
-  readonly positionZ?: number
-  readonly roundNumber?: number
-  readonly tickNumber?: number
-  readonly metadata?: Record<string, unknown>
+  readonly sourcePlayerId?: string | undefined
+  readonly targetPlayerId?: string | undefined
+  readonly weaponId?: string | undefined
+  readonly damageAmount?: number | undefined
+  readonly hitZone?: string | undefined
+  readonly positionX?: number | undefined
+  readonly positionY?: number | undefined
+  readonly positionZ?: number | undefined
+  readonly roundNumber?: number | undefined
+  readonly tickNumber?: number | undefined
+  readonly metadata?: Record<string, unknown> | undefined
 }
 
 export interface PlayerTelemetry {
@@ -25,22 +25,22 @@ export interface PlayerTelemetry {
   readonly damageDealt: bigint
   readonly damageReceived: bigint
   readonly score: number
-  readonly pingMs?: number
-  readonly fpsAvg?: number
-  readonly packetLossPct?: number
+  readonly pingMs?: number | undefined
+  readonly fpsAvg?: number | undefined
+  readonly packetLossPct?: number | undefined
 }
 
 export interface ServerMetrics {
   readonly time: Date
   readonly serverId: string
-  readonly cpuPercent?: number
-  readonly memoryMb?: bigint
-  readonly connections?: number
-  readonly bytesIn?: bigint
-  readonly bytesOut?: bigint
-  readonly activeRooms?: number
-  readonly activePlayers?: number
-  readonly tickRateAvg?: number
+  readonly cpuPercent?: number | undefined
+  readonly memoryMb?: bigint | undefined
+  readonly connections?: number | undefined
+  readonly bytesIn?: bigint | undefined
+  readonly bytesOut?: bigint | undefined
+  readonly activeRooms?: number | undefined
+  readonly activePlayers?: number | undefined
+  readonly tickRateAvg?: number | undefined
 }
 
 export interface TelemetryTimeRange {

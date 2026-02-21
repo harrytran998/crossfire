@@ -114,7 +114,6 @@ project:
 tasks:
   dev:
     command: next dev --port 3000
-    local: true
 
   build:
     command: next build
@@ -184,7 +183,6 @@ tasks:
 
   storybook:
     command: storybook dev
-    local: true
 ```
 
 ### Moonfile.ts (Advanced Configuration)
@@ -340,7 +338,6 @@ tasks:
   deploy:
     # Don't cache this task
     cache: false
-    local: true
 ```
 
 ### Project Dependency Graph

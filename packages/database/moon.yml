@@ -1,6 +1,7 @@
 $schema: 'https://moonrepo.dev/schemas/project.json'
 
-type: 'library'
+layer: 'library'
+stack: 'backend'
 language: 'typescript'
 
 env:
@@ -30,7 +31,6 @@ tasks:
   create-migration:
     command: 'migrate create -ext sql -dir migrations -seq'
     description: 'Create a new migration file (usage: moon run database:create-migration -- <name>)'
-    local: true
 
   seed:
     command: 'bun run scripts/seed.ts'
@@ -41,7 +41,6 @@ tasks:
   reset:
     command: 'migrate -database $DATABASE_URL -path migrations drop'
     description: 'Drop all tables and reset database'
-    local: true
     env:
       DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/crossfire'
 

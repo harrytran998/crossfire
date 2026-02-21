@@ -75,56 +75,51 @@ export const MatchRepositoryLive = Layer.effect(
 
     const getDetailByPlayerId: MatchRepositoryType['getDetailByPlayerId'] = (playerId, matchId) =>
       Effect.promise(async () => {
-        const playerParticipant = await db
-          .selectFrom('match_participants')
-          .where('match_id', '=', matchId)
-          .where('player_id', '=', playerId)
-          .select(['id'])
-          .executeTakeFirst()
-
-        if (!playerParticipant) {
-          return null
-        }
-
-        const match = await db
-          .selectFrom('matches')
-          .innerJoin('maps', 'maps.id', 'matches.map_id')
-          .where('matches.id', '=', matchId)
-          .select([
-            'matches.id',
-            'matches.game_mode',
-            'matches.map_id',
-            'maps.name as map_name',
-            'matches.started_at',
-            'matches.completed_at',
-            'matches.duration_seconds',
-            'matches.winning_team',
-          ])
-          .executeTakeFirst()
+        const [match, participantsRows] = await Promise.all([
+          db
+            .selectFrom('matches')
+            .innerJoin('maps', 'maps.id', 'matches.map_id')
+            .where('matches.id', '=', matchId)
+            .select([
+              'matches.id',
+              'matches.game_mode',
+              'matches.map_id',
+              'maps.name as map_name',
+              'matches.started_at',
+              'matches.completed_at',
+              'matches.duration_seconds',
+              'matches.winning_team',
+            ])
+            .executeTakeFirst(),
+          db
+            .selectFrom('match_participants')
+            .where('match_id', '=', matchId)
+            .select([
+              'player_id',
+              'team',
+              'score',
+              'kills',
+              'deaths',
+              'assists',
+              'headshots',
+              'damage_dealt',
+              'damage_received',
+              'is_winner',
+              'position',
+              'xp_gained',
+            ])
+            .orderBy('score', 'desc')
+            .execute(),
+        ])
 
         if (!match) {
           return null
         }
 
-        const participantsRows = await db
-          .selectFrom('match_participants')
-          .where('match_id', '=', matchId)
-          .select([
-            'player_id',
-            'team',
-            'score',
-            'kills',
-            'deaths',
-            'assists',
-            'headshots',
-            'damage_dealt',
-            'damage_received',
-            'is_winner',
-            'position',
-            'xp_gained',
-          ])
-          .orderBy('score', 'desc')
-          .execute()
+        const isParticipant = participantsRows.some((row) => row.player_id === playerId)
+        if (!isParticipant) {
+          return null
+        }
 
         const participants: MatchParticipant[] = participantsRows.map((row) => ({
           playerId: row.player_id,

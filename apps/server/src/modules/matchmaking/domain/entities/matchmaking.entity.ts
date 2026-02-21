@@ -7,7 +7,7 @@ export interface MatchmakingTicket {
   readonly skillRating: number
   readonly queuedAt: Date
   readonly status: MatchmakingStatus
-  readonly matchId?: string
+  readonly matchId?: string | undefined
 }
 
 export interface Match {
@@ -27,6 +27,6 @@ export interface CreateTicketInput {
 export interface MatchmakingState {
   ticketId: string
   status: MatchmakingStatus
-  position?: number
-  estimatedWait?: number
+  position?: number | undefined
+  estimatedWait?: number | undefined
 }

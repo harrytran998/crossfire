@@ -18,7 +18,7 @@ tasks:
     description: 'Check formatting without making changes'
 
   typecheck:
-    command: 'bun tsc --noEmit'
+    command: 'tsc --noEmit'
     description: 'Type check TypeScript files'
     env:
       NODE_ENV: 'development'
@@ -38,16 +38,14 @@ tasks:
   test-watch:
     command: 'bun test --watch'
     description: 'Run tests in watch mode'
-    local: true
     env:
       NODE_ENV: 'test'
 
   dev:
     description: 'Start development server'
-    local: true
     env:
       NODE_ENV: 'development'
 
   clean:
-    command: 'rm -rf dist node_modules/.cache'
+    command: 'rm -rf dist node_modules'
     description: 'Clean build artifacts'

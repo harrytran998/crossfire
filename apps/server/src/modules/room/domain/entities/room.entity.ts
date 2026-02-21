@@ -26,16 +26,16 @@ export interface CreateRoomInput {
   readonly hostId: string
   readonly mapId: string
   readonly configId: string
-  readonly maxPlayers?: number
-  readonly isPrivate?: boolean
-  readonly password?: string
+  readonly maxPlayers?: number | undefined
+  readonly isPrivate?: boolean | undefined
+  readonly password?: string | undefined
 }
 
 export interface JoinRoomInput {
   readonly roomId: string
   readonly playerId: string
   readonly loadoutId: string
-  readonly password?: string
+  readonly password?: string | undefined
 }
 
 export interface RoomState {

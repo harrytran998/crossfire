@@ -1,6 +1,6 @@
 $schema: 'https://moonrepo.dev/schemas/project.json'
 
-type: 'library'
+layer: 'library'
 language: 'typescript'
 
 tasks:
@@ -17,7 +17,6 @@ tasks:
   dev:
     command: 'tsdown --watch'
     description: 'Build in watch mode'
-    local: true
 
   test:
     command: 'bun test tests/'

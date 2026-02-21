@@ -1,13 +1,13 @@
 $schema: 'https://moonrepo.dev/schemas/project.json'
 
-type: 'application'
+layer: 'application'
+stack: 'frontend'
 language: 'typescript'
 
 tasks:
   dev:
     command: 'vite'
     description: 'Start Vite development server'
-    local: true
     deps:
       - 'shared:build'
 
@@ -31,5 +31,5 @@ tasks:
       - '~:build'
 
   typecheck:
-    command: 'tsc --noEmit'
+    command: 'bunx tsc --noEmit'
     description: 'Type check web client code'

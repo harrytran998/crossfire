@@ -49,16 +49,16 @@ export interface PlayerProgression {
 export interface CreatePlayerInput {
   readonly userId: string
   readonly displayName: string
-  readonly region?: string
-  readonly language?: string
+  readonly region?: string | undefined
+  readonly language?: string | undefined
 }
 
 export interface UpdatePlayerInput {
-  readonly displayName?: string
-  readonly avatarUrl?: string
-  readonly bio?: string
-  readonly region?: string
-  readonly language?: string
+  readonly displayName?: string | undefined
+  readonly avatarUrl?: string | undefined
+  readonly bio?: string | undefined
+  readonly region?: string | undefined
+  readonly language?: string | undefined
 }
 
 export const mapPlayerRowToEntity = (row: PlayerRow): Player => ({

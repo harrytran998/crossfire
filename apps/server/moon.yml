@@ -1,6 +1,7 @@
 $schema: 'https://moonrepo.dev/schemas/project.json'
 
-type: 'application'
+layer: 'application'
+stack: 'backend'
 language: 'typescript'
 
 env:
@@ -12,7 +13,6 @@ tasks:
   dev:
     command: 'bun run src/index.ts'
     description: 'Start development server with hot reload'
-    local: true
     deps:
       - 'shared:build'
     env:
