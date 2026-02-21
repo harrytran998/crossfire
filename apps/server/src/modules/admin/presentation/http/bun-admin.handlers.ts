@@ -55,7 +55,10 @@ const parseDateRange = (url: URL): { start: Date; end: Date } | Response => {
   return { start, end }
 }
 
-const getAdminPlayerTelemetryHandler: RouteDefinition['handler'] = async (req, { runApp, params }) => {
+const getAdminPlayerTelemetryHandler: RouteDefinition['handler'] = async (
+  req,
+  { runApp, params }
+) => {
   const adminCheck = await requireAdmin(req, runApp)
   if (adminCheck instanceof Response) {
     return adminCheck
@@ -103,7 +106,10 @@ const getAdminMatchEventsHandler: RouteDefinition['handler'] = async (req, { run
   return Response.json({ events })
 }
 
-const getAdminServerMetricsHandler: RouteDefinition['handler'] = async (req, { runApp, params }) => {
+const getAdminServerMetricsHandler: RouteDefinition['handler'] = async (
+  req,
+  { runApp, params }
+) => {
   const adminCheck = await requireAdmin(req, runApp)
   if (adminCheck instanceof Response) {
     return adminCheck
@@ -130,7 +136,10 @@ const getAdminServerMetricsHandler: RouteDefinition['handler'] = async (req, { r
   return Response.json({ metrics })
 }
 
-const getAdminAggregatedStatsHandler: RouteDefinition['handler'] = async (req, { runApp, params }) => {
+const getAdminAggregatedStatsHandler: RouteDefinition['handler'] = async (
+  req,
+  { runApp, params }
+) => {
   const adminCheck = await requireAdmin(req, runApp)
   if (adminCheck instanceof Response) {
     return adminCheck
@@ -158,8 +167,24 @@ const getAdminAggregatedStatsHandler: RouteDefinition['handler'] = async (req, {
 }
 
 export const adminRoutes: readonly RouteDefinition[] = [
-  { method: 'GET', path: '/api/admin/telemetry/player/:playerId', handler: getAdminPlayerTelemetryHandler },
-  { method: 'GET', path: '/api/admin/telemetry/match/:matchId', handler: getAdminMatchEventsHandler },
-  { method: 'GET', path: '/api/admin/telemetry/server/:serverId', handler: getAdminServerMetricsHandler },
-  { method: 'GET', path: '/api/admin/telemetry/stats/:playerId', handler: getAdminAggregatedStatsHandler },
+  {
+    method: 'GET',
+    path: '/api/admin/telemetry/player/:playerId',
+    handler: getAdminPlayerTelemetryHandler,
+  },
+  {
+    method: 'GET',
+    path: '/api/admin/telemetry/match/:matchId',
+    handler: getAdminMatchEventsHandler,
+  },
+  {
+    method: 'GET',
+    path: '/api/admin/telemetry/server/:serverId',
+    handler: getAdminServerMetricsHandler,
+  },
+  {
+    method: 'GET',
+    path: '/api/admin/telemetry/stats/:playerId',
+    handler: getAdminAggregatedStatsHandler,
+  },
 ]

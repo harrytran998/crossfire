@@ -62,9 +62,7 @@ export const StaticDataRepositoryLive = Layer.effect(
 
     const getActiveWeapons: StaticDataRepositoryType['getActiveWeapons'] = () =>
       Effect.gen(function* () {
-        const cached = yield* Effect.option(
-          redis.get(CACHE_KEYS.weapons).pipe(Effect.orDie)
-        )
+        const cached = yield* Effect.option(redis.get(CACHE_KEYS.weapons).pipe(Effect.orDie))
         if (cached._tag === 'Some' && cached.value) {
           return JSON.parse(cached.value)
         }
@@ -80,7 +78,7 @@ export const StaticDataRepositoryLive = Layer.effect(
         }).pipe(Effect.orDie)
 
         const weapons = rows.map((row) => mapWeaponRowToEntity(row as unknown as WeaponRow))
-        
+
         yield* redis
           .set(CACHE_KEYS.weapons, JSON.stringify(weapons), gameConfig.staticDataCacheTtlSeconds)
           .pipe(Effect.orDie)
@@ -91,9 +89,7 @@ export const StaticDataRepositoryLive = Layer.effect(
     const getWeaponByKey: StaticDataRepositoryType['getWeaponByKey'] = (weaponKey) =>
       Effect.gen(function* () {
         const cacheKey = CACHE_KEYS.weapon(weaponKey)
-        const cached = yield* Effect.option(
-          redis.get(cacheKey).pipe(Effect.orDie)
-        )
+        const cached = yield* Effect.option(redis.get(cacheKey).pipe(Effect.orDie))
         if (cached._tag === 'Some' && cached.value) {
           return JSON.parse(cached.value)
         }
@@ -120,9 +116,7 @@ export const StaticDataRepositoryLive = Layer.effect(
     const getWeaponAttachments: StaticDataRepositoryType['getWeaponAttachments'] = (weaponId) =>
       Effect.gen(function* () {
         const cacheKey = CACHE_KEYS.attachments(weaponId)
-        const cached = yield* Effect.option(
-          redis.get(cacheKey).pipe(Effect.orDie)
-        )
+        const cached = yield* Effect.option(redis.get(cacheKey).pipe(Effect.orDie))
         if (cached._tag === 'Some' && cached.value) {
           return JSON.parse(cached.value)
         }
@@ -141,7 +135,7 @@ export const StaticDataRepositoryLive = Layer.effect(
         const attachments = rows.map((row) =>
           mapWeaponAttachmentRowToEntity(row as unknown as WeaponAttachmentRow)
         )
-        
+
         yield* redis
           .set(cacheKey, JSON.stringify(attachments), gameConfig.staticDataCacheTtlSeconds)
           .pipe(Effect.orDie)
@@ -151,9 +145,7 @@ export const StaticDataRepositoryLive = Layer.effect(
 
     const getActiveMaps: StaticDataRepositoryType['getActiveMaps'] = () =>
       Effect.gen(function* () {
-        const cached = yield* Effect.option(
-          redis.get(CACHE_KEYS.maps).pipe(Effect.orDie)
-        )
+        const cached = yield* Effect.option(redis.get(CACHE_KEYS.maps).pipe(Effect.orDie))
         if (cached._tag === 'Some' && cached.value) {
           return JSON.parse(cached.value)
         }
@@ -168,7 +160,7 @@ export const StaticDataRepositoryLive = Layer.effect(
         }).pipe(Effect.orDie)
 
         const maps = rows.map((row) => mapMapRowToEntity(row as unknown as MapRow))
-        
+
         yield* redis
           .set(CACHE_KEYS.maps, JSON.stringify(maps), gameConfig.staticDataCacheTtlSeconds)
           .pipe(Effect.orDie)

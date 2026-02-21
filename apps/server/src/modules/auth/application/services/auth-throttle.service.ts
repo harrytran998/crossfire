@@ -34,9 +34,11 @@ const API_ROUTE_LIMITS: Record<
   },
 }
 
-const rateLimitKey = (route: AuthRoute, ip: string | null) => `auth:ratelimit:${route}:${ip ?? 'unknown'}`
+const rateLimitKey = (route: AuthRoute, ip: string | null) =>
+  `auth:ratelimit:${route}:${ip ?? 'unknown'}`
 const apiRateLimitKey = (route: ApiRoute, subject: string) => `api:ratelimit:${route}:${subject}`
-const lockoutKey = (ip: string | null, email: string) => `auth:lockout:${ip ?? 'unknown'}:${email.toLowerCase()}`
+const lockoutKey = (ip: string | null, email: string) =>
+  `auth:lockout:${ip ?? 'unknown'}:${email.toLowerCase()}`
 const loginFailureKey = (ip: string | null, email: string) =>
   `auth:login-fail:${ip ?? 'unknown'}:${email.toLowerCase()}`
 

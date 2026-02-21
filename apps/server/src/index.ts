@@ -52,18 +52,12 @@ import {
 
 const InfraLayer = Layer.provideMerge(
   Layer.mergeAll(DatabaseServiceLive, RedisServiceLive),
-  ConfigLayer,
+  ConfigLayer
 )
 
-const ConnectionLayer = Layer.provideMerge(
-  ConnectionRegistryServiceLive,
-  InfraLayer,
-)
+const ConnectionLayer = Layer.provideMerge(ConnectionRegistryServiceLive, InfraLayer)
 
-const RealtimeLayer = Layer.provideMerge(
-  HeartbeatServiceLive,
-  ConnectionLayer,
-)
+const RealtimeLayer = Layer.provideMerge(HeartbeatServiceLive, ConnectionLayer)
 
 const DomainLayer = Layer.provideMerge(
   Layer.mergeAll(
@@ -79,14 +73,14 @@ const DomainLayer = Layer.provideMerge(
     AchievementServiceLive,
     TelemetryServiceLive,
     OutboxServiceLive,
-    MatchmakingRepositoryLive,
+    MatchmakingRepositoryLive
   ),
-  RealtimeLayer,
+  RealtimeLayer
 )
 
 const AppLayer = Layer.provideMerge(
   Layer.mergeAll(MatchmakingServiceLive, OutboxDispatcherServiceLive),
-  DomainLayer,
+  DomainLayer
 )
 
 const runApp = <A, E, R>(effect: Effect.Effect<A, E, R>) =>

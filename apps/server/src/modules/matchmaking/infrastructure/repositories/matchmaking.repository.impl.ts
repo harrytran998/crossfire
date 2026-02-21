@@ -133,7 +133,11 @@ export const MatchmakingRepositoryLive = Layer.effect(
 
         const updated: MatchmakingTicket = { ...ticket, status, matchId }
         yield* redis
-          .set(`${TICKET_KEY_PREFIX}${ticketId}`, serializeTicket(updated), gameConfig.roomTtlSeconds)
+          .set(
+            `${TICKET_KEY_PREFIX}${ticketId}`,
+            serializeTicket(updated),
+            gameConfig.roomTtlSeconds
+          )
           .pipe(Effect.catchAll((err) => Effect.fail(mapRedisError(err))))
 
         return updated

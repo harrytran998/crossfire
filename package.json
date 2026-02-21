@@ -29,13 +29,13 @@
     "db:create": "moon run database:create-migration"
   },
   "devDependencies": {
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0",
     "oxfmt": "^0.32.0",
     "oxlint": "^1.47.0",
     "oxlint-tsgolint": "^0.12.2",
     "tsdown": "^0.20.0",
-    "typescript": "^5.9.3",
-    "husky": "^9.0.0",
-    "lint-staged": "^15.0.0"
+    "typescript": "^5.9.3"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

@@ -41,7 +41,10 @@ const getAllAchievementsHandler: RouteDefinition['handler'] = async (req, { runA
   return Response.json({ achievements })
 }
 
-const getPlayerAchievementsHandler: RouteDefinition['handler'] = async (req, { runApp, params }) => {
+const getPlayerAchievementsHandler: RouteDefinition['handler'] = async (
+  req,
+  { runApp, params }
+) => {
   const auth = await requireAuthUser(req, runApp)
   if (auth instanceof Response) {
     return auth
@@ -66,7 +69,10 @@ const getPlayerAchievementsHandler: RouteDefinition['handler'] = async (req, { r
   return Response.json({ achievements })
 }
 
-const getAchievementProgressHandler: RouteDefinition['handler'] = async (req, { runApp, params }) => {
+const getAchievementProgressHandler: RouteDefinition['handler'] = async (
+  req,
+  { runApp, params }
+) => {
   const auth = await requireAuthUser(req, runApp)
   if (auth instanceof Response) {
     return auth
@@ -100,6 +106,14 @@ const getAchievementProgressHandler: RouteDefinition['handler'] = async (req, { 
 
 export const achievementRoutes: readonly RouteDefinition[] = [
   { method: 'GET', path: '/api/achievements', handler: getAllAchievementsHandler },
-  { method: 'GET', path: '/api/achievements/player/:playerId', handler: getPlayerAchievementsHandler },
-  { method: 'GET', path: '/api/achievements/progress/:playerId', handler: getAchievementProgressHandler },
+  {
+    method: 'GET',
+    path: '/api/achievements/player/:playerId',
+    handler: getPlayerAchievementsHandler,
+  },
+  {
+    method: 'GET',
+    path: '/api/achievements/progress/:playerId',
+    handler: getAchievementProgressHandler,
+  },
 ]

@@ -12,14 +12,17 @@ const CACHE_KEY_PREFIX = 'leaderboard:'
 
 const buildCacheKey = (
   playerId: string,
-  filters: { metricKey?: string | undefined; period?: string | undefined; mode?: string | undefined },
+  filters: {
+    metricKey?: string | undefined
+    period?: string | undefined
+    mode?: string | undefined
+  },
   page: number,
   pageSize: number,
   includePlayerRank: boolean
 ): string => {
-  const filterStr = [filters.metricKey, filters.period, filters.mode]
-    .filter(Boolean)
-    .join(':') || 'all'
+  const filterStr =
+    [filters.metricKey, filters.period, filters.mode].filter(Boolean).join(':') || 'all'
   return `${CACHE_KEY_PREFIX}${playerId}:${filterStr}:${page}:${pageSize}:${includePlayerRank}`
 }
 
@@ -39,10 +42,8 @@ export const LeaderboardRepositoryLive = Layer.effect(
     ) =>
       Effect.gen(function* () {
         const cacheKey = buildCacheKey(playerId, filters, page, pageSize, includePlayerRank)
-        
-        const cached = yield* Effect.option(
-          redis.get(cacheKey).pipe(Effect.orDie)
-        )
+
+        const cached = yield* Effect.option(redis.get(cacheKey).pipe(Effect.orDie))
         if (cached._tag === 'Some' && cached.value) {
           return JSON.parse(cached.value)
         }
@@ -53,7 +54,9 @@ export const LeaderboardRepositoryLive = Layer.effect(
           const definitions = await db
             .selectFrom('leaderboards')
             .where('is_active', '=', true)
-            .$if(Boolean(filters.metricKey), (qb) => qb.where('metric_key', '=', filters.metricKey!))
+            .$if(Boolean(filters.metricKey), (qb) =>
+              qb.where('metric_key', '=', filters.metricKey!)
+            )
             .$if(Boolean(filters.period), (qb) => qb.where('period_type', '=', filters.period!))
             .$if(Boolean(filters.mode), (qb) => qb.where('game_mode', '=', filters.mode!))
             .select(['id', 'metric_key', 'period_type', 'game_mode'])
@@ -104,7 +107,11 @@ export const LeaderboardRepositoryLive = Layer.effect(
                     .onRef('latest_entries.leaderboard_id', '=', 'le.leaderboard_id')
                     .onRef('latest_entries.period_end', '=', 'le.period_end')
                 )
-                .select(['le.leaderboard_id as leaderboard_id', 'le.rank as rank', 'le.metric_value as metric_value'])
+                .select([
+                  'le.leaderboard_id as leaderboard_id',
+                  'le.rank as rank',
+                  'le.metric_value as metric_value',
+                ])
                 .where('le.player_id', '=', playerId)
                 .execute()
             : []

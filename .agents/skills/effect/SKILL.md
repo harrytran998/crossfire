@@ -242,6 +242,7 @@ When building an application with multiple service layers that have inter-depend
 Use `Layer.provideMerge(consumer, provider)` (non-curried form) to chain tiers so each tier's outputs feed into the next tier's requirements.
 
 **Key rules:**
+
 - `Layer.provideMerge(consumer, provider)` — provider's outputs satisfy consumer's requirements, result outputs both
 - `Layer.mergeAll(A, B)` — only for layers that are truly independent (no dependency between A and B)
 - If layer B depends on layer A at construction time (via `yield*` inside `Layer.effect`), they **cannot** be in the same `mergeAll`
@@ -254,38 +255,32 @@ import { Layer } from 'effect'
 const ConfigLayer = Layer.mergeAll(
   ServerConfig.Default,
   DatabaseConfig.Default,
-  RedisConfig.Default,
+  RedisConfig.Default
 )
 
 const InfraLayer = Layer.provideMerge(
   Layer.mergeAll(DatabaseServiceLive, RedisServiceLive),
-  ConfigLayer,
+  ConfigLayer
 )
 
 // HeartbeatServiceLive depends on ConnectionRegistryService at construction time,
 // so they cannot be in the same mergeAll — split into two steps
-const ConnectionLayer = Layer.provideMerge(
-  ConnectionRegistryServiceLive,
-  InfraLayer,
-)
+const ConnectionLayer = Layer.provideMerge(ConnectionRegistryServiceLive, InfraLayer)
 
-const RealtimeLayer = Layer.provideMerge(
-  HeartbeatServiceLive,
-  ConnectionLayer,
-)
+const RealtimeLayer = Layer.provideMerge(HeartbeatServiceLive, ConnectionLayer)
 
 const DomainLayer = Layer.provideMerge(
   Layer.mergeAll(
     AuthServiceLive,
-    PlayerServiceLive,
+    PlayerServiceLive
     // ... other independent domain services
   ),
-  RealtimeLayer,
+  RealtimeLayer
 )
 
 const AppLayer = Layer.provideMerge(
   Layer.mergeAll(MatchmakingServiceLive, OutboxDispatcherServiceLive),
-  DomainLayer,
+  DomainLayer
 )
 ```
 
@@ -295,10 +290,10 @@ const AppLayer = Layer.provideMerge(
 // BROKEN: layers cannot resolve inter-dependencies
 const AppLayer = Layer.mergeAll(
   ConfigLayer,
-  DatabaseServiceLive,    // needs DatabaseConfig — not available
-  RedisServiceLive,       // needs RedisConfig — not available
-  HeartbeatServiceLive,   // needs ConnectionRegistryService — not available
-  ConnectionRegistryServiceLive,
+  DatabaseServiceLive, // needs DatabaseConfig — not available
+  RedisServiceLive, // needs RedisConfig — not available
+  HeartbeatServiceLive, // needs ConnectionRegistryService — not available
+  ConnectionRegistryServiceLive
 )
 ```
 
@@ -308,7 +303,7 @@ const AppLayer = Layer.mergeAll(
 // BROKEN: in .pipe form, the argument PROVIDES FOR the receiver, not the other way around
 // This feeds InfraLayer's outputs into ConfigLayer's requirements (wrong direction)
 const AppLayer = ConfigLayer.pipe(
-  Layer.provideMerge(Layer.mergeAll(DatabaseServiceLive, RedisServiceLive)),
+  Layer.provideMerge(Layer.mergeAll(DatabaseServiceLive, RedisServiceLive))
 )
 ```
 

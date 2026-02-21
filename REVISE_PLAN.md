@@ -7,6 +7,7 @@
 ## 1. Executive Summary
 
 ### Current Status
+
 - **Total Modules**: 13 implemented
 - **Registered Routes**: ✅ All 13 modules registered (was 9, achievement/matchmaking/telemetry/admin were already fixed)
 - **Critical Issues**: All resolved
@@ -54,6 +55,7 @@ curl http://localhost:3000/health
 ### 3.3 TypeScript Strictness Audit
 
 ✅ **RESOLVED** — `noUncheckedIndexedAccess` and `isolatedModules` were already enabled in `packages/tsconfig/base.json`. We added `exactOptionalPropertyTypes: true` and fixed all resulting type errors across 11 files:
+
 - Domain entity types: Added `| undefined` to optional properties in inventory, leaderboard, matchmaking, loadout, player, room, telemetry entities
 - Service interfaces: Updated inline types in `inventory.service.ts`, `leaderboard.service.ts`
 - Infrastructure: Updated `buildCacheKey` type in `leaderboard.repository.impl.ts`
@@ -393,6 +395,7 @@ bun run --cwd apps/server test
 ### 6.5 Troubleshooting
 
 **PostgreSQL Connection Refused**:
+
 ```bash
 # Check if container is running
 docker-compose ps
@@ -405,6 +408,7 @@ docker-compose logs postgres | tail -50
 ```
 
 **Migration Failed**:
+
 ```bash
 # Force migration version
 migrate -database $DATABASE_URL -path packages/database/migrations force <version>
@@ -416,6 +420,7 @@ migrate -database $DATABASE_URL -path packages/database/migrations up
 ```
 
 **Redis Connection Issues**:
+
 ```bash
 # Test Redis connection
 redis-cli -h localhost -p 6379 ping
@@ -430,30 +435,30 @@ redis-cli -h localhost -p 6379 FLUSHALL
 
 ### Phase 1: Critical Fixes — ✅ ALL COMPLETE
 
-| Task | Priority | Status |
-|------|----------|--------|
-| C01: Register missing routes | P0 | ✅ Already done |
-| P01: Fix leaderboard N+1 query | P0 | ✅ Not an issue (already uses JOINs) |
-| P02: Create oxlint/oxfmt configs | P0 | ✅ Already done |
-| P03: Add static data caching | P1 | ✅ Already done |
+| Task                             | Priority | Status                               |
+| -------------------------------- | -------- | ------------------------------------ |
+| C01: Register missing routes     | P0       | ✅ Already done                      |
+| P01: Fix leaderboard N+1 query   | P0       | ✅ Not an issue (already uses JOINs) |
+| P02: Create oxlint/oxfmt configs | P0       | ✅ Already done                      |
+| P03: Add static data caching     | P1       | ✅ Already done                      |
 
 ### Phase 2: Performance — ✅ ALL COMPLETE
 
-| Task | Priority | Status |
-|------|----------|--------|
-| P04: Add leaderboard caching | P1 | ✅ Already done |
-| P05: Configure Redis connection pooling | P1 | ✅ Already done |
-| P06: Externalize hardcoded values | P1 | ✅ Fixed (`maxPlayers` → `GameConfig`) |
-| P07: Add circuit breaker patterns | P2 | ✅ Already done |
+| Task                                    | Priority | Status                                 |
+| --------------------------------------- | -------- | -------------------------------------- |
+| P04: Add leaderboard caching            | P1       | ✅ Already done                        |
+| P05: Configure Redis connection pooling | P1       | ✅ Already done                        |
+| P06: Externalize hardcoded values       | P1       | ✅ Fixed (`maxPlayers` → `GameConfig`) |
+| P07: Add circuit breaker patterns       | P2       | ✅ Already done                        |
 
 ### Phase 3: Quality of Life — ✅ ALL COMPLETE
 
-| Task | Priority | Status |
-|------|----------|--------|
-| Q01: Add pre-commit hooks | P2 | ✅ Already done |
-| Q02: Add VS Code settings | P3 | ✅ Already done |
-| Q03: Enable stricter TS options | P2 | ✅ Fixed (`exactOptionalPropertyTypes`) |
-| Q04: Add test coverage reporting | P2 | Deferred (not in scope) |
+| Task                             | Priority | Status                                  |
+| -------------------------------- | -------- | --------------------------------------- |
+| Q01: Add pre-commit hooks        | P2       | ✅ Already done                         |
+| Q02: Add VS Code settings        | P3       | ✅ Already done                         |
+| Q03: Enable stricter TS options  | P2       | ✅ Fixed (`exactOptionalPropertyTypes`) |
+| Q04: Add test coverage reporting | P2       | Deferred (not in scope)                 |
 
 ---
 
@@ -461,16 +466,16 @@ redis-cli -h localhost -p 6379 FLUSHALL
 
 ### Before vs After
 
-| Metric | Before | After | Status |
-|--------|--------|-------|--------|
-| Registered Routes | 13 modules | 13 modules | ✅ Already done |
-| Leaderboard Query Time | Already O(1) JOINs | Already O(1) JOINs | ✅ Not an issue |
-| Match Detail Queries | 3 sequential | 2 parallel | ✅ Fixed |
-| Static Data Response | Cached | Cached | ✅ Already done |
-| TypeScript Strictness | Missing `exactOptionalPropertyTypes` | All strict options enabled | ✅ Fixed |
-| Hardcoded Values | 1 remaining (`maxPlayers`) | All in `GameConfig` | ✅ Fixed |
-| Code Lint Errors | 0 | 0 | ✅ |
-| Type Errors (`tsc --noEmit`) | 0 | 0 | ✅ |
+| Metric                       | Before                               | After                      | Status          |
+| ---------------------------- | ------------------------------------ | -------------------------- | --------------- |
+| Registered Routes            | 13 modules                           | 13 modules                 | ✅ Already done |
+| Leaderboard Query Time       | Already O(1) JOINs                   | Already O(1) JOINs         | ✅ Not an issue |
+| Match Detail Queries         | 3 sequential                         | 2 parallel                 | ✅ Fixed        |
+| Static Data Response         | Cached                               | Cached                     | ✅ Already done |
+| TypeScript Strictness        | Missing `exactOptionalPropertyTypes` | All strict options enabled | ✅ Fixed        |
+| Hardcoded Values             | 1 remaining (`maxPlayers`)           | All in `GameConfig`        | ✅ Fixed        |
+| Code Lint Errors             | 0                                    | 0                          | ✅              |
+| Type Errors (`tsc --noEmit`) | 0                                    | 0                          | ✅              |
 
 ### Verification Checklist
 
@@ -490,56 +495,57 @@ redis-cli -h localhost -p 6379 FLUSHALL
 **Server Status**: Running on localhost:3000  
 **Test Result**: ✅ ALL ROUTES PASSING
 
-| Endpoint Category | Status | Notes |
-|-------------------|--------|-------|
-| **5.2 Health & Info** | | |
-| `GET /health` | ✅ Pass | Returns "OK" |
-| `GET /api` | ✅ Pass | Returns API metadata |
-| **5.3 Auth** | | |
-| `POST /api/auth/register` | ✅ Pass | Creates user, returns token |
-| `POST /api/auth/login` | ✅ Pass | Authenticates user, returns token |
-| `GET /api/auth/session` | ✅ Pass | Returns current session |
-| `POST /api/auth/refresh` | ✅ Pass | Returns new token |
-| `POST /api/auth/logout` | ✅ Pass | Logs out user |
-| **5.4 Player** | | |
-| `POST /api/players/me` | ✅ Pass | Creates player profile |
-| `GET /api/players/me` | ✅ Pass | Returns player profile |
-| `PATCH /api/players/me` | ✅ Pass | Updates player profile |
-| `GET /api/players/me/stats` | ✅ Pass | Returns player stats (creates if not exists) |
-| `GET /api/players/me/progression` | ✅ Pass | Returns player progression (creates if not exists) |
-| **5.5 Static Data** | | |
-| `GET /api/static/weapons` | ✅ Pass | Returns weapons array |
-| `GET /api/static/maps` | ✅ Pass | Returns maps array |
-| `GET /api/static/weapons/:id/attachments` | ✅ Pass | Route accessible |
-| **5.6 Inventory** | | |
-| `GET /api/inventory` | ✅ Pass | Returns inventory items |
-| `POST /api/inventory/acquire` | ✅ Pass | Route accessible |
-| **5.7 Loadouts** | | |
-| `GET /api/loadouts` | ✅ Pass | Returns loadouts |
-| `POST /api/loadouts` | ✅ Pass | Creates loadout |
-| **5.8 Match** | | |
-| `GET /api/matches` | ✅ Pass | Returns match history |
-| `GET /api/matches/:id` | ✅ Pass | Returns match details |
-| **5.9 Leaderboard** | | |
-| `GET /api/leaderboards` | ✅ Pass | Returns leaderboard data |
-| **5.10 Friends** | | |
-| `GET /api/friends` | ✅ Pass | Returns friends list |
-| `POST /api/friends/requests` | ✅ Pass | Sends friend request |
-| **5.11 Achievement** | | |
-| `GET /api/achievements` | ✅ Pass | Returns achievements |
-| `GET /api/achievements/player/:id` | ✅ Pass | Route accessible |
-| **5.11 Matchmaking** | | |
-| `GET /api/matchmaking/status` | ✅ Pass | Returns queue status |
-| `POST /api/matchmaking/queue` | ✅ Pass | Route accessible |
-| **5.11 Telemetry** | | |
-| `GET /api/telemetry/player/:id` | ✅ Pass | Route accessible (admin) |
-| `GET /api/telemetry/match/:id` | ✅ Pass | Route accessible (admin) |
-| **5.11 Admin** | | |
-| `GET /api/admin/telemetry/stats/:id` | ✅ Pass | Route accessible |
+| Endpoint Category                         | Status  | Notes                                              |
+| ----------------------------------------- | ------- | -------------------------------------------------- |
+| **5.2 Health & Info**                     |         |                                                    |
+| `GET /health`                             | ✅ Pass | Returns "OK"                                       |
+| `GET /api`                                | ✅ Pass | Returns API metadata                               |
+| **5.3 Auth**                              |         |                                                    |
+| `POST /api/auth/register`                 | ✅ Pass | Creates user, returns token                        |
+| `POST /api/auth/login`                    | ✅ Pass | Authenticates user, returns token                  |
+| `GET /api/auth/session`                   | ✅ Pass | Returns current session                            |
+| `POST /api/auth/refresh`                  | ✅ Pass | Returns new token                                  |
+| `POST /api/auth/logout`                   | ✅ Pass | Logs out user                                      |
+| **5.4 Player**                            |         |                                                    |
+| `POST /api/players/me`                    | ✅ Pass | Creates player profile                             |
+| `GET /api/players/me`                     | ✅ Pass | Returns player profile                             |
+| `PATCH /api/players/me`                   | ✅ Pass | Updates player profile                             |
+| `GET /api/players/me/stats`               | ✅ Pass | Returns player stats (creates if not exists)       |
+| `GET /api/players/me/progression`         | ✅ Pass | Returns player progression (creates if not exists) |
+| **5.5 Static Data**                       |         |                                                    |
+| `GET /api/static/weapons`                 | ✅ Pass | Returns weapons array                              |
+| `GET /api/static/maps`                    | ✅ Pass | Returns maps array                                 |
+| `GET /api/static/weapons/:id/attachments` | ✅ Pass | Route accessible                                   |
+| **5.6 Inventory**                         |         |                                                    |
+| `GET /api/inventory`                      | ✅ Pass | Returns inventory items                            |
+| `POST /api/inventory/acquire`             | ✅ Pass | Route accessible                                   |
+| **5.7 Loadouts**                          |         |                                                    |
+| `GET /api/loadouts`                       | ✅ Pass | Returns loadouts                                   |
+| `POST /api/loadouts`                      | ✅ Pass | Creates loadout                                    |
+| **5.8 Match**                             |         |                                                    |
+| `GET /api/matches`                        | ✅ Pass | Returns match history                              |
+| `GET /api/matches/:id`                    | ✅ Pass | Returns match details                              |
+| **5.9 Leaderboard**                       |         |                                                    |
+| `GET /api/leaderboards`                   | ✅ Pass | Returns leaderboard data                           |
+| **5.10 Friends**                          |         |                                                    |
+| `GET /api/friends`                        | ✅ Pass | Returns friends list                               |
+| `POST /api/friends/requests`              | ✅ Pass | Sends friend request                               |
+| **5.11 Achievement**                      |         |                                                    |
+| `GET /api/achievements`                   | ✅ Pass | Returns achievements                               |
+| `GET /api/achievements/player/:id`        | ✅ Pass | Route accessible                                   |
+| **5.11 Matchmaking**                      |         |                                                    |
+| `GET /api/matchmaking/status`             | ✅ Pass | Returns queue status                               |
+| `POST /api/matchmaking/queue`             | ✅ Pass | Route accessible                                   |
+| **5.11 Telemetry**                        |         |                                                    |
+| `GET /api/telemetry/player/:id`           | ✅ Pass | Route accessible (admin)                           |
+| `GET /api/telemetry/match/:id`            | ✅ Pass | Route accessible (admin)                           |
+| **5.11 Admin**                            |         |                                                    |
+| `GET /api/admin/telemetry/stats/:id`      | ✅ Pass | Route accessible                                   |
 
-**Summary**: All 13 API modules (40+ endpoints) are registered and responding correctly. 
+**Summary**: All 13 API modules (40+ endpoints) are registered and responding correctly.
 
 **Bug Fixed**: The "Internal server error" on auth endpoints was caused by `getClientIp()` returning the string `'unknown'` which PostgreSQL's `inet` type rejected. Fixed by:
+
 1. Changed `getClientIp()` return type from `string` to `string | null`
 2. Return `null` instead of `'unknown'` when IP cannot be determined
 3. Updated `AuthThrottleService` to handle null IPs with fallback to `'unknown'` for Redis keys only
