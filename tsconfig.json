@@ -4,16 +4,8 @@
   "compilerOptions": {
     "noEmit": true
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "apps",
-    "packages"
-  ],
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules", "dist", "apps", "packages"],
   "references": [
     {
       "path": "apps/server"
