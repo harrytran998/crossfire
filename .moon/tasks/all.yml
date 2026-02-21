@@ -18,7 +18,7 @@ tasks:
     description: 'Check formatting without making changes'
 
   typecheck:
-    command: 'node_modules/.bin/tsc --noEmit'
+    command: 'tsc --noEmit'
     description: 'Type check TypeScript files'
     env:
       NODE_ENV: 'development'
@@ -47,5 +47,5 @@ tasks:
       NODE_ENV: 'development'
 
   clean:
-    command: 'rm -rf dist node_modules/.cache'
+    command: 'rm -rf dist node_modules'
     description: 'Clean build artifacts'
