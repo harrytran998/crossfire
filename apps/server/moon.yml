@@ -12,7 +12,6 @@ tasks:
   dev:
     command: 'bun run src/index.ts'
     description: 'Start development server with hot reload'
-    local: true
     deps:
       - 'shared:build'
     env:
