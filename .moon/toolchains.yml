@@ -3,19 +3,19 @@
 
 $schema: 'https://moonrepo.dev/schemas/toolchains.json'
 
-# Bun - Primary runtime for the project
-bun:
-  version: '1.3.9'
+# JavaScript toolchain - Required for bun/node/deno
+javascript:
+  # Package manager configuration
+  packageManager: 'bun'
   # Sync dependencies from package.json to moon's dependency management
   syncProjectWorkspaceDependencies: true
 
-# JavaScript/TypeScript - Managed via Bun
-# Bun includes TypeScript support natively
+# Bun - Primary runtime for the project
+bun:
+  version: '1.3.9'
+
+# TypeScript - Managed via Bun
 typescript:
   version: '5.9.3'
   # Sync TypeScript project references for better monorepo support
   syncProjectReferences: true
-# Node.js - Fallback/compatibility (optional)
-# node:
-#   version: "20.11.0"
-#   syncProjectWorkspaceDependencies: true

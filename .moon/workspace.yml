@@ -15,5 +15,6 @@ generator:
 
 # VCS (Version Control System) settings
 vcs:
+  client: 'git'
   provider: 'github'
   defaultBranch: 'main'
