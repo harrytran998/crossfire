@@ -38,7 +38,7 @@ export const parseJsonObject = async (
   }
 }
 
-export const getClientIp = (req: Request): string => {
+export const getClientIp = (req: Request): string | null => {
   const connectingIp = req.headers.get('cf-connecting-ip')?.trim()
   if (connectingIp) {
     return connectingIp
@@ -62,5 +62,5 @@ export const getClientIp = (req: Request): string => {
     }
   }
 
-  return 'unknown'
+  return null
 }

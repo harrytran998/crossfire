@@ -34,11 +34,11 @@ const API_ROUTE_LIMITS: Record<
   },
 }
 
-const rateLimitKey = (route: AuthRoute, ip: string) => `auth:ratelimit:${route}:${ip}`
+const rateLimitKey = (route: AuthRoute, ip: string | null) => `auth:ratelimit:${route}:${ip ?? 'unknown'}`
 const apiRateLimitKey = (route: ApiRoute, subject: string) => `api:ratelimit:${route}:${subject}`
-const lockoutKey = (ip: string, email: string) => `auth:lockout:${ip}:${email.toLowerCase()}`
-const loginFailureKey = (ip: string, email: string) =>
-  `auth:login-fail:${ip}:${email.toLowerCase()}`
+const lockoutKey = (ip: string | null, email: string) => `auth:lockout:${ip ?? 'unknown'}:${email.toLowerCase()}`
+const loginFailureKey = (ip: string | null, email: string) =>
+  `auth:login-fail:${ip ?? 'unknown'}:${email.toLowerCase()}`
 
 const ttlSeconds = (milliseconds: number): number => Math.max(1, Math.ceil(milliseconds / 1000))
 
@@ -65,14 +65,14 @@ export class AuthThrottleService extends Context.Tag('AuthThrottleService')<
   {
     readonly consumeAuthRateLimit: (
       route: AuthRoute,
-      ip: string
+      ip: string | null
     ) => Effect.Effect<AuthRateLimitResult | AuthRateLimitBlockedResult>
     readonly getLoginLockout: (
-      ip: string,
+      ip: string | null,
       email: string
     ) => Effect.Effect<LoginLockoutResult | LoginLockoutBlockedResult>
-    readonly recordLoginFailure: (ip: string, email: string) => Effect.Effect<void>
-    readonly clearLoginFailures: (ip: string, email: string) => Effect.Effect<void>
+    readonly recordLoginFailure: (ip: string | null, email: string) => Effect.Effect<void>
+    readonly clearLoginFailures: (ip: string | null, email: string) => Effect.Effect<void>
     readonly consumeApiRateLimit: (
       route: ApiRoute,
       subject: string
@@ -87,7 +87,7 @@ export const AuthThrottleServiceLive = Layer.effect(
 
     const consumeAuthRateLimit = (
       route: AuthRoute,
-      ip: string
+      ip: string | null
     ): Effect.Effect<AuthRateLimitResult | AuthRateLimitBlockedResult> =>
       Effect.tryPromise({
         try: async () => {
@@ -116,7 +116,7 @@ export const AuthThrottleServiceLive = Layer.effect(
       }).pipe(Effect.orDie)
 
     const getLoginLockout = (
-      ip: string,
+      ip: string | null,
       email: string
     ): Effect.Effect<LoginLockoutResult | LoginLockoutBlockedResult> =>
       Effect.tryPromise({
@@ -136,7 +136,7 @@ export const AuthThrottleServiceLive = Layer.effect(
           error instanceof Error ? error : new Error('Failed to fetch login lockout state'),
       }).pipe(Effect.orDie)
 
-    const recordLoginFailure = (ip: string, email: string): Effect.Effect<void> =>
+    const recordLoginFailure = (ip: string | null, email: string): Effect.Effect<void> =>
       Effect.tryPromise({
         try: async () => {
           const failKey = loginFailureKey(ip, email)
@@ -157,7 +157,7 @@ export const AuthThrottleServiceLive = Layer.effect(
           error instanceof Error ? error : new Error('Failed to record login failure'),
       }).pipe(Effect.orDie)
 
-    const clearLoginFailures = (ip: string, email: string): Effect.Effect<void> =>
+    const clearLoginFailures = (ip: string | null, email: string): Effect.Effect<void> =>
       Effect.tryPromise({
         try: async () => {
           await redis.client.del(loginFailureKey(ip, email))
