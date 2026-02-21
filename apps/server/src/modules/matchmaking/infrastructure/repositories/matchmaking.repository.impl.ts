@@ -207,6 +207,26 @@ export const MatchmakingRepositoryLive = Layer.effect(
         return deserializeMatch(data)
       })
 
+    const findAllTickets = (): Effect.Effect<MatchmakingTicket[], never> =>
+      Effect.gen(function* () {
+        const keys = yield* Effect.promise(() =>
+          redis.client.keys(`${TICKET_KEY_PREFIX}*`).catch(() => [] as string[])
+        )
+
+        if (keys.length === 0) return []
+
+        const tickets = yield* Effect.all(
+          keys.map((key) =>
+            Effect.promise(() =>
+              redis.client.get(key).then((data) => (data ? deserializeTicket(data) : null))
+            ).pipe(Effect.catchAll(() => Effect.succeed(null)))
+          ),
+          { concurrency: 10 }
+        )
+
+        return tickets.filter((t): t is MatchmakingTicket => t !== null)
+      })
+
     return MatchmakingRepositoryImpl.of({
       createTicket,
       findTicketById,
@@ -216,6 +236,7 @@ export const MatchmakingRepositoryLive = Layer.effect(
       findQueuedTickets,
       createMatch,
       findMatchById,
+      findAllTickets,
     })
   })
 )

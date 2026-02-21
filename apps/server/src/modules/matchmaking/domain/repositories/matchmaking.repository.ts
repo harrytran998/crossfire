@@ -27,4 +27,5 @@ export interface MatchmakingRepository {
     roomId: string
   ) => Effect.Effect<Match, MatchmakingDomainError>
   readonly findMatchById: (matchId: string) => Effect.Effect<Match | null, MatchmakingDomainError>
+  readonly findAllTickets: () => Effect.Effect<MatchmakingTicket[], never>
 }
