@@ -25,7 +25,11 @@ import { DatabaseServiceLive } from '../../src/services/database.service'
 import { RedisServiceLive } from '../../src/services/redis.service'
 
 describe('Inventory + Loadout services', () => {
-  const BaseLayer = Layer.mergeAll(ConfigLayer, DatabaseServiceLive, RedisServiceLive)
+  const BaseLayer = Layer.mergeAll(
+    ConfigLayer,
+    DatabaseServiceLive,
+    Layer.provide(RedisServiceLive, ConfigLayer)
+  )
   const TestLayer = Layer.mergeAll(
     Layer.provide(AuthServiceLive, BaseLayer),
     Layer.provide(PlayerServiceLive, BaseLayer),
