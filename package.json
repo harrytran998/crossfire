@@ -15,6 +15,7 @@
   "scripts": {
     "dev": "moon run server:dev",
     "build": "moon run server:build",
+    "build:libs": "moon run :build --layer library",
     "test": "moon run :test",
     "lint": "oxlint --type-aware",
     "lint:fix": "oxlint --fix --type-aware",
