@@ -1,6 +1,7 @@
 $schema: 'https://moonrepo.dev/schemas/project.json'
 
-type: 'application'
+layer: 'application'
+stack: 'backend'
 language: 'typescript'
 
 env:
