@@ -21,7 +21,7 @@
 ## Task Progress
 
 ### P3-W9-T28: Bun WebSocket Gateway with Effect
-**Status**: 🔄 IN PROGRESS  
+**Status**: ✅ COMPLETE  
 **Duration**: 2 days  
 **Depends On**: T10 (Effect platform), C03 (Event delivery contract)
 
@@ -78,7 +78,7 @@
 ---
 
 ### P3-W9-T29: Message Protocol (MessagePack + Versioning)
-**Status**: ⏳ PENDING  
+**Status**: 🔄 IN PROGRESS  
 **Duration**: 1.5 days  
 **Depends On**: T28 (WebSocket gateway)
 
