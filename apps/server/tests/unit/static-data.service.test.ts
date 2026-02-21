@@ -6,9 +6,14 @@ import {
 } from '../../src/modules/static-data/application/services/static-data.service'
 import { ConfigLayer } from '../../src/layers/index'
 import { DatabaseServiceLive } from '../../src/services/database.service'
+import { RedisServiceLive } from '../../src/services/redis.service'
 
 describe('StaticDataService', () => {
-  const BaseLayer = Layer.mergeAll(ConfigLayer, DatabaseServiceLive)
+  const BaseLayer = Layer.mergeAll(
+    ConfigLayer,
+    DatabaseServiceLive,
+    Layer.provide(RedisServiceLive, ConfigLayer)
+  )
   const TestLayer = Layer.provide(StaticDataServiceLive, BaseLayer)
 
   const runTest = <A, E, R>(effect: Effect.Effect<A, E, R>) =>
