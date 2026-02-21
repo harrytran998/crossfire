@@ -56,6 +56,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup moon
+        uses: moonrepo/setup-toolchain@v0
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
@@ -64,11 +67,8 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Install moon
-        run: bun add -g @moonrepo/cli
-
       - name: Run typecheck
-        run: bun run typecheck
+        run: moon run :typecheck
 
   test:
     name: Test
