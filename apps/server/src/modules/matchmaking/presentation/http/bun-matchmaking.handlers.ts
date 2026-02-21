@@ -103,8 +103,20 @@ const getQueueStatusHandler: RouteDefinition['handler'] = async (req, { runApp }
   return Response.json(status)
 }
 
+const getQueueHealthHandler: RouteDefinition['handler'] = async (_req, { runApp }) => {
+  const health = await runApp(
+    Effect.gen(function* () {
+      const service = yield* MatchmakingServiceTag
+      return yield* service.getQueueHealth()
+    })
+  )
+
+  return Response.json(health)
+}
+
 export const matchmakingRoutes: readonly RouteDefinition[] = [
   { method: 'POST', path: '/api/matchmaking/queue', handler: joinQueueHandler },
   { method: 'DELETE', path: '/api/matchmaking/queue', handler: leaveQueueHandler },
   { method: 'GET', path: '/api/matchmaking/status', handler: getQueueStatusHandler },
+  { method: 'GET', path: '/api/matchmaking/health', handler: getQueueHealthHandler },
 ]
